@@ -16,15 +16,15 @@ FinzyTrack is an open-source (GPLv2) GUI personal finance application for **macO
 - **Powerful querying** — if you can express it as a SQL or Beancount (BQL) query, you can probably run it against your financial data
 - **Transaction search** — quickly find any past transaction across your entire history
 
-## You own your data. There is no lock-in.
+## You own your data
 
 Your entire financial history lives in a single plain-text [Beancount](https://beancount.github.io/) ledger file. Open it in Notepad, Vim, or any text editor. Use it with any tool that speaks Beancount. If you ever stop using FinzyTrack, your data is right there, readable and portable.
 
 FinzyTrack runs **entirely offline by default**. No one is mining your transactions for ads or profiling. If you use AI, you can run a local model on your own computer — your data never leaves your machine. If you connect a cloud-based model, some data will be sent to that provider. See [What data is shared with AI](reference/ai-data-sharing/) for details.
 
-## AI as an accelerator, not a gatekeeper
+## AI as an accelerator
 
-AI is entirely optional. Everything the AI can do, you can do yourself — the [documentation](reference/dashboard-recipes/) covers it all. AI simply makes things faster:
+AI is entirely optional — it is not a gatekeeper. Everything the AI can do, you can do yourself — the [documentation](reference/dashboard-recipes/) covers it all. AI simply makes things faster:
 
 - **AI-assisted import** — skip writing parsing rules for each financial institution. Hand a statement to the AI and it will figure out the format and import the transactions
 - **Natural-language queries** — ask questions in plain English and get SQL or Beancount queries back
