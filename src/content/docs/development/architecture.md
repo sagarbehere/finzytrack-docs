@@ -1,6 +1,6 @@
 ---
 title: Architecture
-description: Technical overview of FinzyTrack's stack and design.
+description: Technical overview of Finzytrack's stack and design.
 sidebar:
   order: 1
 ---

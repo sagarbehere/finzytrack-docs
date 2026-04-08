@@ -1,6 +1,6 @@
 ---
 title: Quick Start
-description: Get up and running with FinzyTrack in 5 minutes.
+description: Get up and running with Finzytrack in 5 minutes.
 ---
 
 :::note
@@ -9,7 +9,7 @@ This page is under construction.
 
 ## Starting the App
 
-After installation, launch FinzyTrack and you'll be greeted with the main dashboard.
+After installation, launch Finzytrack and you'll be greeted with the main dashboard.
 
 ## Your First Import
 

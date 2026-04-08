@@ -1,11 +1,11 @@
 ---
 title: Contributing
-description: How to contribute to FinzyTrack and its documentation.
+description: How to contribute to Finzytrack and its documentation.
 sidebar:
   order: 2
 ---
 
-Thank you for your interest in contributing to FinzyTrack!
+Thank you for your interest in contributing to Finzytrack!
 
 ## Contributing to Documentation
 
@@ -35,6 +35,6 @@ This starts a local server with live reload.
 4. Preview locally with `npm run dev`
 5. Submit a pull request
 
-## Contributing to FinzyTrack
+## Contributing to Finzytrack
 
-For contributions to the main application, see the [FinzyTrack repository](https://github.com/finzytrack/finzytrack).
+For contributions to the main application, see the [Finzytrack repository](https://github.com/finzytrack/finzytrack).

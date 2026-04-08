@@ -8,7 +8,7 @@ export default defineConfig({
 	server: { port: 4322 },
 	integrations: [
 		starlight({
-			title: 'FinzyTrack',
+			title: 'Finzytrack',
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/finzytrack/finzytrack' },
 			],

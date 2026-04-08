@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: How to download, install, and set up FinzyTrack.
+description: How to download, install, and set up Finzytrack.
 ---
 
 :::note

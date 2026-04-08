@@ -9,7 +9,7 @@ sidebar:
 This page is under construction.
 :::
 
-The Dashboards view is FinzyTrack's primary interface for visualizing your financial data at a glance.
+The Dashboards view is Finzytrack's primary interface for visualizing your financial data at a glance.
 
 ## Overview
 

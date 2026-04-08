@@ -5,14 +5,14 @@ sidebar:
   order: 3
 ---
 
-Import rules tell FinzyTrack how to read bank-exported CSV and XLS/XLSX files and extract transactions from them. Each rule is a YAML file that maps columns in the source file to transaction fields (date, amount, payee, etc.).
+Import rules tell Finzytrack how to read bank-exported CSV and XLS/XLSX files and extract transactions from them. Each rule is a YAML file that maps columns in the source file to transaction fields (date, amount, payee, etc.).
 
 Rules live in your config directory:
 
 - **CSV rules:** `config/csv_rules/*.yaml`
 - **XLS rules:** `config/xls_rules/*.yaml`
 
-You can create and edit rules through the FinzyTrack UI or by writing YAML files directly.
+You can create and edit rules through the Finzytrack UI or by writing YAML files directly.
 
 ---
 

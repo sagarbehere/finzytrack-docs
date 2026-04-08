@@ -1,11 +1,11 @@
 ---
 title: Dashboard & Widget Recipes
-description: Complete reference for the JSON recipe system that powers FinzyTrack dashboards and widgets.
+description: Complete reference for the JSON recipe system that powers Finzytrack dashboards and widgets.
 sidebar:
   order: 1
 ---
 
-Dashboards and widgets in FinzyTrack are defined using **JSON recipe files**. There are two types of recipes:
+Dashboards and widgets in Finzytrack are defined using **JSON recipe files**. There are two types of recipes:
 
 - **Dashboard recipes** define a grid layout containing multiple widgets — KPI cards, charts, tables, and pivot tables.
 - **Widget recipes** define a single, self-contained visualization that can be reused across multiple dashboards.
@@ -1685,7 +1685,7 @@ Recipes are validated when saved. Here's a summary of the validation rules:
 
 ### ID Conflict Detection
 
-Widget and dashboard IDs must be unique across all recipe files. FinzyTrack detects the following conflicts:
+Widget and dashboard IDs must be unique across all recipe files. Finzytrack detects the following conflicts:
 
 - **Duplicate widget IDs** — two standalone widget files with the same `id`.
 - **Duplicate dashboard IDs** — two dashboard files with the same `id`.

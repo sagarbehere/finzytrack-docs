@@ -9,4 +9,4 @@ sidebar:
 This page is under construction.
 :::
 
-FinzyTrack is configured via a `config.yaml` file. This reference covers all available configuration options.
+Finzytrack is configured via a `config.yaml` file. This reference covers all available configuration options.

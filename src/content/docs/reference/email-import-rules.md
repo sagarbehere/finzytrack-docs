@@ -5,7 +5,7 @@ sidebar:
   order: 4
 ---
 
-Email import rules tell FinzyTrack how to connect to an email account, find transaction alert emails from your bank, and extract transaction data from them. Each rule is a YAML file that covers one bank account — it defines the IMAP connection, which emails to match, and how to extract fields like amount, date, and payee from the email body.
+Email import rules tell Finzytrack how to connect to an email account, find transaction alert emails from your bank, and extract transaction data from them. Each rule is a YAML file that covers one bank account — it defines the IMAP connection, which emails to match, and how to extract fields like amount, date, and payee from the email body.
 
 Rules live in your config directory at `config/email_rules/*.yaml`.
 
@@ -211,7 +211,7 @@ body_keyword: "XX7317"    # masked account number
 
 This is useful when you receive many emails from the same bank but only want those mentioning a specific account. It significantly reduces the number of emails fetched.
 
-**Note:** This is a plain string, not a regex. It is matched by the IMAP server, not by FinzyTrack.
+**Note:** This is a plain string, not a regex. It is matched by the IMAP server, not by Finzytrack.
 
 ---
 
@@ -685,7 +685,7 @@ transaction_types:
 
 **Reasoning:**
 - `body_keyword: "XX7317"` pre-filters at the IMAP server so only emails mentioning this account are downloaded
-- `email_filter.body_regex` further confirms the account number in FinzyTrack
+- `email_filter.body_regex` further confirms the account number in Finzytrack
 - `reference` and `payee_raw` are optional because some UPI emails may not include them
 - `external_id_type: "UPI"` is a literal value (not an extracted field) — it labels the reference for duplicate detection
 - `amount_sign.field: "fixed"` and `value: "negative"` because this type is always a debit

@@ -1,11 +1,11 @@
 ---
 title: Views
-description: Overview of FinzyTrack's main screens.
+description: Overview of Finzytrack's main screens.
 sidebar:
   order: 1
 ---
 
-FinzyTrack's sidebar provides access to the main views of the application. Each view focuses on a different aspect of your financial data.
+Finzytrack's sidebar provides access to the main views of the application. Each view focuses on a different aspect of your financial data.
 
 | View | Purpose |
 | ---- | ------- |

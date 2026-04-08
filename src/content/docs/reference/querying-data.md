@@ -5,7 +5,7 @@ sidebar:
   order: 2
 ---
 
-FinzyTrack provides two query engines for accessing your financial data: **SQL** (SQLite) and **BQL** (Beancount Query Language). Both are available in the [Query view](/views/query/) for ad-hoc queries, and in [dashboard recipes](/reference/dashboard-recipes/) for widget data.
+Finzytrack provides two query engines for accessing your financial data: **SQL** (SQLite) and **BQL** (Beancount Query Language). Both are available in the [Query view](/views/query/) for ad-hoc queries, and in [dashboard recipes](/reference/dashboard-recipes/) for widget data.
 
 ## Query Engines
 
@@ -345,7 +345,7 @@ These summarize multiple rows and require a `GROUP BY` clause (or apply to all r
 - `HAVING` is **not implemented** in BQL. Filter before aggregation with `WHERE` instead.
 - `NULL = NULL` evaluates to `TRUE` in BQL, unlike standard SQL where it would be `NULL`.
 - Semicolons at the end of queries are optional.
-- Only SELECT queries are allowed in FinzyTrack.
+- Only SELECT queries are allowed in Finzytrack.
 
 ### Common BQL Patterns
 
