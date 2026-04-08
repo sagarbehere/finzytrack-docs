@@ -4,8 +4,7 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://sagarbehere.github.io',
-	base: '/finzytrack-docs',
+	site: 'https://docs.finzytrack.com',
 	server: { port: 4322 },
 	integrations: [
 		starlight({
