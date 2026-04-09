@@ -39,29 +39,40 @@ These columns have the same value for all postings within a transaction.
 | Column | Type | Description |
 |--------|------|-------------|
 | `transaction_id` | TEXT | Unique transaction identifier (UUID). |
+| `transaction_content_hash` | TEXT | SHA256 content-based hash of the transaction. |
 | `transaction_date` | TEXT | Date in YYYY-MM-DD format. |
+| `transaction_flag` | TEXT | `'*'` (cleared) or `'!'` (pending). |
 | `transaction_payee` | TEXT | Payee or merchant name. |
 | `transaction_narration` | TEXT | Transaction description. |
-| `transaction_flag` | TEXT | `'*'` (cleared) or `'!'` (pending). |
 | `transaction_tags` | TEXT | JSON array of tag strings. |
 | `transaction_links` | TEXT | JSON array of link strings. |
+| `transaction_metadata_json` | TEXT | JSON object of transaction-level metadata from the ledger. |
 
 #### Posting-Level Columns
 
 | Column | Type | Description |
 |--------|------|-------------|
+| `posting_id` | INTEGER | Auto-incrementing primary key. |
 | `account` | TEXT | Full colon-separated account path (e.g., `Expenses:Food:Groceries`). |
 | `account_type` | TEXT | First segment: `Assets`, `Liabilities`, `Equity`, `Income`, or `Expenses`. |
 | `amount` | REAL | Posting amount. Positive = debit, negative = credit. |
 | `currency` | TEXT | Currency code (e.g., `"USD"`, `"INR"`). |
+| `cost_amount` | REAL | Cost basis amount (for investments with cost tracking). |
+| `cost_currency` | TEXT | Cost basis currency. |
+| `price_amount` | REAL | Price conversion amount (for currency conversions). |
+| `price_currency` | TEXT | Price conversion currency. |
+| `source_account` | TEXT | The originating Assets or Liabilities account for this transaction. Computed from the other posting(s). |
+| `source_account_type` | TEXT | Account type of the `source_account`. |
+| `posting_metadata_json` | TEXT | JSON object of posting-level metadata from the ledger. |
 
 #### Derived Columns
 
 | Column | Type | Description |
 |--------|------|-------------|
 | `year` | INTEGER | Year extracted from `transaction_date`. |
-| `year_month` | TEXT | Year and month as `YYYY-MM`. |
+| `month` | INTEGER | Month (1-12) extracted from `transaction_date`. |
 | `quarter` | INTEGER | Quarter (1-4). |
+| `year_month` | TEXT | Year and month as `YYYY-MM`. |
 
 ### Sign Conventions
 

@@ -1,0 +1,631 @@
+---
+title: Account Hierarchy Design
+description: Principles and patterns for designing a clean, queryable Beancount account hierarchy.
+sidebar:
+  order: 6
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+A well-designed account hierarchy is the foundation of a useful ledger. Finzytrack makes it easy to rename accounts across all your transactions, so nothing here is set in stone — but queries, dashboard recipes, and import rules may reference account names, so it's worth thinking through your structure upfront. This guide covers the principles and patterns for designing a hierarchy that stays clean as your financial life grows.
+
+---
+
+## Core Principles
+
+### 1. Structure by Type, Not by Institution
+
+The single most important decision is what goes at the top of the hierarchy. The two candidates are:
+
+- **Type-first:** `Assets:Liquid:Savings:AxisBank:NRE`
+- **Institution-first:** `Assets:AxisBank:Savings:Liquid:NRE`
+
+**We recommend type-first.** Here is why:
+
+Your most frequent and useful queries are type-based: _how much do I have in savings accounts_, _what is my total outstanding credit card debt_, or at tax filing time, _how much total interest income did I earn this year_. These are answered with a clean prefix match when type is first:
+
+<Tabs>
+  <TabItem label="SQLite">
+    ```sql
+    SELECT account, SUM(amount) AS total
+    FROM postings
+    WHERE account LIKE 'Assets:Liquid:Savings:%'
+    GROUP BY account
+
+    SELECT account, SUM(amount) AS total
+    FROM postings
+    WHERE account LIKE 'Income:Interest:TermDeposits:%'
+    GROUP BY account
+
+    SELECT account, SUM(amount) AS total
+    FROM postings
+    WHERE account LIKE 'Liabilities:CreditCards:%'
+    GROUP BY account
+    ```
+  </TabItem>
+  <TabItem label="BQL">
+    ```
+    SELECT account, COST(SUM(position)) WHERE account ~ '^Assets:Liquid:Savings'  GROUP BY 1
+    SELECT account, COST(SUM(position)) WHERE account ~ '^Income:Interest:TermDeposits'  GROUP BY 1
+    SELECT account, COST(SUM(position)) WHERE account ~ '^Liabilities:CreditCards'  GROUP BY 1
+    ```
+  </TabItem>
+</Tabs>
+
+Institution-based queries — _everything at AxisBank_ — also work cleanly under type-first, using a regex on the institution name segment:
+
+<Tabs>
+  <TabItem label="SQLite">
+    ```sql
+    SELECT account, SUM(amount) AS total
+    FROM postings
+    WHERE account LIKE '%:AxisBank:%'
+    GROUP BY account
+    ```
+  </TabItem>
+  <TabItem label="BQL">
+    ```
+    SELECT account, COST(SUM(position)) WHERE account ~ ':AxisBank:' GROUP BY 1
+    ```
+  </TabItem>
+</Tabs>
+
+Institution-first breaks income parallelism badly. If your assets are `Assets:AxisBank:Savings:NRE`, the natural income mirror would be `Income:AxisBank:Interest:Savings:NRE`, and querying all savings interest across institutions becomes `account ~ ':Interest:Savings'` — a fragile mid-path search instead of a clean prefix.
+
+---
+
+### 2. The Institution Sits Second-to-Last
+
+Once you commit to type-first, the institution has a fixed slot: **always second-to-last**, immediately before the leaf node that identifies the individual account.
+
+```
+Assets : Liquid : Savings : AxisBank : NRE
+  ^         ^        ^          ^         ^
+root      broad    type    institution  account
+         type               (2nd to      leaf
+                              last)
+```
+
+This means institution-based queries are always a `:InstitutionName` pattern — regardless of hierarchy depth. When a leaf is present, the institution sits between colons (`:AxisBank:NRE`); when the leaf is dropped (see [Leaf Node Rule](#4-the-leaf-node-rule)), the institution is the last segment (`:TechCU`). In both cases, `account LIKE '%:InstitutionName%'` matches reliably.
+
+---
+
+### 3. The Custodian Slot, Not the Institution Slot
+
+Think of the second-to-last position as a **custodian slot** — who or what holds this asset. Usually that is a financial institution. But when no institution exists, the most specific real-world descriptor takes that slot instead:
+
+| Situation | Custodian slot value | Example |
+|---|---|---|
+| Bank or brokerage account | Institution name | `AxisBank`, `TechCU` |
+| Physical asset | Form or location | `Physical`, `HomeCity` |
+| Self-custodied crypto | Custody type | `SelfCustody` |
+| Employer stock plan | The employer | `Google`, `Acme` |
+| Cash on hand | Location label | `Wallet` |
+
+Examples:
+
+```
+Assets:Investments:Gold:Physical
+Assets:Investments:Crypto:SelfCustody:BTC
+Assets:Investments:Crypto:Coinbase:BTC
+Assets:Receivable:Personal:FriendName
+```
+
+---
+
+### 4. The Leaf Node Rule
+
+The leaf is the individual account identifier. Apply these rules when deciding what it should be:
+
+- **Drop the leaf if the institution is already unambiguous.** If you have exactly one savings account at TechCU and will never have two, `Assets:Liquid:Savings:TechCU` is sufficient. A leaf like `Primary` adds noise without meaning.
+- **Keep the leaf when it carries real information.** Account product names (`NRE`, `NRO`, `HYSA`), card names (`SapphireReserve`, `BlueCashPreferred`), or numbered instruments (`CD1`, `FD-2024`) are real leaves — they disambiguate meaningfully.
+- **Keep the leaf when you genuinely have multiple accounts of the same type at the same institution.** If ETrade holds both a taxable account and an IRA, those are genuinely distinct:
+
+```
+Assets:Investments:Brokerage:ETrade:Taxable
+Assets:Investments:Brokerage:ETrade:IRA
+```
+
+- **Drop placeholder leaves.** If you would write `Primary`, `Account`, or `Portfolio`, ask whether the institution name alone is sufficient. It usually is.
+
+---
+
+### 5. Securities Are Commodities, Not Accounts
+
+In beancount, _what_ you hold is a commodity; _where_ you hold it is an account. Never create sub-accounts for individual securities:
+
+```beancount
+; WRONG — security as account
+Assets:Investments:ETFs:Betterment:VOO
+
+; CORRECT — security as commodity, held at an account
+Assets:Investments:Brokerage:Betterment    20 VOO {250.00 USD}
+```
+
+The wrong approach breaks immediately when an account holds multiple securities (which is almost always the case). One real-world account must map to exactly one beancount account. Securities are queried through the `currency` dimension, not the account hierarchy.
+
+---
+
+### 6. Mirror Income and Expense Hierarchies to Asset and Liability Hierarchies
+
+Where possible, income accounts should mirror the structure of the asset accounts that generate them, and expense accounts should mirror the liability accounts they relate to. This makes cross-referencing intuitive and keeps queries parallel:
+
+| Asset account | Income account |
+|---|---|
+| `Assets:Liquid:Savings:AxisBank:NRE` | `Income:Interest:Savings:AxisBank:NRE` |
+| `Assets:Investments:TermDeposits:TechCU:CD1` | `Income:Interest:TermDeposits:TechCU:CD1` |
+| `Assets:Investments:Bonds:TreasuryDirect:IBonds` | `Income:Interest:Bonds:TreasuryDirect:IBonds` |
+
+| Liability account | Expense account |
+|---|---|
+| `Liabilities:CreditCards:Chase:SapphireReserve` | `Income:Rewards:Chase:SapphireReserve` |
+| `Liabilities:Loans:HomeLoan:SBI:HL001` | `Expenses:DebtServicing:Interest:HomeLoan` |
+
+---
+
+### 7. Only Add a Hierarchy Level If It Groups Things You Actually Query
+
+Every level in the hierarchy should earn its place. Ask: _will I ever want to query everything under this node as a group?_
+
+- `Assets:Liquid` earns its place because "how much do I have in liquid assets" is a real, frequent query.
+- `Liabilities:ShortTerm` and `Liabilities:LongTerm` do not earn their place — the leaf type names (`CreditCards`, `HomeLoan`) already carry that signal and you would rarely query "all short-term liabilities" as a group.
+
+When in doubt, flatten. A shallower hierarchy is easier to type, easier to read, and easier to query.
+
+---
+
+## Cross-Border Terminology
+
+Ledgers that span multiple countries often encounter terminology mismatches. Use neutral terms where possible. Here are some examples from US and Indian terminology:
+
+| US term | Indian term | Neutral term (recommended) |
+|---|---|---|
+| Certificate of Deposit (CD) | Fixed Deposit (FD) | `TermDeposits` |
+| Checking account | Current account | `Checking` (type node), drop redundant leaf |
+| Brokerage account | Demat account | `Brokerage` |
+
+When an account name creates redundancy — such as `Checking:ICICI:Current` where _Current_ is just the Indian word for _Checking_ — drop the redundant leaf:
+
+```
+; Redundant — Current restates Checking
+Assets:Liquid:Checking:ICICI:Current
+
+; Correct
+Assets:Liquid:Checking:ICICI
+```
+
+Similarly, the NRE/NRO distinction for AxisBank accounts is a real and meaningful leaf (it captures the account type and tax status), not a redundant placeholder:
+
+```
+Assets:Liquid:Savings:AxisBank:NRE      ; Non-Resident External — tax-free, repatriable
+Assets:Liquid:Savings:AxisBank:NRO     ; Non-Resident Ordinary — taxable, repatriation capped
+Assets:Investments:TermDeposits:AxisBank:NRE-FD
+Assets:Investments:TermDeposits:AxisBank:NRO-FD
+```
+
+---
+
+## A Complete Example Hierarchy
+
+```
+Assets
+├── Liquid
+│   ├── Checking
+│   │   ├── BofA
+│   │   ├── ICICI
+│   │   └── TechCU
+│   └── Savings
+│       ├── AxisBank:NRE
+│       ├── AxisBank:NRO
+│       ├── BofA
+│       ├── ICICI
+│       ├── TechCU
+│       └── Wealthfront:HYSA
+├── Investments
+│   ├── TermDeposits
+│   │   ├── AxisBank:NRE-FD
+│   │   ├── AxisBank:NRO-FD
+│   │   ├── BofA:CD001
+│   │   └── TechCU:CD1  (through CD6)
+│   ├── Bonds
+│   │   └── TreasuryDirect:IBonds
+│   └── Brokerage
+│       ├── Betterment
+│       └── ETrade:Taxable  /  ETrade:IRA  /  ETrade:StockPlan
+├── Receivable
+│   ├── Personal
+│   └── Work
+└── Transfer
+
+Liabilities
+├── CreditCards
+│   ├── Amex:BlueCashPreferred
+│   ├── BofA
+│   ├── Chase:SapphireReserve
+│   └── FNBO
+└── Loans
+    └── HomeLoan:SBI:HL001      (if applicable)
+
+Income
+├── Interest
+│   ├── Savings
+│   │   ├── AxisBank:NRE
+│   │   ├── AxisBank:NRO
+│   │   ├── BofA
+│   │   ├── ICICI
+│   │   ├── TechCU
+│   │   └── Wealthfront:HYSA
+│   ├── Checking
+│   │   ├── BofA
+│   │   └── TechCU
+│   ├── TermDeposits
+│   │   ├── AxisBank:NRE-FD
+│   │   ├── AxisBank:NRO-FD
+│   │   ├── BofA:CD001
+│   │   └── TechCU:CD1  (through CD6)
+│   └── Bonds
+│       └── TreasuryDirect:IBonds
+├── Salary:[Employer]
+├── Bonus:[Employer]
+├── Rewards
+│   ├── Amex:BlueCashPreferred
+│   └── Chase:SapphireReserve
+└── Other
+
+Expenses
+├── DebtServicing
+│   └── Interest
+│       └── HomeLoan       (mirrors Liabilities:Loans:HomeLoan)
+└── [your spending categories]
+
+Equity
+├── Conversions
+├── CurrentEarnings
+├── OpeningBalances
+├── RetainedEarnings
+└── Taxes
+    ├── Federal
+    └── State
+```
+
+---
+
+## Common Transaction Patterns
+
+### Savings interest
+
+```beancount
+2024-03-31 * "TechCU" "Monthly savings interest"
+  Income:Interest:Savings:TechCU          -4.12 USD
+  Assets:Liquid:Savings:TechCU             4.12 USD
+```
+
+### Term deposit interest
+
+```beancount
+2024-03-15 * "AxisBank" "NRE-FD interest payout"
+  Income:Interest:TermDeposits:AxisBank:NRE-FD    -8,250.00 INR
+  Assets:Liquid:Savings:AxisBank:NRE               8,250.00 INR
+```
+
+### Credit card purchase
+
+```beancount
+2024-03-20 * "Swiggy" "Dinner"
+  Expenses:Food:Delivery                           650 INR
+  Liabilities:CreditCards:Amex:BlueCashPreferred
+```
+
+### Credit card payment
+
+```beancount
+2024-04-05 * "Amex" "Credit card payment"
+  Liabilities:CreditCards:Amex:BlueCashPreferred   1,240.00 USD
+  Assets:Liquid:Checking:BofA
+```
+
+### EMI payment with principal/interest split
+
+```beancount
+2024-03-01 * "SBI" "Home loan EMI March"
+  Liabilities:Loans:HomeLoan:SBI:HL001    22,000 INR   ; principal
+  Expenses:DebtServicing:Interest:HomeLoan 18,000 INR   ; interest
+  Assets:Liquid:Savings:AxisBank:NRO
+```
+
+### Brokerage purchase (security as commodity)
+
+```beancount
+2024-03-10 * "ETrade" "Buy VUSXX"
+  Assets:Investments:Brokerage:ETrade:Individual    500 VUSXX {1.00 USD}
+  Assets:Liquid:Checking:BofA                      -500.00 USD
+```
+
+---
+
+## Tags
+
+Tags are attached to transactions (not individual postings) and enable cross-cutting queries that would be awkward to model in the account hierarchy. A tag looks like `#tagname` in the transaction header.
+
+### Recommended tags
+
+**`#taxable`** — marks income that is taxable, enabling tax estimation queries without a parallel Gross/Net account tree:
+
+```beancount
+2024-03-31 * "TechCU" "CD interest" #taxable
+  Income:Interest:TermDeposits:TechCU:CD1    -500.00 USD
+  Assets:Liquid:Checking:TechCU               500.00 USD
+```
+
+Query for estimated federal tax on all taxable income:
+
+<Tabs>
+  <TabItem label="SQLite">
+    ```sql
+    SELECT SUM(amount) * -0.30 AS estimated_tax
+    FROM postings, json_each(transaction_tags)
+    WHERE account_type = 'Income'
+      AND json_each.value = 'taxable'
+    ```
+  </TabItem>
+  <TabItem label="BQL">
+    ```
+    SELECT COST(SUM(position)) * 0.30 AS estimated_tax
+    WHERE account ~ '^Income' AND 'taxable' IN tags
+    ```
+  </TabItem>
+</Tabs>
+
+Use variant tags for different jurisdictions or rates:
+
+```beancount
+#taxable-us     ; US federal taxable income
+#taxable-india  ; Indian taxable income (different rate)
+```
+
+**`#reimbursable`** — marks expenses you expect to recover:
+
+```beancount
+2024-04-01 * "Uber" "Travel to client site" #reimbursable
+  Expenses:Travel:Taxi          850 INR
+  Liabilities:CreditCards:Amex:BlueCashPreferred
+```
+
+**`#transfer`** — marks internal fund movements between your own accounts, to exclude them from income/expense analysis:
+
+```beancount
+2024-04-10 * "Self" "Wire NRE to BofA" #transfer
+  Assets:Liquid:Checking:BofA       2,000.00 USD
+  Assets:Liquid:Savings:AxisBank:NRE
+```
+
+**Year tags** for grouping events that span calendar years (e.g. multi-year investments, tax lots):
+
+```beancount
+2024-01-15 * "TechCU" "Open 12-month CD" #cd-2024
+  Assets:Investments:TermDeposits:TechCU:CD6    10,000.00 USD
+  Assets:Liquid:Checking:TechCU
+```
+
+---
+
+## Links
+
+Links connect related transactions across time using the `^link-name` syntax. Unlike tags (which classify), links tie specific transactions together into a named group.
+
+### Recommended uses
+
+**Matching a transfer sent to a transfer received** (eliminates the need for a transit account in simple cases):
+
+```beancount
+2024-04-10 * "Wire sent" ^wire-apr-2024
+  Assets:Transfer     -5,000.00 USD
+  Assets:Liquid:Checking:TechCU
+
+2024-04-12 * "Wire received" ^wire-apr-2024
+  Assets:Liquid:Savings:AxisBank:NRE    5,000.00 USD
+  Assets:Transfer
+```
+
+**Tracking a CD from open to maturity**:
+
+```beancount
+2024-01-15 * "Open CD" ^techcu-cd6
+  Assets:Investments:TermDeposits:TechCU:CD6    10,000.00 USD
+  Assets:Liquid:Checking:TechCU
+
+2025-01-15 * "CD matures" ^techcu-cd6
+  Assets:Liquid:Checking:TechCU                 10,512.00 USD
+  Assets:Investments:TermDeposits:TechCU:CD6   -10,000.00 USD
+  Income:Interest:TermDeposits:TechCU:CD6          -512.00 USD
+```
+
+**Linking an expense to its reimbursement**:
+
+```beancount
+2024-04-01 * "Client dinner" ^reimb-apr-2024 #reimbursable
+  Expenses:Meals:Business              3,400 INR
+  Liabilities:CreditCards:Amex:BlueCashPreferred
+
+2024-04-20 * "Reimbursement received" ^reimb-apr-2024
+  Assets:Liquid:Savings:AxisBank:NRO    3,400 INR
+  Expenses:Meals:Business
+```
+
+---
+
+## Account Metadata
+
+Metadata is declared on the `open` directive for an account and is queryable in `bean-query`. Use it to carry information that belongs to the account itself rather than to individual transactions.
+
+### Recommended metadata fields
+
+```beancount
+2024-01-01 open Assets:Investments:TermDeposits:TechCU:CD6   USD
+  institution: "Tech CU"
+  account_number: "XXXX-6789"
+  interest_rate: "5.10%"
+  maturity_date: 2025-01-15
+  currency_type: "USD"
+  country: "US"
+
+2024-01-01 open Assets:Liquid:Savings:AxisBank:NRE   INR
+  institution: "Axis Bank"
+  account_number: "XXXX-4321"
+  country: "IN"
+  tax_status: "NRE"          ; Non-Resident External — interest exempt in India
+
+2024-01-01 open Liabilities:CreditCards:Chase:SapphireReserve   USD
+  institution: "Chase"
+  credit_limit: "10000 USD"
+  annual_fee: "550 USD"
+  rewards_type: "travel-points"
+```
+
+Metadata can then be used in queries:
+
+<Tabs>
+  <TabItem label="BQL">
+    ```
+    -- All Indian accounts
+    SELECT account, COST(SUM(position)) WHERE meta('country') = 'IN' GROUP BY 1
+
+    -- All accounts at a specific institution
+    SELECT account WHERE meta('institution') = 'Tech CU'
+
+    -- CDs maturing before a date
+    SELECT account, meta('maturity_date') WHERE meta('maturity_date') < 2025-06-01
+    ```
+
+    :::note
+    The `meta()` function is BQL-only. Account metadata from `open` directives is not available in SQLite queries.
+    :::
+  </TabItem>
+</Tabs>
+
+### Posting-level metadata
+
+Metadata can also be attached to individual postings within a transaction, for information specific to that event rather than the account as a whole:
+
+```beancount
+2024-03-20 * "ETrade" "RSU vesting"
+  Assets:Investments:Brokerage:ETrade:StockPlan    10 AUR {4.25 USD}
+    vest_date: 2024-03-20
+    grant_id: "RSU-2021-001"
+    lot_id: "LOT-001"
+  Income:Salary:Acme:StockPlan                    -42.50 USD
+```
+
+Posting metadata is particularly useful for tax lot tracking, where you need to record the acquisition date and cost basis of each lot.
+
+---
+
+## Tax Estimation Pattern
+
+A common need for cross-border finances is estimating tax owed on income at different rates. The recommended approach uses tags rather than a parallel account hierarchy.
+
+**Do not do this:**
+
+```
+Income:Gross:Interest:AxisBank:NRE    ; Gross — used to estimate 30% tax
+Income:Net:Interest:AxisBank:NRE      ; Net — after estimated tax
+```
+
+This couples tax logic into the account structure, creates redundant accounts for the same real-world account, and makes the rate implicit.
+
+**Do this instead:**
+
+Tag taxable income at the point of entry:
+
+```beancount
+2024-03-31 * "AxisBank" "NRE savings interest" #taxable-india
+  Income:Interest:Savings:AxisBank:NRE    -1,12,000 INR
+  Assets:Liquid:Savings:AxisBank:NRE       1,12,000 INR
+```
+
+Query for estimated tax when needed:
+
+<Tabs>
+  <TabItem label="SQLite">
+    ```sql
+    -- Estimate 30% Indian tax on tagged income
+    SELECT SUM(amount) * -0.30 AS estimated_indian_tax
+    FROM postings, json_each(transaction_tags)
+    WHERE account_type = 'Income'
+      AND json_each.value = 'taxable-india'
+
+    -- Estimate 22% US federal tax
+    SELECT SUM(amount) * -0.22 AS estimated_us_tax
+    FROM postings, json_each(transaction_tags)
+    WHERE account_type = 'Income'
+      AND json_each.value = 'taxable-us'
+    ```
+  </TabItem>
+  <TabItem label="BQL">
+    ```
+    -- Estimate 30% Indian tax on tagged income
+    SELECT COST(SUM(position)) * 0.30 AS estimated_indian_tax
+    WHERE account ~ '^Income' AND 'taxable-india' IN tags
+
+    -- Estimate 22% US federal tax
+    SELECT COST(SUM(position)) * 0.22 AS estimated_us_tax
+    WHERE account ~ '^Income' AND 'taxable-us' IN tags
+    ```
+  </TabItem>
+</Tabs>
+
+For a more precise model, book the estimated liability explicitly at transaction time or quarterly:
+
+```beancount
+; Quarterly estimated tax accrual — Q1 2024
+2024-04-15 * "IRS Q1 estimated tax" #estimated-tax
+  Expenses:Taxes:Federal:Estimated    1,250.00 USD
+  Liabilities:Taxes:Federal:Estimated
+
+; Payment
+2024-04-15 * "IRS Q1 payment"
+  Liabilities:Taxes:Federal:Estimated    1,250.00 USD
+  Assets:Liquid:Checking:BofA
+```
+
+---
+
+## Do's and Don'ts
+
+### Do's
+
+- **Do** structure by type first, institution second-to-last.
+- **Do** use neutral terms when terminology differs across countries (`TermDeposits` not `CDs` or `FDs`; `Checking` as the type node with the Indian `Current` label dropped at the leaf).
+- **Do** mirror Income accounts to Asset accounts and Expense accounts to Liability accounts.
+- **Do** keep the institution in the second-to-last slot consistently — this makes `:InstitutionName:` a reliable regex.
+- **Do** use tags for cross-cutting classification (taxability, reimbursability, internal transfers).
+- **Do** use links to connect related transactions across time (wires, CD lifecycle, expense-to-reimbursement).
+- **Do** add account metadata for institution-level facts (account number, rate, maturity, country).
+- **Do** model securities as commodities, not as sub-accounts.
+- **Do** split EMI payments into principal (reduces liability) and interest (expense) at transaction time.
+- **Do** add a new hierarchy level only when it groups things you will actually query as a group.
+
+### Don'ts
+
+- **Don't** put the institution at the top of the hierarchy — type queries become fragile, and income parallelism breaks.
+- **Don't** create sub-accounts for individual securities (`Assets:ETFs:Betterment:VOO` is wrong).
+- **Don't** use `Primary`, `Account`, or `Portfolio` as leaf nodes when the institution is already unambiguous.
+- **Don't** repeat information already present in a parent node (`Checking:ICICI:Current` states "checking" twice).
+- **Don't** use a Gross/Net account split to model tax estimation — use tags and explicit tax entries instead.
+- **Don't** add hierarchy levels that group things you will never query as a group (`ShortTerm`/`LongTerm` under Liabilities, for instance).
+- **Don't** use currency as a hierarchy level — currency is a beancount commodity, not a structural dimension.
+- **Don't** map one real-world account to multiple beancount accounts or split it across parent nodes.
+- **Don't** use hyphens in account names unless necessary — they create noise and reduce readability.
+
+---
+
+## Quick Reference: Account Naming Checklist
+
+When adding a new account, ask these questions in order:
+
+1. **What type is it?** Choose the type node: `Liquid:Checking`, `Liquid:Savings`, `Investments:TermDeposits`, `Investments:Brokerage`, `CreditCards`, etc.
+2. **Who holds it?** That is the custodian — usually an institution name. This goes second-to-last.
+3. **Do I need a leaf?** Only if the institution alone is ambiguous (multiple accounts of same type at same institution) or the account has a real product name worth preserving.
+4. **Is there a mirrored income or expense account needed?** Create it now, at the same depth, following the same structure.
+5. **What metadata should I declare on open?** At minimum: `institution`, `country`. Add `interest_rate` and `maturity_date` for term deposits.
+6. **Should transactions on this account be tagged?** Add `#taxable-us` or `#taxable-india` to interest-bearing accounts so tax queries work automatically.
