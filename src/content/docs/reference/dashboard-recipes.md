@@ -1622,9 +1622,16 @@ A horizontal bar chart of the highest expense accounts.
       "default": 10,
       "min": 5,
       "max": 20
+    },
+    {
+      "name": "currency",
+      "label": "Currency",
+      "type": "select",
+      "default": { "$gen": "defaultCurrency" },
+      "optionsFrom": "currencies"
     }
   ],
-  "query": "SELECT account, SUM(amount) AS total FROM postings WHERE account_type = 'Expenses' AND currency = 'USD' GROUP BY account ORDER BY total ASC LIMIT :limit",
+  "query": "SELECT account, SUM(amount) AS total FROM postings WHERE account_type = 'Expenses' AND currency = :currency GROUP BY account ORDER BY total DESC LIMIT :limit",
   "visualization": {
     "type": "chart",
     "chartType": "bar",
@@ -1651,10 +1658,11 @@ A horizontal bar chart of the highest expense accounts.
 
 **What this demonstrates:**
 - A `number` parameter with `min`/`max` constraints
+- A `select` parameter with `optionsFrom` to dynamically populate from ledger currencies
 - Horizontal bar chart (value on X, category on Y)
-- `ORDER BY total ASC` so the largest bars appear at the top of the chart
+- `ORDER BY total DESC` so the highest spending categories appear at the top
 - `accountName` format on Y-axis labels to show only the last segment of account paths
-- `currency` format on series labels for dollar amounts
+- `currency` format on series labels for formatted amounts
 
 ---
 
