@@ -1641,7 +1641,7 @@ A horizontal bar chart of the highest expense accounts.
     "options": {
       "grid": { "left": 120, "right": 24, "top": 16, "bottom": 16 },
       "xAxis": { "type": "value" },
-      "yAxis": { "type": "category", "axisLabel": { "width": 100, "overflow": "truncate" } },
+      "yAxis": { "type": "category", "inverse": true, "axisLabel": { "width": 100, "overflow": "truncate" } },
       "series": [
         {
           "name": "Amount",
@@ -1660,7 +1660,7 @@ A horizontal bar chart of the highest expense accounts.
 - A `number` parameter with `min`/`max` constraints
 - A `select` parameter with `optionsFrom` to dynamically populate from ledger currencies
 - Horizontal bar chart (value on X, category on Y)
-- `ORDER BY total DESC` so the highest spending categories appear at the top
+- `ORDER BY total DESC` with `"inverse": true` on yAxis so the highest spending categories appear at the top of the chart (ECharts renders category axes bottom-to-top by default)
 - `accountName` format on Y-axis labels to show only the last segment of account paths
 - `currency` format on series labels for formatted amounts
 
