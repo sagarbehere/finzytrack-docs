@@ -1,12 +1,273 @@
 ---
 title: Configuration
-description: Reference for config.yaml options.
+description: Reference for all config.yaml options.
 sidebar:
   order: 5
 ---
 
+Finzytrack is configured via a `config.yaml` file located in the `config/` directory. This file is created automatically on first run from a seed template. Most settings can also be changed through the Settings screen in the app, which writes back to this file.
+
+---
+
+## Ledger File
+
+```yaml
+ledger_file: "./data/ledgers/one.beancount"
+```
+
+| Field | Type | Default |
+|-------|------|---------|
+| `ledger_file` | string (file path) | `"./data/ledgers/one.beancount"` |
+
+Path to the main Beancount ledger file. All transactions are stored here. Can be absolute or relative to the working directory. Changing this switches the active ledger without restarting — useful if you maintain separate ledgers.
+
+---
+
+## Accounts
+
+```yaml
+accounts:
+  default_currency: "USD"
+  default_unknown_account: "Expenses:Unknown"
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `default_currency` | string | `"USD"` | Default currency code (e.g., `USD`, `EUR`, `INR`). Used when a currency is not specified during import. |
+| `default_unknown_account` | string | `"Expenses:Unknown"` | Fallback account assigned to imported transactions when the category cannot be determined. |
+
+---
+
+## Server
+
+```yaml
+server:
+  host: "127.0.0.1"
+  port: 8001
+```
+
+| Field | Type | Default | Constraints | Description |
+|-------|------|---------|-------------|-------------|
+| `host` | string | `"127.0.0.1"` | Valid network address | Address the backend listens on. Use `0.0.0.0` to allow connections from other devices on the network. |
+| `port` | integer | `8000` | 1–65535 | Port the backend listens on. |
+
 :::note
-This page is under construction.
+Changing server settings requires a restart to take effect.
 :::
 
-Finzytrack is configured via a `config.yaml` file. This reference covers all available configuration options.
+---
+
+## AI
+
+The `ai` section controls transaction categorization and AI model settings. All AI features are optional — Finzytrack works fully without any AI configured.
+
+### Categorization
+
+```yaml
+ai:
+  categorization:
+    enabled: true
+    engine: "classifier"
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `enabled` | boolean | `true` | Enable or disable automatic transaction categorization during import. |
+| `engine` | string | `"classifier"` | Which engine to use. See values below. |
+
+**Engine values:**
+
+| Value | Description |
+|-------|-------------|
+| `"classifier"` | Local scikit-learn classifier trained on your previously categorized transactions. Runs entirely on your machine — no data is sent anywhere. This is the default. |
+| `"ai"` | AI-based categorization using your configured LLM (requires the `ai.llm` section to be configured). See [Data Shared with AI](/reference/ai-data-sharing/#autocategorization) for what is sent. |
+
+### LLM
+
+The `ai.llm` section configures the AI model used for natural language features (transaction entry, query generation, file parsing, AI assistant, and AI-based categorization). There are two modes: **Finzytrack AI** (managed service) and **bring-your-own model**.
+
+#### Finzytrack AI
+
+```yaml
+ai:
+  llm:
+    finzytrack_ai: true
+    finzytrack_ai_token: "your-token-here"
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `finzytrack_ai` | boolean | `false` | Use the Finzytrack AI managed service. When enabled, all other provider/model fields below are ignored. |
+| `finzytrack_ai_token` | string (secret) | `""` | Authentication token for the Finzytrack AI service. |
+| `finzytrack_ai_url` | string | `"https://ai.finzytrack.com"` | Finzytrack AI proxy URL. Override only for development or testing. |
+
+When `finzytrack_ai` is `true`, Finzytrack routes AI requests through its server to a cloud model. See [Data Shared with AI](/reference/ai-data-sharing/) for privacy details.
+
+#### Bring Your Own Model
+
+```yaml
+ai:
+  llm:
+    provider: "openai"
+    api_url: "http://127.0.0.1:1234"
+    api_key: ""
+    model: "llama-3.1-8b-instruct"
+```
+
+| Field | Type | Default | Constraints | Description |
+|-------|------|---------|-------------|-------------|
+| `provider` | string | `"openai"` | `"openai"` or `"anthropic"` | LLM provider. Use `"openai"` for any OpenAI-compatible endpoint (OpenAI, LM Studio, Ollama, Groq, etc.) or `"anthropic"` for the Anthropic API directly. |
+| `api_url` | string | `""` | Valid URL | API base URL. Only used when `provider` is `"openai"`. Examples: `http://127.0.0.1:1234` (LM Studio), `http://localhost:11434/v1` (Ollama), `https://api.openai.com` (OpenAI). Leave empty for Anthropic. |
+| `api_key` | string (secret) | `""` | — | API key. Required for cloud providers (OpenAI, Anthropic, Groq). Leave empty for local LLMs that don't require authentication. |
+| `model` | string | `""` | — | Model name. Examples: `gpt-4o`, `claude-sonnet-4-6`, `llama-3.1-8b-instruct`. AI features are disabled when this is empty and `finzytrack_ai` is `false`. |
+
+#### Model Settings (Bring Your Own Only)
+
+These settings apply when using your own model. When Finzytrack AI is enabled, these are controlled by the Finzytrack AI service and any local values are ignored.
+
+```yaml
+ai:
+  llm:
+    temperature: 0.1
+    max_tokens: 0
+    max_tool_rounds: 12
+    timeout_secs: 120
+```
+
+| Field | Type | Default | Constraints | Description |
+|-------|------|---------|-------------|-------------|
+| `temperature` | float | `0.1` | 0.0–2.0 | Sampling temperature. Lower values produce more deterministic output (recommended for parsing and SQL generation). Higher values introduce more variation. |
+| `max_tokens` | integer | `0` | >= 0 | Maximum tokens in the LLM response. `0` uses the model's default limit. Anthropic models require a value greater than 0. |
+| `max_tool_rounds` | integer | `12` | 1–50 | Maximum number of tool-call round-trips per message in the AI assistant. Higher values allow longer multi-step conversations but require models with larger context windows. |
+| `timeout_secs` | integer | `120` | 10–600 | Timeout in seconds for LLM API requests. Increase if you experience timeouts with slower models or large inputs. |
+
+---
+
+## Backup
+
+```yaml
+backup:
+  enabled: true
+  retention_count: 100
+```
+
+| Field | Type | Default | Constraints | Description |
+|-------|------|---------|-------------|-------------|
+| `enabled` | boolean | `true` | — | Enable the backup system. When enabled, a backup is created before every write. |
+| `retention_count` | integer | `100` | >= 1 | Number of backup versions to keep per file. Older backups are automatically deleted when this limit is exceeded. |
+
+Backups cover all files that Finzytrack writes to: the ledger file, config file, CSV/XLS/email import rules, dashboard recipes, and OFX account mappings. Backups are stored in the `data/backups/` directory.
+
+---
+
+## Logging
+
+```yaml
+logging:
+  level: "INFO"
+  max_file_size_mb: 5
+  backup_count: 3
+```
+
+| Field | Type | Default | Constraints | Description |
+|-------|------|---------|-------------|-------------|
+| `level` | string | `"INFO"` | See values below | Application log level. |
+| `max_file_size_mb` | integer | `5` | 1–100 | Maximum log file size in megabytes before rotation occurs. |
+| `backup_count` | integer | `3` | 0–20 | Number of rotated log files to keep in addition to the current log file. |
+
+**Log levels** (from most to least verbose): `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`.
+
+The log file is located at `logs/finzytrack.log`.
+
+---
+
+## Email Import
+
+```yaml
+email_import:
+  enabled: false
+  default_lookback_days: 7
+  max_emails: 500
+  imap_timeout_secs: 30
+  parsing_mode: "regex"
+```
+
+| Field | Type | Default | Constraints | Description |
+|-------|------|---------|-------------|-------------|
+| `enabled` | boolean | `false` | — | Enable email import functionality. When disabled, email import endpoints are not available. |
+| `default_lookback_days` | integer | `7` | >= 1 | Default number of days to look back when fetching emails. Can be overridden per request. |
+| `max_emails` | integer | `500` | >= 1 | Maximum number of emails to fetch per request. Requests exceeding this limit are truncated with a warning. |
+| `imap_timeout_secs` | integer | `30` | >= 0 | Socket timeout in seconds for IMAP operations. Set to `0` for no timeout (not recommended — may block indefinitely on network issues). |
+| `parsing_mode` | string | `"regex"` | `"regex"` or `"ai"` | Default method for extracting transaction data from emails. `"regex"` uses rule-based extraction; `"ai"` uses the configured LLM. Can be overridden per email account profile. |
+
+Email account credentials (IMAP usernames and passwords) can be stored in `config/.env` as environment variables and referenced from email rule files using `${VAR_NAME}` syntax.
+
+---
+
+## File Locations
+
+These paths are derived from the configuration and are not directly configurable. They are listed here for reference.
+
+| Path | Description |
+|------|-------------|
+| `config/config.yaml` | Main configuration file |
+| `config/.env` | Environment variables (email credentials, etc.) |
+| `config/csv_rules/` | CSV import rule files |
+| `config/xls_rules/` | Excel (XLS/XLSX) import rule files |
+| `config/email_rules/` | Email import account profiles and rules |
+| `config/recipes/` | Dashboard and widget recipe files (JSON) |
+| `config/ofx_mappings.yaml` | OFX account mappings |
+| `data/ledgers/` | Beancount ledger files |
+| `data/ledger.db` | SQLite export of the ledger (auto-generated) |
+| `data/backups/` | Backups of all files written by Finzytrack |
+| `logs/finzytrack.log` | Application log file |
+
+---
+
+## Example config.yaml
+
+A complete configuration file with all defaults shown:
+
+```yaml
+setup_complete: true
+ledger_file: "./data/ledgers/one.beancount"
+
+accounts:
+  default_currency: "USD"
+  default_unknown_account: "Expenses:Unknown"
+
+server:
+  host: "127.0.0.1"
+  port: 8001
+
+ai:
+  categorization:
+    enabled: true
+    engine: "classifier"
+  llm:
+    finzytrack_ai: false
+    provider: "openai"
+    api_url: ""
+    api_key: ""
+    model: ""
+    temperature: 0.1
+    max_tokens: 0
+    max_tool_rounds: 12
+    timeout_secs: 120
+
+backup:
+  enabled: true
+  retention_count: 100
+
+logging:
+  level: "INFO"
+  max_file_size_mb: 5
+  backup_count: 3
+
+email_import:
+  enabled: false
+  default_lookback_days: 7
+  max_emails: 500
+  imap_timeout_secs: 30
+  parsing_mode: "regex"
+```
