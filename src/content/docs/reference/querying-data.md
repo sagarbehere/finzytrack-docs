@@ -28,6 +28,12 @@ In dashboard recipes, set the widget's `dbType` field to `"sqlite"` (default) or
 
 SQL queries run against a SQLite export of your Beancount ledger. This is the default and recommended engine for dashboard recipes.
 
+The database contains two groups of tables:
+- **`postings`** — a denormalized, analytics-optimized table with one row per posting. This is the primary table for dashboard widgets and aggregate queries.
+- **Ledger mirror tables** — normalized tables covering all other Beancount directives and computed state: `accounts`, `account_balances`, `commodities`, `prices`, `balance_assertions`, `lots`, and more.
+
+Most queries only need the `postings` table. The ledger mirror tables are useful for specialized widgets like price history charts, lot tracking views, or balance assertion reports.
+
 ### The Postings Table
 
 The `postings` table contains one row per posting. Each transaction has two or more postings that sum to zero (double-entry accounting).
@@ -257,6 +263,214 @@ WHERE ...
 ```
 These columns can then be referenced in `clickLink` templates as `{{data.dateFrom}}` and `{{data.dateTo}}`. See the [dashboard recipes reference](/reference/dashboard-recipes/#click-through-links) for details.
 :::
+
+---
+
+## Ledger Mirror Tables
+
+These tables provide a complete, normalized view of your Beancount ledger beyond transactions. They are populated automatically whenever your ledger changes.
+
+### accounts
+
+One row per account (Open directive). Close directives set the `close_date`.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `name` | TEXT (PK) | Full account path (e.g., `Assets:Bank:Checking`). |
+| `open_date` | TEXT | Date the account was opened (YYYY-MM-DD). |
+| `close_date` | TEXT | Date closed, or NULL if still open. |
+| `currencies_json` | TEXT | JSON array of allowed currencies (e.g., `["USD", "EUR"]`). |
+| `booking` | TEXT | Booking method: `STRICT`, `FIFO`, `LIFO`, `AVERAGE`, `HIFO`, or NULL. |
+| `metadata_json` | TEXT | JSON object of account metadata from the Open directive. |
+
+### account_balances
+
+Per-account, per-currency final balances computed from all postings.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `account` | TEXT | Account name (references `accounts.name`). |
+| `currency` | TEXT | Currency code. |
+| `balance` | TEXT | Current balance as a decimal string (preserves precision). |
+| `transaction_count` | INTEGER | Number of transactions affecting this account+currency. |
+| `last_transaction_date` | TEXT | Date of the most recent transaction (YYYY-MM-DD). |
+
+Primary key: `(account, currency)`.
+
+**Example — accounts with balances:**
+```sql
+SELECT a.name, a.open_date, a.close_date,
+       ab.currency, ab.balance, ab.transaction_count
+FROM accounts a
+LEFT JOIN account_balances ab ON a.name = ab.account
+ORDER BY a.name
+```
+
+### commodities
+
+One row per Commodity directive.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `code` | TEXT (PK) | Commodity code (e.g., `USD`, `AAPL`). |
+| `declaration_date` | TEXT | Date of the commodity directive. |
+| `name` | TEXT | Full name from metadata (e.g., `"Apple Inc."`). |
+| `type` | TEXT | Commodity type from metadata (e.g., `"stock"`, `"currency"`). |
+| `metadata_json` | TEXT | JSON object of commodity metadata. |
+
+### commodity_usage
+
+Transaction usage statistics per commodity, computed from postings.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `code` | TEXT (PK) | Commodity code. |
+| `transaction_count` | INTEGER | Number of postings using this commodity. |
+| `total_volume` | TEXT | Sum of absolute amounts transacted. |
+| `first_seen` | TEXT | Earliest transaction date. |
+| `last_seen` | TEXT | Latest transaction date. |
+
+### prices
+
+One row per Price directive. Useful for price history charts.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER (PK) | Auto-incrementing ID. |
+| `date` | TEXT | Price date (YYYY-MM-DD). |
+| `base_currency` | TEXT | What's being priced (e.g., `AAPL`). |
+| `quote_number` | TEXT | Price value as decimal string (e.g., `"150.00"`). |
+| `quote_currency` | TEXT | Price denomination (e.g., `USD`). |
+| `metadata_json` | TEXT | JSON object of price metadata. |
+
+**Example — price history for a stock:**
+```sql
+SELECT date, CAST(quote_number AS REAL) AS price
+FROM prices
+WHERE base_currency = 'AAPL' AND quote_currency = 'USD'
+ORDER BY date
+```
+
+### balance_assertions
+
+One row per Balance directive. Tracks whether each assertion passed or failed.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER (PK) | Auto-incrementing ID. |
+| `date` | TEXT | Assertion date (YYYY-MM-DD). |
+| `account` | TEXT | Account being asserted. |
+| `amount_number` | TEXT | Expected balance as decimal string. |
+| `amount_currency` | TEXT | Currency of the assertion. |
+| `tolerance` | TEXT | Tolerance value, or NULL. |
+| `passed` | INTEGER | `1` if assertion passed, `0` if failed. |
+| `diff_number` | TEXT | Difference if failed, NULL if passed. |
+| `diff_currency` | TEXT | Currency of the difference. |
+| `metadata_json` | TEXT | JSON metadata. |
+
+### pad_directives
+
+One row per Pad directive.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER (PK) | Auto-incrementing ID. |
+| `date` | TEXT | Pad date (YYYY-MM-DD). |
+| `account` | TEXT | Account being padded. |
+| `source_account` | TEXT | Equity account to pad from. |
+| `metadata_json` | TEXT | JSON metadata. |
+
+### lots
+
+Current investment lot positions with cost basis, computed from Beancount's booking engine.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER (PK) | Auto-incrementing ID. |
+| `account` | TEXT | Account holding the position. |
+| `units_number` | TEXT | Number of shares/units as decimal string. |
+| `units_currency` | TEXT | What's held (e.g., `AAPL`, `BTC`). |
+| `cost_number` | TEXT | Per-unit cost basis as decimal string. |
+| `cost_currency` | TEXT | Cost denomination (e.g., `USD`). |
+| `acquisition_date` | TEXT | When the lot was opened (YYYY-MM-DD). |
+| `label` | TEXT | Lot label (rare, usually NULL). |
+| `book_value` | TEXT | `units_number * cost_number` (precomputed). |
+
+**Example — current holdings with book value:**
+```sql
+SELECT account, units_currency AS ticker,
+       CAST(units_number AS REAL) AS shares,
+       CAST(cost_number AS REAL) AS cost_per_share,
+       CAST(book_value AS REAL) AS total_cost
+FROM lots
+WHERE CAST(units_number AS REAL) > 0
+ORDER BY account, units_currency
+```
+
+### ledger_errors
+
+Beancount parsing errors from the most recent parse.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER (PK) | Auto-incrementing ID. |
+| `source_file` | TEXT | File path where the error occurred. |
+| `line_number` | INTEGER | Line number of the error. |
+| `message` | TEXT | Error message. |
+| `entry_json` | TEXT | JSON representation of the problematic entry, if available. |
+
+### training_data
+
+Payee/narration to category mappings extracted from transactions. Used for ML-based transaction categorization.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | INTEGER (PK) | Auto-incrementing ID. |
+| `description` | TEXT | Payee + narration text. |
+| `category` | TEXT | Target account (e.g., `Expenses:Food`). |
+
+### Other Tables
+
+These tables are available but less commonly queried in dashboards:
+
+| Table | Description |
+|-------|-------------|
+| `notes` | Note directives attached to accounts (`date`, `account`, `comment`). |
+| `events` | Event directives tracking named variables over time (`date`, `type`, `description`). |
+| `documents` | Document directives linking files to accounts (`date`, `account`, `filename`). |
+| `custom_directives` | Custom Beancount directives (`date`, `type`, `values_json`). |
+| `stored_queries` | Named BQL queries defined in the ledger (`name`, `query_string`). |
+| `ledger_options` | Beancount option values (`key`, `value_json`). |
+
+### Cross-Table Query Examples
+
+**Accounts with their most recent transaction date:**
+```sql
+SELECT a.name, a.open_date, a.close_date,
+       MAX(ab.last_transaction_date) AS last_activity
+FROM accounts a
+LEFT JOIN account_balances ab ON a.name = ab.account
+GROUP BY a.name
+ORDER BY last_activity DESC
+```
+
+**Commodities with usage statistics:**
+```sql
+SELECT c.code, c.name, c.type,
+       cu.transaction_count, cu.first_seen, cu.last_seen
+FROM commodities c
+LEFT JOIN commodity_usage cu ON c.code = cu.code
+ORDER BY cu.transaction_count DESC
+```
+
+**Failed balance assertions:**
+```sql
+SELECT date, account, amount_number, amount_currency,
+       diff_number, diff_currency
+FROM balance_assertions
+WHERE passed = 0
+ORDER BY date
+```
 
 ---
 
