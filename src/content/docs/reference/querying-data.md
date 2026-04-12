@@ -266,11 +266,11 @@ These columns can then be referenced in `clickLink` templates as `{{data.dateFro
 
 ---
 
-## Ledger Mirror Tables
+### Ledger Mirror Tables
 
 These tables provide a complete, normalized view of your Beancount ledger beyond transactions. They are populated automatically whenever your ledger changes.
 
-### accounts
+#### accounts
 
 One row per account (Open directive). Close directives set the `close_date`.
 
@@ -283,7 +283,7 @@ One row per account (Open directive). Close directives set the `close_date`.
 | `booking` | TEXT | Booking method: `STRICT`, `FIFO`, `LIFO`, `AVERAGE`, `HIFO`, or NULL. |
 | `metadata_json` | TEXT | JSON object of account metadata from the Open directive. |
 
-### account_balances
+#### account_balances
 
 Per-account, per-currency final balances computed from all postings.
 
@@ -306,7 +306,7 @@ LEFT JOIN account_balances ab ON a.name = ab.account
 ORDER BY a.name
 ```
 
-### commodities
+#### commodities
 
 One row per Commodity directive.
 
@@ -318,7 +318,7 @@ One row per Commodity directive.
 | `type` | TEXT | Commodity type from metadata (e.g., `"stock"`, `"currency"`). |
 | `metadata_json` | TEXT | JSON object of commodity metadata. |
 
-### commodity_usage
+#### commodity_usage
 
 Transaction usage statistics per commodity, computed from postings.
 
@@ -330,7 +330,7 @@ Transaction usage statistics per commodity, computed from postings.
 | `first_seen` | TEXT | Earliest transaction date. |
 | `last_seen` | TEXT | Latest transaction date. |
 
-### prices
+#### prices
 
 One row per Price directive. Useful for price history charts.
 
@@ -351,7 +351,7 @@ WHERE base_currency = 'AAPL' AND quote_currency = 'USD'
 ORDER BY date
 ```
 
-### balance_assertions
+#### balance_assertions
 
 One row per Balance directive. Tracks whether each assertion passed or failed.
 
@@ -368,7 +368,7 @@ One row per Balance directive. Tracks whether each assertion passed or failed.
 | `diff_currency` | TEXT | Currency of the difference. |
 | `metadata_json` | TEXT | JSON metadata. |
 
-### pad_directives
+#### pad_directives
 
 One row per Pad directive.
 
@@ -380,7 +380,7 @@ One row per Pad directive.
 | `source_account` | TEXT | Equity account to pad from. |
 | `metadata_json` | TEXT | JSON metadata. |
 
-### lots
+#### lots
 
 Current investment lot positions with cost basis, computed from Beancount's booking engine.
 
@@ -407,7 +407,7 @@ WHERE CAST(units_number AS REAL) > 0
 ORDER BY account, units_currency
 ```
 
-### ledger_errors
+#### ledger_errors
 
 Beancount parsing errors from the most recent parse.
 
@@ -419,7 +419,7 @@ Beancount parsing errors from the most recent parse.
 | `message` | TEXT | Error message. |
 | `entry_json` | TEXT | JSON representation of the problematic entry, if available. |
 
-### training_data
+#### training_data
 
 Payee/narration to category mappings extracted from transactions. Used for ML-based transaction categorization.
 
@@ -429,7 +429,7 @@ Payee/narration to category mappings extracted from transactions. Used for ML-ba
 | `description` | TEXT | Payee + narration text. |
 | `category` | TEXT | Target account (e.g., `Expenses:Food`). |
 
-### Other Tables
+#### Other Tables
 
 These tables are available but less commonly queried in dashboards:
 
@@ -442,7 +442,7 @@ These tables are available but less commonly queried in dashboards:
 | `stored_queries` | Named BQL queries defined in the ledger (`name`, `query_string`). |
 | `ledger_options` | Beancount option values (`key`, `value_json`). |
 
-### Cross-Table Query Examples
+#### Cross-Table Query Examples
 
 **Accounts with their most recent transaction date:**
 ```sql
