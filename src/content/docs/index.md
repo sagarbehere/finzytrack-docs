@@ -24,7 +24,7 @@ Finzytrack runs **entirely offline by default**. No one is mining your transacti
 
 ## AI as an accelerator
 
-AI is entirely optional — it is not a gatekeeper. Everything the AI can do, you can do yourself — the [documentation](reference/dashboard-recipes/) covers it all. AI simply makes things faster:
+AI is entirely optional — it is not a gatekeeper. Everything the AI can do, you can do yourself — this documentation covers it all. AI simply makes things faster and more convenient:
 
 - **AI-assisted import** — skip writing parsing rules for each financial institution. Hand a statement to the AI and it will figure out the format and import the transactions
 - **Natural-language queries** — ask questions in plain English and get SQL or Beancount queries back
@@ -34,7 +34,7 @@ AI is entirely optional — it is not a gatekeeper. Everything the AI can do, yo
 
 ## Open source and sustainable
 
-Finzytrack is and will remain open source. In future, we may explore fair monetization such as a bundled AI model subscription, signed binaries, or companion web and mobile apps — and you can always bring your own AI model.
+Finzytrack is and will remain open source, and you can always use your own AI model. In future, we may explore fair monetization such as a bundled AI model subscription, signed binaries, a hosted web app, or companion mobile apps.
 
 ## Quick links
 
