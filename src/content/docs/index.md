@@ -8,13 +8,12 @@ Finzytrack is an open-source (GPLv2) GUI personal finance application for **macO
 ## Features
 
 - **Double-entry bookkeeping** — built on [Beancount](https://beancount.github.io/), the powerful plain-text accounting system
-- **Import from anywhere** — rule-based importers for OFX, CSV, XLS files, or directly from your email. Finzytrack can connect to your email server and import transactions from emails sent by your financial institutions — no need to share your bank login credentials with third-party aggregators.
-- **Flexible import rules** — define rules to automatically transform and categorize transactions as they come in
+- **Import a wide variety of statements** — rule-based importers for OFX, CSV, XLS files, or directly from your email. Finzytrack can connect to your email server and import transactions from emails sent by your financial institutions — no need to share your bank login credentials with third-party aggregators.
 - **Auto-categorization** — automatically categorize imported transactions, either fully offline by training on your past categorizations or with AI assistance
-- **Natural language transaction entry** — type transactions in plain language and Finzytrack parses them into your ledger
 - **Customizable dashboards** — build your own widgets, charts, and visualizations tailored to how you think about your finances
 - **Powerful querying** — if you can express it as a SQL or Beancount (BQL) query, you can probably run it against your financial data
 - **Transaction search** — quickly find any past transaction across your entire history
+- **Optional AI assistance** — let AI parse statements, create import rules, categorize transactions, enter transactions in natural language, build dashboards, and answer financial questions. Bring your own model; no AI required for core features.
 
 ## You own your data
 
@@ -34,7 +33,7 @@ AI is entirely optional — it is not a gatekeeper. Everything the AI can do, yo
 
 ## Open source and sustainable
 
-Finzytrack is and will remain open source, and you can always use your own AI model. In future, we may explore fair monetization such as a bundled AI model subscription, signed binaries, a hosted web app, or companion mobile apps.
+Finzytrack is and will remain open source, and you can always use your own AI model. In future, we may explore fair monetization such as a bundled AI model subscription, signed auto-updating binaries, a hosted web app, or companion mobile apps.
 
 ## Quick links
 

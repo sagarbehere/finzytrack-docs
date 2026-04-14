@@ -163,6 +163,10 @@ Once you have some transactions in your ledger, here is where to look:
 | [Query](/views/query/) | Run SQL or BQL queries for custom analysis |
 | [AI Assistant](/views/ai-assistant/) | Conversational assistant for financial analysis, import rule creation, dashboard building, and more |
 
+### Global Search
+
+The search field in the top bar is available from any screen. As you type, it shows matching account names in a dropdown — click one to jump to the Accounts view filtered to that account. You can also press Enter or click "Search transactions" to jump to the Transactions view with your search term applied against payee and narration fields. Use the arrow keys to navigate the dropdown and Escape to close it.
+
 ### Things to Try
 
 - Open the default [Dashboard](/views/dashboards/) to see spending breakdowns and trends.

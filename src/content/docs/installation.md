@@ -12,7 +12,7 @@ Finzytrack is actively developed and tested on **macOS Tahoe (26.x)**. It has be
 Download the latest release for your platform:
 
 - [finzytrack.com/download](https://finzytrack.com/download)
-- [GitHub Releases](https://github.com/finzytrack/finzytrack/releases)
+- [GitHub Releases](https://github.com/sagarbehere/finzytrack/releases)
 
 | Platform | Download |
 |---|---|
@@ -139,7 +139,7 @@ Finzytrack is designed as a local desktop app, but it can be self-hosted on a VP
 On your server, clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/finzytrack/finzytrack.git
+git clone https://github.com/sagarbehere/finzytrack.git
 cd finzytrack
 
 python -m venv venv

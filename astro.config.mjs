@@ -10,7 +10,7 @@ export default defineConfig({
 		starlight({
 			title: 'Finzytrack',
 			social: [
-				{ icon: 'github', label: 'GitHub', href: 'https://github.com/finzytrack/finzytrack' },
+				{ icon: 'github', label: 'GitHub', href: 'https://github.com/sagarbehere/finzytrack' },
 			],
 			sidebar: [
 				{ label: 'Home', slug: 'index' },

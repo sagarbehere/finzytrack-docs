@@ -14,7 +14,7 @@ This documentation site is built with [Starlight](https://starlight.astro.build/
 ### Setup
 
 ```bash
-git clone https://github.com/finzytrack/finzytrack-docs.git
+git clone https://github.com/sagarbehere/finzytrack-docs.git
 cd finzytrack-docs
 npm install
 ```
@@ -37,4 +37,4 @@ This starts a local server with live reload.
 
 ## Contributing to Finzytrack
 
-For contributions to the main application, see the [Finzytrack repository](https://github.com/finzytrack/finzytrack).
+For contributions to the main application, see the [Finzytrack repository](https://github.com/sagarbehere/finzytrack).
