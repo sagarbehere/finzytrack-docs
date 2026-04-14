@@ -9,17 +9,29 @@ This page is under construction.
 
 ## General
 
-**What is Beancount?**
+### Is all my financial data really stored in a single plain-text file?
+
+Yes. Everything — your accounts, transactions, balance assertions, and metadata — lives in a single [Beancount](https://beancount.github.io/) ledger file. With Finzytrack, you own your data and there is no lock-in. We want your data to be portable so it can be used with other open-source tools from the [plain-text accounting](https://plaintextaccounting.org/) community. Even without any tools, just casually glancing at the ledger file in a text editor will give you a pretty good idea of what information is stored in there and how it all works.
+
+### What is Beancount?
 
 [Beancount](https://beancount.github.io/) is a double-entry bookkeeping system that uses plain-text files. Finzytrack provides a modern UI on top of Beancount, so you get the power of plain-text accounting with a visual interface.
 
-**Do I need to know Beancount to use Finzytrack?**
+### Do I need to know Beancount to use Finzytrack?
 
 No. Finzytrack handles the Beancount details for you. However, familiarity with double-entry bookkeeping concepts (accounts, transactions, postings) will help you get the most out of the app.
 
+### Can I edit the ledger file directly in a text editor while the app is running?
+
+No. Finzytrack caches the ledger in memory and writes it back as a whole file on every change. If you edit the ledger file externally while the app is running, your edits will be silently overwritten the next time the app writes to the file.
+
+If you want to edit the raw ledger directly, close Finzytrack first, make your changes in a text editor, and then restart the app. Finzytrack will load the updated file on startup.
+
+---
+
 ## Transactions
 
-**How do I log an international transfer where currencies differ?**
+### How do I log an international transfer where currencies differ?
 
 When you transfer money between accounts in different currencies — for example, sending USD from a US bank and receiving INR in an Indian bank — use the `@@` (total price) annotation on the receiving posting.
 
