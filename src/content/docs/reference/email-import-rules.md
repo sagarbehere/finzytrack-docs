@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::note
-If you have [AI configured](/quick-start/#configuring-ai), you can ask the AI assistant to create email import rules for you, or use AI-based extraction instead of regex patterns. If you prefer to create rules manually, or want to understand and fine-tune what the assistant generates, read on.
+If you have [AI configured](/quick-start/#configuring-ai), you can ask the AI assistant to [create email import rules for you](/views/ai-assistant/#setup-mode-creating-import-rules), or use AI-based extraction instead of regex patterns. If you prefer to create rules manually, or want to understand and fine-tune what the assistant generates, read on.
 :::
 
 Email import rules tell Finzytrack how to connect to an email account, find transaction alert emails from your financial institution, and extract transaction data from them. Each rule is a YAML file that covers one bank account — it defines the IMAP connection, which emails to match, and how to extract fields like amount, date, and payee from the email body.

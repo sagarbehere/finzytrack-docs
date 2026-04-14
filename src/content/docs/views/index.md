@@ -14,4 +14,4 @@ Finzytrack's sidebar provides access to the main views of the application. Each 
 | [Transactions](/views/transactions/) | Browse and search your transaction history |
 | [Accounts](/views/accounts/) | View your account hierarchy and balances |
 | [Query](/views/query/) | Run custom queries against your financial data |
-| [Analyze](/views/analyze/) | Advanced analysis and reporting |
+| [AI Assistant](/views/ai-assistant/) | Conversational assistant for financial analysis, import rule creation, dashboard building, and more |

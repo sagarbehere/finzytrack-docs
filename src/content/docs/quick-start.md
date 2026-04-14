@@ -79,7 +79,7 @@ CSV and Excel files have no standardized structure — every financial instituti
 4. Go to **Import > CSV** (or **XLS**), select your rule, upload the statement, review, and register.
 
 :::note
-If you have [AI configured](#configuring-ai), you can ask the AI assistant to create import rules for you. Upload a sample statement in the Assistant view and ask it to generate the rule — this is often easier than writing one by hand.
+If you have [AI configured](#configuring-ai), you can ask the AI assistant to [create import rules for you](/views/ai-assistant/#setup-mode-creating-import-rules). Upload a sample statement in the Assistant view and ask it to generate the rule — this is often easier than writing one by hand.
 :::
 
 ### AI-Assisted Parsing (No Rules Needed)
@@ -161,7 +161,7 @@ Once you have some transactions in your ledger, here is where to look:
 | [Transactions](/views/transactions/) | Searchable, filterable list of all transactions |
 | [Accounts](/views/accounts/) | Account hierarchy with balances |
 | [Query](/views/query/) | Run SQL or BQL queries for custom analysis |
-| [Analyze](/views/analyze/) | Advanced reporting and analysis tools |
+| [AI Assistant](/views/ai-assistant/) | Conversational assistant for financial analysis, import rule creation, dashboard building, and more |
 
 ### Things to Try
 

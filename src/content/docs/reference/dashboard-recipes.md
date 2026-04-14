@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::note
-If you have [AI configured](/quick-start/#configuring-ai), you can build dashboards conversationally using the AI assistant — describe what you want to see and it will create the recipe for you. If you prefer to create recipes manually, or want to understand and fine-tune what the assistant generates, read on.
+If you have [AI configured](/quick-start/#configuring-ai), you can [build dashboards conversationally](/views/ai-assistant/#analyst-mode-building-dashboards) using the AI assistant — describe what you want to see and it will create the recipe for you. If you prefer to create recipes manually, or want to understand and fine-tune what the assistant generates, read on.
 :::
 
 Dashboards and widgets in Finzytrack are defined using **JSON recipe files**. There are two types of recipes:
