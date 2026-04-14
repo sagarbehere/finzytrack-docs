@@ -5,6 +5,10 @@ sidebar:
   order: 1
 ---
 
+:::note
+If you have [AI configured](/quick-start/#configuring-ai), you can build dashboards conversationally using the AI assistant — describe what you want to see and it will create the recipe for you. If you prefer to create recipes manually, or want to understand and fine-tune what the assistant generates, read on.
+:::
+
 Dashboards and widgets in Finzytrack are defined using **JSON recipe files**. There are two types of recipes:
 
 - **Dashboard recipes** define a grid layout containing multiple widgets — KPI cards, charts, tables, and pivot tables.
