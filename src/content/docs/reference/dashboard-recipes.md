@@ -1138,7 +1138,7 @@ A dashboard showing net worth, total assets, total liabilities, and breakdown pi
     {
       "id": "total-liabilities",
       "title": "Total Liabilities",
-      "query": "SELECT currency, SUM(amount) AS amount FROM postings WHERE account_type = 'Liabilities' GROUP BY currency HAVING amount != 0 ORDER BY currency",
+      "query": "SELECT currency, SUM(amount) * -1 AS amount FROM postings WHERE account_type = 'Liabilities' GROUP BY currency HAVING amount != 0 ORDER BY currency",
       "visualization": {
         "type": "kpi",
         "icon": "↓",
