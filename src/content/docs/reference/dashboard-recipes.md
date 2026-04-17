@@ -1159,18 +1159,23 @@ A dashboard showing net worth, total assets, total liabilities, and breakdown pi
           "optionsFrom": "currencies"
         }
       ],
-      "query": "SELECT REPLACE(account, 'Assets:', '') AS name, account, ROUND(SUM(amount), 2) AS value FROM postings WHERE account_type = 'Assets' AND currency = :currency GROUP BY account HAVING value > 0 ORDER BY value DESC",
+      "query": "SELECT CASE WHEN account LIKE 'Assets:Liquid:%' THEN REPLACE(account, 'Assets:Liquid:', '') WHEN account LIKE 'Assets:Investments:%' THEN REPLACE(account, 'Assets:Investments:', '') ELSE REPLACE(account, 'Assets:', '') END AS name, account, ROUND(SUM(amount), 2) AS value FROM postings WHERE account_type = 'Assets' AND currency = :currency GROUP BY account HAVING value > 0 ORDER BY value DESC",
       "visualization": {
         "type": "chart",
         "chartType": "pie",
         "options": {
           "tooltip": { "trigger": "item" },
+          "legend": { "show": false },
           "series": [
             {
               "type": "pie",
-              "radius": ["30%", "60%"],
+              "radius": ["35%", "65%"],
               "encode": { "itemName": "name", "value": "value" },
-              "label": { "show": true, "formatter": "{b}: {d}%" }
+              "label": { "show": true, "formatter": "{b}", "minShowLabelAngle": 15 },
+              "labelLine": { "show": true, "length": 8, "length2": 8 },
+              "emphasis": {
+                "label": { "show": true, "fontWeight": "bold", "formatter": "{b}\n{d}%" }
+              }
             }
           ]
         },
@@ -1199,12 +1204,17 @@ A dashboard showing net worth, total assets, total liabilities, and breakdown pi
         "chartType": "pie",
         "options": {
           "tooltip": { "trigger": "item" },
+          "legend": { "show": false },
           "series": [
             {
               "type": "pie",
-              "radius": ["30%", "60%"],
+              "radius": ["35%", "65%"],
               "encode": { "itemName": "name", "value": "value" },
-              "label": { "show": true, "formatter": "{b}: {d}%" }
+              "label": { "show": true, "formatter": "{b}", "minShowLabelAngle": 15 },
+              "labelLine": { "show": true, "length": 8, "length2": 8 },
+              "emphasis": {
+                "label": { "show": true, "fontWeight": "bold", "formatter": "{b}\n{d}%" }
+              }
             }
           ]
         },
@@ -1222,9 +1232,12 @@ A dashboard showing net worth, total assets, total liabilities, and breakdown pi
 - Three multi-currency KPI widgets across the top row
 - Two half-width pie charts in the second section
 - Widget-level currency parameter on pie charts (not shared at dashboard level, since KPIs show all currencies)
-- `REPLACE(account, 'Assets:', '')` to create cleaner display names
+- `CASE WHEN` to strip `Assets:Liquid:` and `Assets:Investments:` prefixes for shorter, unambiguous display names
 - Liabilities multiplied by `-1` to show as positive values in pie chart
 - `HAVING value > 0` to exclude negative/zero entries from pie charts
+- `minShowLabelAngle` to hide labels on tiny slices, preventing overlap
+- `emphasis` label to show name + percentage on hover
+- `legend: { "show": false }` since slice labels provide sufficient context
 - Click-through links using `{{data.account}}`
 
 ### Example: Year Summary Dashboard
