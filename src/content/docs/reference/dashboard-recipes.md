@@ -257,7 +257,7 @@ Parameters add interactive controls (dropdowns, number inputs) to dashboards and
   "label": "Year",
   "type": "select",
   "default": { "$gen": "currentYear" },
-  "options": { "$gen": "yearRange", "count": 6 }
+  "optionsFrom": "years"
 }
 ```
 
@@ -270,7 +270,7 @@ Parameters add interactive controls (dropdowns, number inputs) to dashboards and
 | `type` | string | **Required.** One of: `"select"`, `"number"`, `"date"`. |
 | `default` | any | Default value. Can be a literal or a `$gen` generator. |
 | `options` | array | For `select` type: array of `{ "value": ..., "label": "..." }` objects. Can be a `$gen` generator. |
-| `optionsFrom` | string | For `select` type: dynamic option source. Currently only `"currencies"` is supported (populates from ledger currencies). |
+| `optionsFrom` | string | For `select` type: dynamic option source. Supported values: `"currencies"` (populates from ledger currencies), `"years"` (populates from years present in ledger data). |
 | `min` | number | For `number` type: minimum value. |
 | `max` | number | For `number` type: maximum value. |
 
@@ -283,7 +283,7 @@ Parameters add interactive controls (dropdowns, number inputs) to dashboards and
   "label": "Year",
   "type": "select",
   "default": { "$gen": "currentYear" },
-  "options": { "$gen": "yearRange", "count": 6 }
+  "optionsFrom": "years"
 }
 ```
 
@@ -367,7 +367,6 @@ These return arrays of `{ "value": ..., "label": "..." }` objects, suitable for 
 
 | Generator | Args | Output |
 |-----------|------|--------|
-| `yearRange` | `count` (default 5) | Array of recent years, descending. `{ "$gen": "yearRange", "count": 6 }` |
 | `monthOptions` | `format` (`"long"` or `"short"`, default `"long"`) | All 12 months. `{ "$gen": "monthOptions" }` |
 | `quarterOptions` | — | Q1 through Q4. `{ "$gen": "quarterOptions" }` |
 | `accountTypeOptions` | — | Assets, Liabilities, Income, Expenses, Equity. |
@@ -1243,7 +1242,7 @@ An annual overview with income, expenses, savings KPIs, a monthly bar chart, and
       "label": "Year",
       "type": "select",
       "default": { "$gen": "currentYear" },
-      "options": { "$gen": "yearRange", "count": 6 }
+      "optionsFrom": "years"
     }
   ],
   "layout": {
@@ -1446,7 +1445,7 @@ A monthly breakdown with KPIs and an expense treemap. This dashboard mixes inlin
       "label": "Year",
       "type": "select",
       "default": { "$gen": "currentYear" },
-      "options": { "$gen": "yearRange", "count": 5 }
+      "optionsFrom": "years"
     },
     {
       "name": "month",
@@ -1552,7 +1551,7 @@ A treemap showing expense categories for a given month, with click-through to tr
       "label": "Year",
       "type": "select",
       "default": { "$gen": "currentYear" },
-      "options": { "$gen": "yearRange", "count": 5 }
+      "optionsFrom": "years"
     },
     {
       "name": "month",
@@ -1603,8 +1602,8 @@ A treemap showing expense categories for a given month, with click-through to tr
 ```
 
 **What this demonstrates:**
-- Three parameters (year, month, currency) all using `$gen` generators
-- `optionsFrom: "currencies"` to dynamically load currency options from the ledger
+- Three parameters: year using `optionsFrom: "years"`, month using `$gen` generator, currency using `optionsFrom: "currencies"`
+- `optionsFrom` to dynamically load year and currency options from the ledger
 - `REPLACE(account, 'Expenses:', '')` for cleaner treemap labels
 - Computed `dateFrom`/`dateTo` columns in SQL for click-through links
 - Treemap-specific rules: `name`/`value` columns, no `encode`, `HAVING value > 0`
@@ -1726,6 +1725,7 @@ When saving a recipe in the Settings view, the editor checks for ID conflicts an
 ### Multi-Currency Tips
 - For KPIs showing totals across all currencies, use `multiCurrency: true` and `GROUP BY currency`.
 - For charts and pivots that need a single currency, add a `currency` parameter with `"optionsFrom": "currencies"` and filter with `WHERE currency = :currency`.
+- For year selectors, use `"optionsFrom": "years"` to dynamically populate from years present in the ledger data.
 - Common pattern: dashboard-level `year` parameter + widget-level `currency` parameter on charts/pivots, while KPIs show all currencies.
 
 ### Dark Mode

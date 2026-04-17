@@ -134,6 +134,10 @@ Finzytrack's AI features require a capable model. Specifically, the model needs 
 
 Most smaller models that run locally on typical consumer hardware are unlikely to produce reliable results. The AI features involve complex multi-step tasks like parsing financial statements, creating structured rules, and executing query plans — these require a model with strong instruction-following and tool-use capabilities.
 
+:::caution[Choosing an incapable model is worse than not using AI at all]
+If you connect a model that does not meet the requirements above, the AI features will not work as intended and will cause frustration. You'll end up having to read and understand the docs and then manually tweak or rewrite the AI's outputs, making the experience worse than simply not using AI in the first place. Please make sure your chosen model meets or exceeds every requirement listed above before enabling AI features.
+:::
+
 ### Recommended model
 
 We have tested with several models and found that **GLM-4.7** (an open-source model by Zhipu AI) works satisfyingly well. We tested it through [Synthetic](https://synthetic.new), a cloud provider that runs open-source models in private datacenters and states that they never train on your data and never store API prompts or completions. We recommend Synthetic, though we are not affiliated with them in any way — just happy users. If you use a different provider, look for one with similarly strong privacy commitments, since some of your financial data may be included in the prompts. See [AI Data Sharing](/reference/ai-data-sharing/) for details on what data is sent to the AI model in each feature.
@@ -147,7 +151,7 @@ You can configure AI during the setup wizard or later from **Settings > AI**. Th
 - **OpenAI-compatible** — Works with cloud providers (Synthetic, OpenAI, Groq, etc.) and local servers (LM Studio, Ollama). Enter the API URL, API key (if required), and model name.
 - **Anthropic** — Direct connection to Anthropic's API. Enter your API key and model name.
 
-See [Configuration](/reference/configuration/) for the full reference of AI settings.
+See [LLM Configuration](/reference/configuration/#llm) for the full reference of AI settings.
 
 ---
 

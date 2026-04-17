@@ -132,6 +132,7 @@ ai:
     max_tokens: 0
     max_tool_rounds: 12
     timeout_secs: 120
+    show_thinking: false
 ```
 
 | Field | Type | Default | Constraints | Description |
@@ -140,6 +141,7 @@ ai:
 | `max_tokens` | integer | `0` | >= 0 | Maximum tokens in the LLM response. `0` uses the model's default limit. Anthropic models require a value greater than 0. |
 | `max_tool_rounds` | integer | `12` | 1–50 | Maximum number of tool-call round-trips per message in the AI assistant. Higher values allow longer multi-step conversations but require models with larger context windows. |
 | `timeout_secs` | integer | `120` | 10–600 | Timeout in seconds for LLM API requests. Increase if you experience timeouts with slower models or large inputs. |
+| `show_thinking` | boolean | `false` | — | Stream the model's internal reasoning/thinking to the UI as collapsible blocks. Requires a model that supports extended thinking (e.g. Anthropic models with extended thinking, or OpenAI-compatible models that expose `reasoning_content`). When using Finzytrack AI, this is controlled by the service. |
 
 ---
 
@@ -254,6 +256,7 @@ ai:
     max_tokens: 0
     max_tool_rounds: 12
     timeout_secs: 120
+    show_thinking: false
 
 backup:
   enabled: true
