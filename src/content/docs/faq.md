@@ -58,3 +58,43 @@ If the send and receive happen on different dates, use an intermediary account t
 ```
 
 The `@@` means "total price" — the entire 83,000 INR cost 1,000 USD. Beancount derives the per-unit rate (1 INR = 0.01205 USD) from this. You never need to calculate or type the exchange rate yourself.
+
+### How do I record a GST invoice with TDS deduction?
+
+When you issue a consulting invoice that includes GST and the client deducts TDS before paying, you need two transactions: one to raise the invoice and one to record the payment.
+
+**Example numbers:**
+
+| Item | Amount |
+|---|---|
+| Consulting fee | 1,00,000 INR |
+| GST @ 18% | 18,000 INR |
+| Invoice total | 1,18,000 INR |
+| TDS @ 10% on 1,00,000 | 10,000 INR |
+| Amount received | 1,08,000 INR |
+
+**Step 1 — Raise the invoice:**
+
+```beancount
+2025-03-01 * "Client ABC" "Consulting invoice #42"
+  Assets:Receivable:Work             118000 INR
+  Income:Consulting                 -100000 INR
+  Liabilities:GST                    -18000 INR
+```
+
+**Step 2 — Record the payment received:**
+
+```beancount
+2025-03-15 * "Client ABC" "Payment for invoice #42"
+  Assets:Bank:Current                108000 INR
+  Assets:Receivable:TDS               10000 INR
+  Assets:Receivable:Work            -118000 INR
+```
+
+**Notes:**
+
+- TDS is deducted on the base fee only (1,00,000 INR), not on GST.
+- After Step 2, `Assets:Receivable:Work` is fully cleared — the invoice is settled.
+- The 10,000 INR in `Assets:Receivable:TDS` stays on your books until you file your ITR, at which point it is applied as a credit against your tax liability and clears against `Equity:Taxes:India`.
+- Verify your running `Assets:Receivable:TDS` balance against Form 26AS periodically to catch any discrepancies early.
+- The 18,000 INR in `Liabilities:GST` is remitted to the government separately when you file your GSTR-3B, net of any `Assets:Receivable:GST` input credit you have accumulated.
