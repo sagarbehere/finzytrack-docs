@@ -144,6 +144,12 @@ We have tested with several models and found that **GLM-4.7** (an open-source mo
 
 In the future, **Finzytrack AI** will offer a cloud-hosted model that requires no configuration on your part, preserves your privacy, and is well-suited for financial imports and analysis.
 
+:::note[Trying AI before committing to a provider]
+If you want to explore Finzytrack's AI features before signing up with a paid provider, [OpenRouter](https://openrouter.ai) offers a free tier with no credit card required. Sign up, generate an API key, and browse their [free models](https://openrouter.ai/models?q=:free) — look for one that meets the requirements above (tool calling, 128k+ context, 32B+ parameters). Set the API URL to `https://openrouter.ai/api/v1` in **Settings > AI**.
+
+Be aware that privacy policies vary across free models on OpenRouter — some providers may use your prompts for training. Check the model card for the specific model you choose before sending any sensitive financial data. For regular use, we recommend switching to a provider with explicit privacy commitments, such as [Synthetic](https://synthetic.new).
+:::
+
 ### How to Configure
 
 You can configure AI during the setup wizard or later from **Settings > AI**. There are two provider modes:
