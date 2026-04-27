@@ -29,6 +29,8 @@ Get your financial data in — however it arrives.
 - **Manual and natural-language entry** — type a transaction by hand, or describe it
   in plain English and let AI parse it
 
+Transactions are autocategorized on import for you to review.
+
 ### Search
 
 Find any transaction, instantly.
@@ -49,9 +51,7 @@ in plain English, drill down with follow-up questions, and let the AI translate 
 intent into queries and run them for you. The query engine is always directly
 accessible; AI is just a faster path to the same place.
 
-### Persist
-
-Save what matters. Use it again and again.
+### Visualize
 
 Turn any query or analysis into a dashboard widget — a chart, a table, a KPI — that
 updates automatically whenever your data changes. Build a dashboard that reflects
@@ -61,15 +61,13 @@ exactly how you think about your finances.
 
 ## Private by default
 
-Finzytrack runs entirely on your computer. No account required. No cloud sync. Your
-financial data is yours — no third party has access to it, for any reason.
+Finzytrack runs entirely on your computer. Your financial data is yours — no third
+party has access to it, for any reason.
 
-**If you use AI**, you choose the model and the provider — a local model that never
-leaves your machine, or a cloud provider you trust. You decide what gets shared and
+**If you use AI**, you choose the model and the provider — including a local model
+if you prefer to keep everything on-device — or a cloud provider you trust. You decide what gets shared and
 with whom. See [What data is shared with AI](/reference/ai-data-sharing/) for the
 full details.
-
-**Your finances. Your data. Your rules.**
 
 ---
 
@@ -89,20 +87,23 @@ Finzytrack handles the bookkeeping mechanics so you don't have to think about th
 
 ---
 
-## AI as an accelerator, not a gatekeeper
+## Powerful with AI, complete without it.
 
-AI is entirely optional. Everything the AI can do, you can do yourself in Finzytrack —
-this documentation covers all of it. AI simply makes things faster:
+AI is entirely optional. Everything in Finzytrack works without it —
+this documentation covers all of it. AI simply makes things faster and easier:
 
 - **Import** — hand a statement to the AI and it figures out the format. It can then
   generate reusable import rules for that source (so future imports need no AI), or
   pull the transactions out directly without any rules at all
+- **Categorization** — no prior transaction history? No problem. AI can categorize
+  imported transactions from scratch — inferring expense categories, accounts, and tags
+  from the transaction description alone
 - **Queries** — ask financial questions in plain English instead of writing SQL
 - **Dashboards** — build charts and visualizations through conversation
 - **Transaction entry** — describe a transaction naturally and let AI parse it
 
 **Bring your own model.** Connect any OpenAI-compatible or Anthropic model — local
-or cloud-based. No Finzytrack account needed to use AI.
+or cloud-based. You decide what gets shared and with whom.
 
 ---
 
