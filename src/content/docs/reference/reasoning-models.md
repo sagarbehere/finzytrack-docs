@@ -7,9 +7,15 @@ Some modern AI models are *reasoning models* — they generate an internal chain
 
 ## What you'll see in the assistant
 
-When the AI Assistant talks to a reasoning model, you'll see a small expandable block labelled **Model is reasoning** with a live character counter. While the model is thinking, this block streams its internal monologue in real time. When the model finishes, the block collapses and the actual answer takes its place.
+When the AI Assistant talks to a reasoning model, you'll see a small expanded block labelled **Model is reasoning**. While the model is thinking, the block shows three things:
 
-You can ignore this block most of the time — it's the model "thinking out loud" and is not the answer. It's there so you always know what's happening, never a silent spinner.
+- A **live character counter** that climbs steadily — the model is "alive" as long as this number is going up.
+- The **first ~500 characters** of the model's internal monologue, captured once at the start of reasoning. This stays static and gives you a quick sense of how the model is approaching the task ("The user wants me to create a rule file for an ICICI bank XLS file…").
+- A note that the **full reasoning will appear when the model finishes**.
+
+We deliberately do not stream the entire reasoning text live. Reasoning models can produce hundreds of thousands of characters of internal monologue, far faster than anyone can read, and rendering all of it live makes the UI feel janky on long runs. The counter is the alive signal; the snippet is the diagnostic peek; the full text appears in one go at the end.
+
+When the model finishes, the block auto-collapses and the actual answer takes its place. You can re-expand the block at any time to read the full reasoning.
 
 ## Why a reasoning model might fail
 
@@ -17,7 +23,7 @@ Every model on a hosted provider has a maximum number of tokens it can produce i
 
 You will recognise this when:
 
-- The reasoning block streams for a long time (often a minute or more), the character counter climbs into the tens or hundreds of thousands, and then…
+- The character counter in the **Model is reasoning** block climbs for a long time (often a minute or more) into the tens or hundreds of thousands of characters, and then…
 - The assistant shows an error like *"The model used its entire token budget on internal reasoning (360,040 chars) and never produced an answer."*
 
 This is not a Finzytrack bug. It is a consequence of the model's sampling behaviour combined with the provider's token cap. The same prompt can succeed quickly one minute and fail the next — reasoning paths are probabilistic.
@@ -43,7 +49,7 @@ In **Settings → AI**, the *max_tokens* setting controls the upper bound on a s
 Finzytrack could try to disable reasoning automatically using one of several model-specific switches (`enable_thinking=false`, `reasoning_effort=low`, and so on). We chose not to, for two reasons:
 
 1. **It doesn't reliably work.** Each provider exposes the switch differently, providers change without notice, and there's no way to verify silently whether the switch took effect.
-2. **Hiding makes it worse.** A tool that *looks* like it's working but silently failing is harder to debug than one that shows you what's happening. By streaming the reasoning live and surfacing clear errors when budgets are exhausted, we let you see the problem and react — either by retrying, switching models, or raising the budget.
+2. **Hiding makes it worse.** A tool that *looks* like it's working but silently failing is harder to debug than one that shows you what's happening. By keeping a live reasoning indicator in front of you and surfacing clear errors when budgets are exhausted, we let you see the problem and react — either by retrying, switching models, or raising the budget.
 
 The single knob the assistant gives you is the model itself. Picking the right model for the task is the most reliable way to avoid this failure mode.
 
