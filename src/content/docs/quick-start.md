@@ -142,6 +142,10 @@ If you connect a model that does not meet the requirements above, the AI feature
 
 We have tested with several models and found that **GLM-4.7** (an open-source model by Zhipu AI) works satisfyingly well. We tested it through [Synthetic](https://synthetic.new), a cloud provider that runs open-source models in private datacenters and states that they never train on your data and never store API prompts or completions. We recommend Synthetic, though we are not affiliated with them in any way — just happy users. If you use a different provider, look for one with similarly strong privacy commitments, since some of your financial data may be included in the prompts. See [AI Data Sharing](/reference/ai-data-sharing/) for details on what data is sent to the AI model in each feature.
 
+:::note[A note about GLM-4.7 and reasoning models]
+GLM-4.7 is a *reasoning model* — it thinks at length internally before answering. Most of the time this works fine, but occasionally the model gets stuck reasoning and returns an empty answer or takes much longer than usual. The Finzytrack assistant streams the model's reasoning live so you can see when this is happening; if it occurs frequently, switching to a non-reasoning instruct model on the same provider usually resolves it. See [Reasoning Models](/reference/reasoning-models/) for what to look for and how to react.
+:::
+
 In the future, **Finzytrack AI** will offer a cloud-hosted model that requires no configuration on your part, preserves your privacy, and is well-suited for financial imports and analysis.
 
 :::note[Trying AI before committing to a provider]
