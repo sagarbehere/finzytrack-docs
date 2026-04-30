@@ -36,15 +36,16 @@ If you connect a model that does not meet the requirements above, the AI feature
 
 ---
 
-## Recommended model
+## Tested models
 
-We have tested with several models and found that **GLM-4.7** (an open-source model by Zhipu AI) works satisfyingly well. We tested it through [Synthetic](https://synthetic.new), a cloud provider that runs open-source models in private datacenters and states that they never train on your data and never store API prompts or completions. We recommend Synthetic, though we are not affiliated with them in any way — just happy users.
+The table below lists model + provider combinations we have used with Finzytrack and found to work acceptably across the full range of AI features (statement parsing, rule creation, natural-language entry, and the assistant). It grows as we test more.
 
-If you use a different provider, look for one with similarly strong privacy commitments, since some of your financial data may be included in the prompts. See [Data Shared with AI](/reference/ai-data-sharing/) for details on what is sent in each feature.
+| Model | Provider | Reasoning? | Notes |
+|-------|----------|------------|-------|
+| GLM-5 | [Synthetic](https://synthetic.new) | Yes | Open-source model by Zhipu AI. Works satisfyingly well across all AI features. Synthetic runs open-source models in private datacenters and states that they never train on user data and never store API prompts or completions. We are not affiliated with Synthetic — just happy users. |
+| GLM-4.7 | [Synthetic](https://synthetic.new) | Yes | Earlier open-source model by Zhipu AI. Also works well across all AI features; GLM-5 is preferred where available. |
 
-:::note[A note about GLM-4.7 and reasoning models]
-GLM-4.7 is a *reasoning model* — it thinks at length internally before answering. Most of the time this works fine, but occasionally the model gets stuck reasoning and returns an empty answer or takes much longer than usual. The Finzytrack assistant streams the model's reasoning live so you can see when this is happening; if it occurs frequently, switching to a non-reasoning instruct model on the same provider usually resolves it. On vLLM-hosted deployments (such as Synthetic) you can also try disabling thinking via the **Settings → AI → Advanced → Extra request body** field — see [Reasoning Models — What to try](/reference/reasoning-models/#what-to-try) for the exact JSON.
-:::
+Models marked *Reasoning: yes* can occasionally hang or return empty answers when the model gets stuck thinking; see [Reasoning Models](/reference/reasoning-models/) for the failure mode and what to do. If you use a provider not listed above, look for one with strong privacy commitments — some of your financial data may be included in the prompts. See [Data Shared with AI](/reference/ai-data-sharing/) for what is sent in each feature.
 
 In the future, **Finzytrack AI** will offer a cloud-hosted model that requires no configuration on your part, preserves your privacy, and is well-suited for financial imports and analysis.
 

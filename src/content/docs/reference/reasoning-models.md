@@ -3,7 +3,7 @@ title: Reasoning Models
 description: How reasoning models work in Finzytrack, why they occasionally produce empty answers or hang, and what to do about it.
 ---
 
-Some modern AI models are *reasoning models* — they generate an internal chain of thought before producing a visible answer. GLM-4.7, DeepSeek-R1, OpenAI's o-series, and Qwen3 (in thinking mode) are common examples. They can be very capable, but they have a failure mode worth understanding before you choose one.
+Some modern AI models are *reasoning models* — they generate an internal chain of thought before producing a visible answer. GLM-5, DeepSeek-R1, OpenAI's o-series, and Qwen3 (in thinking mode) are common examples. They can be very capable, but they have a failure mode worth understanding before you choose one.
 
 ## What you'll see in the assistant
 
@@ -56,6 +56,12 @@ If your provider exposes a switch that disables reasoning, you can attempt to us
 - **DeepSeek-R1 and similar** — no documented switch; only the model choice matters
 
 This is an escape hatch, not a guaranteed fix. There is no way for Finzytrack to confirm the switch took effect — if the provider silently ignores the key, the model still reasons. If it isn't working, the live reasoning indicator in the assistant will tell you. See [Extra Request Body](/reference/configuration/#advanced-extra-request-body-bring-your-own-only) for the full reference.
+
+### 5. Try a higher temperature
+
+Finzytrack's default `temperature` (`0.1`) is tuned for deterministic parsing and SQL generation. Reasoning models at very low temperature can deterministically follow the same reasoning path on each retry — including a bad one that loops. Raising `temperature` to `0.3`–`0.7` (in **Settings → AI → Advanced**) introduces enough variation that retries diverge, which can help when a particular prompt consistently triggers a loop. Some providers (for example, DeepSeek) explicitly recommend this range for their reasoning models.
+
+This is a small experiment, not a fix. Higher temperature also makes structured-output tasks (rule creation, query generation) less reliable — only raise it if reasoning failures are a recurring problem, and consider lowering it again once the troublesome prompt is past.
 
 ## Why the assistant doesn't expose a single "disable reasoning" toggle
 

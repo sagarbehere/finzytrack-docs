@@ -119,7 +119,7 @@ AI is entirely optional — every core feature works without it. With AI configu
 
 The model you pick matters a lot. Finzytrack needs a capable model — tool calling, 128k+ context, and roughly 32B+ active parameters. A weaker model is worse than no AI at all. For the full requirements, recommended provider, and trade-offs, see [Choosing an AI Model](/reference/choosing-an-ai-model/).
 
-**The short version:** we recommend **GLM-4.7** via [Synthetic](https://synthetic.new), which has strong privacy commitments. Configure it during the setup wizard or from **Settings > AI**. For what financial data is sent to the model in each feature, see [Data Shared with AI](/reference/ai-data-sharing/).
+**The short version:** see the [Tested models](/reference/choosing-an-ai-model/#tested-models) table for model + provider combinations we have verified work well, and configure your pick during the setup wizard or from **Settings > AI**. For what financial data is sent to the model in each feature, see [Data Shared with AI](/reference/ai-data-sharing/).
 
 :::note[Trying AI before committing to a provider]
 [OpenRouter](https://openrouter.ai) offers a free tier with no credit card required. Sign up, generate an API key, set the API URL to `https://openrouter.ai/api/v1` in **Settings > AI**, and pick a [free model](https://openrouter.ai/models?q=:free) that meets the requirements. Privacy policies vary across free models — check the model card before sending sensitive data. See [Choosing an AI Model](/reference/choosing-an-ai-model/#trying-ai-before-committing-to-a-provider) for more.
