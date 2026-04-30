@@ -40,13 +40,15 @@ If you connect a model that does not meet the requirements above, the AI feature
 
 The table below lists model + provider combinations we have used with Finzytrack and found to work acceptably across the full range of AI features (statement parsing, rule creation, natural-language entry, and the assistant). It grows as we test more. Even the models below have occasional hiccups on specific tasks — a malformed rule, a query that needs a second try, a parse that misses a column — so treat the assistant's output as a draft and review it before committing.
 
+We only test against providers with strong privacy commitments, since some of your financial data may be included in prompts. So far that has meant [Synthetic](https://synthetic.new), which runs open-source models in private datacenters and states it never trains on user data and never stores API prompts or completions. We are not affiliated with Synthetic — just happy users. If you choose a provider not listed below, review its privacy policy carefully; see [Data Shared with AI](/reference/ai-data-sharing/) for what is sent in each feature.
+
 | Model | Provider | Reasoning? | Notes |
 |-------|----------|------------|-------|
-| GLM-5 | [Synthetic](https://synthetic.new) | Yes | Open-source model by Zhipu AI. Works satisfyingly well across all AI features. Synthetic runs open-source models in private datacenters and states that they never train on user data and never store API prompts or completions. We are not affiliated with Synthetic — just happy users. |
+| GLM-5 | [Synthetic](https://synthetic.new) | Yes | Open-source model by Zhipu AI. Works satisfyingly well across all AI features. |
 | GLM-4.7 | [Synthetic](https://synthetic.new) | Yes | Earlier open-source model by Zhipu AI. Also works well across all AI features; GLM-5 is preferred where available. |
 | Qwen3-Coder-480B-A35B-Instruct | [Synthetic](https://synthetic.new) | No | Open-source non-reasoning instruct model by Alibaba. Strong tool calling and structured output, and avoids the reasoning-loop failure mode entirely. A good choice if you've hit reasoning hangs with the GLM models. |
 
-Models marked *Reasoning: yes* can occasionally hang or return empty answers when the model gets stuck thinking; see [Reasoning Models](/reference/reasoning-models/) for the failure mode and what to do. If you use a provider not listed above, look for one with strong privacy commitments — some of your financial data may be included in the prompts. See [Data Shared with AI](/reference/ai-data-sharing/) for what is sent in each feature.
+Models marked *Reasoning: yes* can occasionally hang or return empty answers when the model gets stuck thinking; see [Reasoning Models](/reference/reasoning-models/) for the failure mode and what to do.
 
 In the future, **Finzytrack AI** will offer a cloud-hosted model that requires no configuration on your part, preserves your privacy, and is well-suited for financial imports and analysis.
 
