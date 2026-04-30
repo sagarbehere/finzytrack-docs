@@ -143,6 +143,42 @@ ai:
 
 When the configured model supports it, the AI Assistant always streams the model's internal reasoning live in a collapsible block. There is no separate setting for this. See [Reasoning Models](/reference/reasoning-models/) for details.
 
+#### Advanced: Extra Request Body (Bring Your Own Only)
+
+```yaml
+ai:
+  llm:
+    extra_request_body:
+      chat_template_kwargs:
+        enable_thinking: false
+      top_p: 0.9
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `extra_request_body` | object \| null | `null` | Provider-specific request parameters to merge into every chat call. Use this to pass options Finzytrack does not expose as first-class fields (for example `top_p`, `frequency_penalty`, `seed`, or vendor-specific switches like `chat_template_kwargs`). |
+
+This is an escape hatch for power users. Whatever object you put here is forwarded to the provider on every request:
+
+- For OpenAI-compatible providers, the keys are sent as additional fields in the request body via the SDK's `extra_body` channel.
+- For Anthropic, the keys are merged directly into the SDK call kwargs.
+
+The same object is applied to whichever provider is active. A given setting may be valid for one provider and rejected by another (e.g. `chat_template_kwargs` is meaningless to Anthropic) — if the upstream provider rejects an unknown field, the error is surfaced to you and you can edit the field to remove it.
+
+**Format.** In `config.yaml` the value is a YAML mapping (as shown above). In the **Settings → AI → Advanced** UI it is entered as a JSON object — the two are equivalent and round-trip cleanly. Use whichever is more convenient; if you edit one, the other reflects the change after a reload.
+
+**Ignored under Finzytrack AI.** When `finzytrack_ai: true`, this field is not applied — the managed service controls request parameters and accepts no overrides.
+
+**Protected keys.** Keys that Finzytrack manages itself are silently dropped at request time, with a warning written to the log. These are: `model`, `messages`, `stream`, `tools`, `tool_choice`, `system`, `temperature`, `max_tokens`. To change `temperature` or `max_tokens`, use the dedicated fields above; values placed inside `extra_request_body` for these keys take no effect.
+
+**No validation.** Finzytrack does not check that the keys you set are meaningful for the configured provider — that is between you and the provider's API. The upstream provider's error message will tell you if something is wrong.
+
+**Stored in plaintext.** The contents of this field are written to `config.yaml` unencrypted. Do not paste secrets you would not store on disk.
+
+The field is editable from the **Settings → AI → Advanced** disclosure. It is hidden when Finzytrack AI is enabled, since the managed service ignores it.
+
+A concrete use case: disabling internal reasoning on a vLLM-hosted reasoning model that supports the `enable_thinking` template kwarg — see [Reasoning Models](/reference/reasoning-models/#what-to-try) for when this is appropriate.
+
 ---
 
 ## Backup
@@ -256,6 +292,7 @@ ai:
     max_tokens: 0
     max_tool_rounds: 12
     timeout_secs: 120
+    extra_request_body: null
 
 backup:
   enabled: true

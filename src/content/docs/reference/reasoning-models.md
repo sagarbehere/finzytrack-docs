@@ -46,14 +46,25 @@ Look for models whose names contain *Instruct*, *Chat*, or *V3* (rather than *Re
 
 In **Settings → AI**, the *max_tokens* setting controls the upper bound on a single response. The default (`0`) lets the provider apply its own cap, which is usually enough for non-reasoning models but can be too low for reasoning models on long prompts. Try `16000` or `32000` and see whether the model gets enough room to finish reasoning *and* produce an answer. Note that not all providers honour values above their internal cap.
 
-## Why the assistant doesn't hide this from you
+### 4. Try to turn reasoning off (advanced)
 
-Finzytrack could try to disable reasoning automatically using one of several model-specific switches (`enable_thinking=false`, `reasoning_effort=low`, and so on). We chose not to, for two reasons:
+If your provider exposes a switch that disables reasoning, you can attempt to use it via the **Settings → AI → Advanced → Extra request body** field. Whatever JSON object you put there is forwarded with every chat request. The exact key depends on the provider and the model:
+
+- **vLLM-hosted Qwen3 / GLM-family models** — `{ "chat_template_kwargs": { "enable_thinking": false } }`
+- **OpenAI o-series** — `{ "reasoning_effort": "low" }` (lowers, does not fully disable)
+- **Anthropic extended-thinking models** — `{ "thinking": { "type": "disabled" } }`, or simply pick a non-extended-thinking model
+- **DeepSeek-R1 and similar** — no documented switch; only the model choice matters
+
+This is an escape hatch, not a guaranteed fix. There is no way for Finzytrack to confirm the switch took effect — if the provider silently ignores the key, the model still reasons. If it isn't working, the live reasoning indicator in the assistant will tell you. See [Extra Request Body](/reference/configuration/#advanced-extra-request-body-bring-your-own-only) for the full reference.
+
+## Why the assistant doesn't expose a single "disable reasoning" toggle
+
+Finzytrack could surface a single toggle that maps to whatever provider-specific switch is in fashion (`enable_thinking=false`, `reasoning_effort=low`, and so on). We chose not to, for two reasons:
 
 1. **It doesn't reliably work.** Each provider exposes the switch differently, providers change without notice, and there's no way to verify silently whether the switch took effect.
-2. **Hiding makes it worse.** A tool that *looks* like it's working but silently failing is harder to debug than one that shows you what's happening. By keeping a live reasoning indicator in front of you and surfacing clear errors when budgets are exhausted, we let you see the problem and react — either by retrying, switching models, or raising the budget.
+2. **Hiding makes it worse.** A tool that *looks* like it's working but silently failing is harder to debug than one that shows you what's happening. By keeping a live reasoning indicator in front of you and surfacing clear errors when budgets are exhausted, we let you see the problem and react — either by retrying, switching models, raising the budget, or using the **Extra request body** escape hatch above to pass the provider's specific switch directly.
 
-The single knob the assistant gives you is the model itself. Picking the right model for the task is the most reliable way to avoid this failure mode.
+The single knob the assistant gives you front and centre is the model itself. Picking the right model for the task is the most reliable way to avoid this failure mode.
 
 ## See also
 
