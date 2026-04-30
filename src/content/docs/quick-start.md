@@ -115,53 +115,15 @@ Email import requires IMAP server configuration and per-institution rule files w
 
 ## Configuring AI
 
-AI is entirely optional — every core feature works without it. But if you choose to enable it, AI makes several workflows significantly easier:
+AI is entirely optional — every core feature works without it. With AI configured, you also get statement parsing for arbitrary formats (including PDFs and images), AI-generated import rules, natural-language transaction entry, auto-categorization, and a conversational assistant for financial queries.
 
-- **Statement parsing** — Upload a CSV, PDF, or image and let the AI extract transactions without writing rules.
-- **Import rule creation** — Ask the assistant to generate CSV/XLS import rules from a sample file.
-- **Natural-language entry** — Describe transactions in plain English.
-- **Auto-categorization** — Let the AI suggest expense/income accounts for imported transactions.
-- **Financial queries** — Ask questions about your data in natural language.
+The model you pick matters a lot. Finzytrack needs a capable model — tool calling, 128k+ context, and roughly 32B+ active parameters. A weaker model is worse than no AI at all. For the full requirements, recommended provider, and trade-offs, see [Choosing an AI Model](/reference/choosing-an-ai-model/).
 
-### What Kind of Model Works
-
-Finzytrack's AI features require a capable model. Specifically, the model needs to support:
-
-- **Tool calling** (function calling)
-- **Reasoning and coding ability**
-- **A context window of 128k tokens or more**
-- **32B or more active parameters**
-
-Most smaller models that run locally on typical consumer hardware are unlikely to produce reliable results. The AI features involve complex multi-step tasks like parsing financial statements, creating structured rules, and executing query plans — these require a model with strong instruction-following and tool-use capabilities.
-
-:::caution[Choosing an incapable model is worse than not using AI at all]
-If you connect a model that does not meet the requirements above, the AI features will not work as intended and will cause frustration. You'll end up having to read and understand the docs and then manually tweak or rewrite the AI's outputs, making the experience worse than simply not using AI in the first place. Please make sure your chosen model meets or exceeds every requirement listed above before enabling AI features.
-:::
-
-### Recommended model
-
-We have tested with several models and found that **GLM-4.7** (an open-source model by Zhipu AI) works satisfyingly well. We tested it through [Synthetic](https://synthetic.new), a cloud provider that runs open-source models in private datacenters and states that they never train on your data and never store API prompts or completions. We recommend Synthetic, though we are not affiliated with them in any way — just happy users. If you use a different provider, look for one with similarly strong privacy commitments, since some of your financial data may be included in the prompts. See [AI Data Sharing](/reference/ai-data-sharing/) for details on what data is sent to the AI model in each feature.
-
-:::note[A note about GLM-4.7 and reasoning models]
-GLM-4.7 is a *reasoning model* — it thinks at length internally before answering. Most of the time this works fine, but occasionally the model gets stuck reasoning and returns an empty answer or takes much longer than usual. The Finzytrack assistant streams the model's reasoning live so you can see when this is happening; if it occurs frequently, switching to a non-reasoning instruct model on the same provider usually resolves it. See [Reasoning Models](/reference/reasoning-models/) for what to look for and how to react.
-:::
-
-In the future, **Finzytrack AI** will offer a cloud-hosted model that requires no configuration on your part, preserves your privacy, and is well-suited for financial imports and analysis.
+**The short version:** we recommend **GLM-4.7** via [Synthetic](https://synthetic.new), which has strong privacy commitments. Configure it during the setup wizard or from **Settings > AI**. For what financial data is sent to the model in each feature, see [Data Shared with AI](/reference/ai-data-sharing/).
 
 :::note[Trying AI before committing to a provider]
-If you want to explore Finzytrack's AI features before signing up with a paid provider, [OpenRouter](https://openrouter.ai) offers a free tier with no credit card required. Sign up, generate an API key, and browse their [free models](https://openrouter.ai/models?q=:free) — look for one that meets the requirements above (tool calling, 128k+ context, 32B+ parameters). Set the API URL to `https://openrouter.ai/api/v1` in **Settings > AI**.
-
-Be aware that privacy policies vary across free models on OpenRouter — some providers may use your prompts for training. Check the model card for the specific model you choose before sending any sensitive financial data. For regular use, we recommend switching to a provider with explicit privacy commitments, such as [Synthetic](https://synthetic.new).
+[OpenRouter](https://openrouter.ai) offers a free tier with no credit card required. Sign up, generate an API key, set the API URL to `https://openrouter.ai/api/v1` in **Settings > AI**, and pick a [free model](https://openrouter.ai/models?q=:free) that meets the requirements. Privacy policies vary across free models — check the model card before sending sensitive data. See [Choosing an AI Model](/reference/choosing-an-ai-model/#trying-ai-before-committing-to-a-provider) for more.
 :::
-
-### How to Configure
-
-You can configure AI during the setup wizard or later from **Settings > AI**. There are two provider modes:
-
-- **OpenAI-compatible** — Works with cloud providers (Synthetic, OpenAI, Groq, etc.) and local servers (LM Studio, Ollama). Enter the API URL, API key (if required), and model name.
-- **Anthropic** — Direct connection to Anthropic's API. Enter your API key and model name.
-
-See [LLM Configuration](/reference/configuration/#llm) for the full reference of AI settings.
 
 ---
 

@@ -5,7 +5,7 @@ sidebar:
   order: 7
 ---
 
-The AI Assistant is a conversational interface for working with your financial data. It requires [AI to be configured](/quick-start/#configuring-ai). If AI is not configured, a warning banner appears with a link to Settings.
+The AI Assistant is a conversational interface for working with your financial data. It requires [AI to be configured](/quick-start/#configuring-ai). If AI is not configured, a warning banner appears with a link to Settings. The model you pick has a large effect on how well the assistant works — see [Choosing an AI Model](/reference/choosing-an-ai-model/) for requirements and recommendations.
 
 The assistant operates in two modes depending on whether you attach a file:
 

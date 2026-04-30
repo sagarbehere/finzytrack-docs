@@ -21,6 +21,8 @@ When the model finishes, the block auto-collapses and the actual answer takes it
 
 Every model on a hosted provider has a maximum number of tokens it can produce in a single response. Reasoning and answer share that one budget. If a reasoning model wanders too long during its internal monologue, it can run out of budget *before* it gets to the answer. The provider then cuts the response off, and the model has produced thousands of reasoning tokens but zero visible content.
 
+A particular variant of this failure mode is the model getting **stuck in a reasoning loop** — re-considering the same question, second-guessing its own conclusions, or repeatedly restarting an outline — and never breaking out before `max_tokens` is exhausted. From the outside this looks identical to a model that's just thinking hard: the character counter keeps climbing. The tell is that it climbs for an unusually long time and then ends with the no-message-body error described below rather than an answer.
+
 You will recognise this when:
 
 - The character counter in the **Model is reasoning** block climbs for a long time (often a minute or more) into the tens or hundreds of thousands of characters, and then…
