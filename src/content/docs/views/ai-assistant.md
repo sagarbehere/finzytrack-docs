@@ -57,6 +57,10 @@ When you send your first message with a file attached, an initial prompt is auto
 
 When you attach a statement file, the assistant examines its structure and helps you create an import rule. The typical flow is:
 
+:::tip[Use a small sample file]
+**Attach a statement with only a handful of transactions — ideally 5 or fewer.** The assistant only needs to see the *structure* of the file (header rows to skip, which column holds the date/amount/payee, the date format, decimal conventions, and so on), not your full transaction history. Uploading a large statement wastes the model's context window on data it does not need, makes responses slower, and can degrade the quality of the rule it produces. Trim your file to a few representative rows before attaching.
+:::
+
 1. **Attach the file** and fill in the quick-fill fields (account, currency, expected count). For CSV and XLS files, a **file preview panel** opens in the sidebar showing the file contents with row numbers and column indices. Use this preview to verify the assistant's guesses or to answer its questions — for example, you can see which column number contains dates or amounts.
 2. **The assistant analyzes the file** — it identifies header rows, column structure, date formats, and amount columns, then presents a checklist of its guesses for you to confirm or correct.
 3. **Confirm or adjust** — refer to the file preview panel and tell the assistant if anything looks wrong (e.g., "the date is in column 3, not 2" or "amounts are in Indian format with commas").

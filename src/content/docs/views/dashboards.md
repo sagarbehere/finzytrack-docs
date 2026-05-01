@@ -49,7 +49,7 @@ A single prominent number — net worth, total income, total expenses, savings, 
 
 ### Charts
 
-Visual plots of your data. Supported chart types include bar, line, pie, area, scatter, and treemap. Charts support tooltips on hover and can be interactive — clicking a bar or slice can navigate you to a filtered view of the underlying transactions.
+Visual plots of your data. Supported chart types include **bar**, **line**, **pie**, **area**, **scatter**, **treemap**, **funnel**, **gauge**, **calendar heatmap**, **sankey**, **radar**, and **sunburst**. Charts support tooltips on hover and can be interactive — clicking a bar, slice, or flow can navigate you to a filtered view of the underlying transactions. See the **Widget Gallery** dashboard (described below) for a working example of every type.
 
 ### Tables
 
@@ -75,7 +75,7 @@ Parameter selections are remembered — dashboard parameters are encoded in the 
 
 ## Included Dashboards
 
-Finzytrack ships with three dashboards out of the box. These are designed to give you a useful overview from day one, and they serve as examples of what dashboards can do.
+Finzytrack ships with four dashboards out of the box. The first three are designed to give you a useful overview from day one and serve as examples of what dashboards can do. The fourth — the **Widget Gallery** — is a reference of every supported widget type, useful both for visual inspection and as a starting point when creating your own dashboards.
 
 ### Financial Overview
 
@@ -106,7 +106,18 @@ An annual financial summary. Use the **Year** parameter to select the year.
 - **Monthly Income & Expenses** — a bar chart comparing income, expenses, and savings month by month throughout the year. Click any bar to see the transactions behind it.
 - **Expenses Pivot Table** — a table with expense categories as rows and months as columns, showing how spending in each category changes over the year. Includes row and column totals.
 
-All three dashboards support multiple currencies and include click-through links — clicking on KPI values, chart elements, or table cells navigates you to the Transactions view with the appropriate filters pre-applied.
+### Widget Gallery
+
+A reference dashboard with one example of every widget type the app supports — KPI, bar, line, area, pie, scatter, treemap, table, pivot, funnel, gauge, calendar heatmap, sankey, radar, and sunburst. Each widget hovers a small **ⓘ** icon next to its title that, on hover, explains the type's gotchas (data shape requirements, encoding patterns, click-through behaviour, etc.).
+
+Treat the gallery as both:
+
+- **A working visual reference** — see how each chart type renders against your own data before committing to use it.
+- **A starting point for new dashboards** — find the closest example, click **Manage Recipes**, and copy the underlying widget JSON to use as a template. The full source for the gallery dashboard lives at `backend/resources/seed_config/recipes/dashboards/widget-gallery.json`. See the [Dashboard Recipes reference](/reference/dashboard-recipes/) for the recipe format.
+
+Editing the user-facing copy of the gallery (in `config/recipes/dashboards/widget-gallery.json`) only affects what *you* see in the app — the AI assistant always reads its own copy from the bundled seed and is unaffected.
+
+All four dashboards support multiple currencies and include click-through links — clicking on KPI values, chart elements, or table cells navigates you to the Transactions view with the appropriate filters pre-applied.
 
 ---
 

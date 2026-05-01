@@ -9,6 +9,10 @@ sidebar:
 If you have [AI configured](/quick-start/#configuring-ai), you can [build dashboards conversationally](/views/ai-assistant/#analyst-mode-building-dashboards) using the AI assistant — describe what you want to see and it will create the recipe for you. You can also create and edit recipes manually in **Settings > Dashboards**, which provides a JSON editor with live preview. If you prefer to work directly with the recipe format, or want to understand and fine-tune what the assistant generates, read on.
 :::
 
+:::tip[Quickest way in: copy from the Widget Gallery]
+The bundled **Widget Gallery** dashboard contains a working example of every widget type the app supports (kpi, bar, line, area, pie, scatter, treemap, table, pivot, funnel, gauge, calendar heatmap, sankey, radar, sunburst). When building a new recipe, the fastest path is to find the closest gallery widget, copy its JSON, and adapt the SQL and titles. The gallery's source lives at `backend/resources/seed_config/recipes/dashboards/widget-gallery.json` (or open it from the Dashboard panel and use the recipe editor to inspect each widget). Each gallery widget has a `helpText` field describing the type's specific gotchas — those notes are the most reliable distillation of what works for that chart type.
+:::
+
 Dashboards and widgets in Finzytrack are defined using **JSON recipe files**. There are two types of recipes:
 
 - **Dashboard recipes** define a grid layout containing multiple widgets — KPI cards, charts, tables, and pivot tables.
@@ -34,7 +38,8 @@ config/recipes/
 ├── dashboards/
 │   ├── financial-overview.json
 │   ├── year-summary.json
-│   └── month-summary.json
+│   ├── month-summary.json
+│   └── widget-gallery.json       # Reference: one example per widget type
 └── widgets/
     ├── expense-treemap.json
     └── top-spending-categories.json
@@ -854,6 +859,157 @@ Treemaps have special requirements that differ from other chart types:
 - Treemaps cannot display negative or zero values. Your SQL query must include `HAVING value > 0` to filter them out.
 - **Do not** set label colors — the treemap auto-adjusts label contrast for readability.
 :::
+
+#### Funnel
+
+Ranked stages, larger at top, narrowing down. Useful for budget allocation and savings funnels.
+
+```json
+{
+  "type": "chart",
+  "chartType": "funnel",
+  "options": {
+    "tooltip": { "trigger": "item" },
+    "legend": { "show": false },
+    "series": [
+      {
+        "type": "funnel",
+        "sort": "descending",
+        "label": { "show": true, "position": "inside", "formatter": "{b}" }
+      }
+    ]
+  }
+}
+```
+
+- Query must return `name` and `value` columns.
+- Like treemap, the runtime injects rows directly into `series[0].data` — do **not** use `encode`.
+- Use `HAVING value > 0` (negative stages don't make sense).
+
+#### Gauge
+
+A dial showing a single value against a min/max range. Useful for budget progress, savings rate, etc.
+
+```json
+{
+  "type": "chart",
+  "chartType": "gauge",
+  "options": {
+    "tooltip": { "trigger": "item" },
+    "series": [
+      {
+        "type": "gauge",
+        "min": 0,
+        "max": 100,
+        "detail": { "formatter": "{value}%", "fontSize": 22 }
+      }
+    ]
+  }
+}
+```
+
+- Query should return one row with a numeric `value` column. The runtime uses the first row.
+- Set `min` and `max` on the series to define the dial range.
+
+#### Calendar Heatmap
+
+GitHub-contributions style — one cell per day across a date range.
+
+```json
+{
+  "type": "chart",
+  "chartType": "calendar",
+  "options": {
+    "tooltip": { "trigger": "item" },
+    "legend": { "show": false },
+    "visualMap": { "min": 0, "max": 5000, "orient": "horizontal", "left": "center", "top": 0 },
+    "calendar": { "top": 60, "cellSize": ["auto", 14] },
+    "series": [
+      { "type": "heatmap", "coordinateSystem": "calendar" }
+    ]
+  }
+}
+```
+
+- Query must return `date` (YYYY-MM-DD) and `value` columns.
+- The `calendar.range` is auto-derived from the data's min/max date when not specified.
+- The runtime auto-injects a tooltip formatter that shows the date plus the formatted value.
+- Always set `legend: { show: false }` — the global legend swatch clashes with the visualMap colour ramp.
+
+See the gallery's `gallery-calendar` widget (in `widget-gallery.json`) for a complete worked example with a clickLink filtering by date.
+
+#### Sankey
+
+Flow diagram between source and target categories with link width proportional to value. Great for showing how money flows from income sources through to expenses.
+
+```json
+{
+  "type": "chart",
+  "chartType": "sankey",
+  "options": {
+    "tooltip": { "trigger": "item", "triggerOn": "mousemove" },
+    "series": [
+      {
+        "type": "sankey",
+        "lineStyle": { "color": "gradient", "curveness": 0.5, "opacity": 0.5 },
+        "label": { "fontSize": 10 },
+        "emphasis": { "focus": "adjacency" }
+      }
+    ]
+  }
+}
+```
+
+- Query must return `source`, `target`, and `value` columns. The runtime derives unique nodes and uses rows as links.
+- For click-through routing, also emit `sourceAccount` and `targetAccount` columns carrying the *real* account paths (NULL for synthetic intermediates like a "Total Income" node). The runtime attaches a `realAccount` field to both nodes (rectangles) and links (flows), so a `clickLink` template using `{{data.realAccount}}` resolves correctly regardless of which side the user clicks. See the gallery `gallery-sankey` widget for the canonical SQL pattern.
+
+#### Radar
+
+Multi-dimensional comparison on a single shape. Useful for spending profiles across categories.
+
+```json
+{
+  "type": "chart",
+  "chartType": "radar",
+  "options": {
+    "tooltip": { "trigger": "item" },
+    "legend": { "show": false },
+    "series": [
+      { "type": "radar", "areaStyle": { "opacity": 0.4 }, "lineStyle": { "width": 2 } }
+    ]
+  }
+}
+```
+
+- Query returns one row per dimension with `category` and `value` columns.
+- The runtime auto-builds the top-level `radar.indicator` from the categories, scaled to 1.2× the maximum observed value (override via `series.indicatorMaxRatio`).
+- A recipe-supplied `radar:` config (e.g. for axis styling) is merged with the auto-derived indicator — recipe wins for everything except the indicator field.
+- No `clickLink` — ECharts radar emits clicks at the subject level rather than per-axis.
+
+#### Sunburst
+
+Hierarchical breakdown rendered as concentric rings. The complement to treemap for nested category hierarchies.
+
+```json
+{
+  "type": "chart",
+  "chartType": "sunburst",
+  "options": {
+    "tooltip": { "trigger": "item" },
+    "series": [
+      {
+        "type": "sunburst",
+        "radius": [0, "90%"],
+        "label": { "rotate": "tangential", "minAngle": 6, "fontSize": 10 }
+      }
+    ]
+  }
+}
+```
+
+- Query returns `account` (a colon-separated path like `"Expenses:Food:Restaurants"`) and `value`. The runtime splits the paths and builds the nested tree automatically.
+- Outer rings represent deeper levels in the account hierarchy.
+- No `clickLink` — ECharts sunburst uses clicks for built-in zoom/drill-down. Adding a click-link would conflict with that interaction.
 
 ### Table
 
@@ -1698,7 +1854,7 @@ Recipes are validated when saved. Here's a summary of the validation rules:
 - `title`: Required, non-empty string.
 - `query`: Required, non-empty string. Must be a SELECT statement.
 - `visualization`: Required object with `type` in `["kpi", "chart", "table", "pivot"]`.
-- For `chart`: `chartType` must be in `["bar", "line", "pie", "area", "scatter", "treemap"]`.
+- For `chart`: `chartType` must be in `["bar", "line", "pie", "area", "scatter", "treemap", "funnel", "gauge", "calendar", "sankey", "radar", "sunburst"]`.
 - For `kpi`: `iconColor` must be in `["blue", "green", "red", "purple", "amber"]`.
 - `format` and label format strings must be valid format names.
 - `transform`: Must be a valid simple string or object transform.
