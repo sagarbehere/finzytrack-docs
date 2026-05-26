@@ -147,7 +147,7 @@ The search field in the top bar is available from any screen. As you type, it sh
 
 - Open the default [Dashboard](/views/dashboards/) to see spending breakdowns and trends.
 - Go to [Transactions](/views/transactions/) and filter by account or date range.
-- Go to [Query](/views/query/) and run something like `SELECT account, SUM(amount) AS total FROM postings WHERE account_type = 'Expenses' GROUP BY account ORDER BY total DESC` to see your top expense categories. See [Querying Data](/reference/querying-data/) for more examples.
+- Go to [Query](/views/query/) and run something like `SELECT account, SUM(CAST(amount AS REAL)) AS total FROM postings WHERE account_type = 'Expenses' GROUP BY account ORDER BY total DESC` to see your top expense categories. See [Querying Data](/reference/querying-data/) for more examples.
 - Customize a dashboard by editing its [recipe](/reference/dashboard-recipes/).
 
 ---

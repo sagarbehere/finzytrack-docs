@@ -14,7 +14,7 @@ Finzytrack provides two query engines for accessing your financial data: **SQL**
 | **Data source** | SQLite export of your ledger | Beancount entries directly (in-memory) |
 | **Table** | Explicit `FROM postings` | Implicit — no table name needed |
 | **Syntax** | Standard SQLite SQL | SQL-like but with Beancount-specific extensions |
-| **Aggregation** | `SUM(amount)` | `COST(SUM(position))` |
+| **Aggregation** | `SUM(CAST(amount AS REAL))` | `COST(SUM(position))` |
 | **Pattern matching** | `LIKE` operator | `~` (regex) operator |
 | **Date functions** | `strftime()` | `YEAR()`, `MONTH()`, `DAY()` |
 | **Best for** | Complex joins, window-style queries, dashboard recipes | Quick account lookups, register views, balance queries |
@@ -61,11 +61,11 @@ These columns have the same value for all postings within a transaction.
 | `posting_id` | INTEGER | Auto-incrementing primary key. |
 | `account` | TEXT | Full colon-separated account path (e.g., `Expenses:Food:Groceries`). |
 | `account_type` | TEXT | First segment: `Assets`, `Liabilities`, `Equity`, `Income`, or `Expenses`. |
-| `amount` | REAL | Posting amount. Positive = debit, negative = credit. |
+| `amount` | TEXT | Posting amount as a Decimal-as-string (e.g. `"100.00"`). Positive = debit, negative = credit. Wrap with `CAST(amount AS REAL)` for `SUM`/`AVG`/arithmetic — see [Money column note](#money-columns-are-text) below. |
 | `currency` | TEXT | Currency code (e.g., `"USD"`, `"INR"`). |
-| `cost_amount` | REAL | Cost basis amount (for investments with cost tracking). |
+| `cost_amount` | TEXT | Cost basis amount as Decimal-as-string (for investments with cost tracking). Cast with `CAST(cost_amount AS REAL)` for arithmetic. |
 | `cost_currency` | TEXT | Cost basis currency. |
-| `price_amount` | REAL | Price conversion amount (for currency conversions). |
+| `price_amount` | TEXT | Price conversion amount as Decimal-as-string. Cast with `CAST(price_amount AS REAL)` for arithmetic. |
 | `price_currency` | TEXT | Price conversion currency. |
 | `source_account` | TEXT | The originating Assets or Liabilities account for this transaction. Computed from the other posting(s). |
 | `source_account_type` | TEXT | Account type of the `source_account`. |
@@ -80,24 +80,44 @@ These columns have the same value for all postings within a transaction.
 | `quarter` | INTEGER | Quarter (1-4). |
 | `year_month` | TEXT | Year and month as `YYYY-MM`. |
 
+### Money columns are TEXT
+
+`amount`, `cost_amount`, and `price_amount` are stored as `TEXT` holding the string form of an arbitrary-precision Decimal (e.g. `"1234.5678"`). This preserves the exact precision of the source ledger — a value like `0.12345678 BTC` round-trips without binary-float rounding error.
+
+The trade-off is at aggregation. SQLite has no exact-decimal arithmetic, so when you sum or average these columns you must cast to `REAL`:
+
+```sql
+-- Correct: explicit cast for aggregation
+SELECT account, SUM(CAST(amount AS REAL)) AS total
+FROM postings
+GROUP BY account
+
+-- Also correct: SQLite implicit cast works for plain comparisons
+SELECT * FROM postings WHERE amount > 0
+```
+
+A bare `SUM(amount)` will appear to work — SQLite silently coerces — but the convention in this project is to write the `CAST(... AS REAL)` explicitly so the float aggregation is visible to anyone reading the query.
+
+The aggregation error from float conversion grows as `√N × machine epsilon`; for tens of thousands of postings it's around `10⁻¹²`, far below display precision. Single-row reads stay exact because no aggregation happens.
+
 ### Sign Conventions
 
 Beancount uses double-entry accounting. Every transaction has postings that sum to zero. Understanding the sign of each account type is essential for writing correct queries.
 
 | Account Type | Sign | Meaning | To Display as Positive |
 |-------------|------|---------|----------------------|
-| **Expenses** | Positive (debit) | Money spent | Use `SUM(amount)` directly |
-| **Income** | Negative (credit) | Money earned | Use `-SUM(amount)` or `SUM(amount) * -1` |
-| **Assets** | Positive (debit) | What you own | Use `SUM(amount)` directly |
-| **Liabilities** | Negative (credit) | What you owe | Use `-SUM(amount)` for outstanding balance |
+| **Expenses** | Positive (debit) | Money spent | Use `SUM(CAST(amount AS REAL))` directly |
+| **Income** | Negative (credit) | Money earned | Use `-SUM(CAST(amount AS REAL))` or `SUM(CAST(amount AS REAL)) * -1` |
+| **Assets** | Positive (debit) | What you own | Use `SUM(CAST(amount AS REAL))` directly |
+| **Liabilities** | Negative (credit) | What you owe | Use `-SUM(CAST(amount AS REAL))` for outstanding balance |
 
 Common derived values:
 
-- **Net worth** = `SUM(amount) WHERE account_type IN ('Assets', 'Liabilities')`
-- **Savings** = Income - Expenses = `SUM(CASE WHEN account_type = 'Income' THEN -amount ELSE 0 END) - SUM(CASE WHEN account_type = 'Expenses' THEN amount ELSE 0 END)`
+- **Net worth** = `SUM(CAST(amount AS REAL)) WHERE account_type IN ('Assets', 'Liabilities')`
+- **Savings** = Income - Expenses = `SUM(CASE WHEN account_type = 'Income' THEN -CAST(amount AS REAL) ELSE 0 END) - SUM(CASE WHEN account_type = 'Expenses' THEN CAST(amount AS REAL) ELSE 0 END)`
 
 :::caution
-Expenses can be negative (refunds) and income can be positive (reversals). Always use `SUM(amount)` to compute net figures — it handles these edge cases automatically. Don't assume all expenses are positive.
+Expenses can be negative (refunds) and income can be positive (reversals). Always use `SUM(CAST(amount AS REAL))` to compute net figures — it handles these edge cases automatically. Don't assume all expenses are positive.
 :::
 
 ### Multi-Currency Rules
@@ -106,7 +126,7 @@ Your ledger may contain multiple currencies (e.g., USD and INR). **Never sum amo
 
 **Group by currency** — show each currency separately:
 ```sql
-SELECT currency, SUM(amount) AS amount
+SELECT currency, SUM(CAST(amount AS REAL)) AS amount
 FROM postings
 WHERE account_type = 'Expenses' AND year = :year
 GROUP BY currency
@@ -115,7 +135,7 @@ HAVING amount != 0
 
 **Filter to one currency** — let the user choose:
 ```sql
-SELECT account, SUM(amount) AS total
+SELECT account, SUM(CAST(amount AS REAL)) AS total
 FROM postings
 WHERE account_type = 'Expenses' AND currency = :currency
 GROUP BY account
@@ -137,7 +157,7 @@ GROUP BY account
 
 #### Total income for a year (multi-currency)
 ```sql
-SELECT currency, SUM(amount) * -1 AS amount
+SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount
 FROM postings
 WHERE account_type = 'Income' AND year = :year
 GROUP BY currency
@@ -147,7 +167,7 @@ ORDER BY currency
 
 #### Total expenses for a year (multi-currency)
 ```sql
-SELECT currency, SUM(amount) AS amount
+SELECT currency, SUM(CAST(amount AS REAL)) AS amount
 FROM postings
 WHERE account_type = 'Expenses' AND year = :year
 GROUP BY currency
@@ -158,7 +178,7 @@ ORDER BY currency
 #### Net worth by currency
 ```sql
 SELECT currency,
-  SUM(CASE WHEN account_type IN ('Assets', 'Liabilities') THEN amount ELSE 0 END) AS amount
+  SUM(CASE WHEN account_type IN ('Assets', 'Liabilities') THEN CAST(amount AS REAL) ELSE 0 END) AS amount
 FROM postings
 GROUP BY currency
 HAVING amount != 0
@@ -170,7 +190,7 @@ ORDER BY currency
 SELECT year_month,
   SUBSTR('JanFebMarAprMayJunJulAugSepOctNovDec',
     (CAST(strftime('%m', year_month || '-01') AS INTEGER) - 1) * 3 + 1, 3) AS month_label,
-  SUM(amount) AS expenses
+  SUM(CAST(amount AS REAL)) AS expenses
 FROM postings
 WHERE account_type = 'Expenses'
   AND year = :year AND currency = :currency
@@ -185,10 +205,10 @@ SELECT year_month,
     (CAST(strftime('%m', year_month || '-01') AS INTEGER) - 1) * 3 + 1, 3) AS month_label,
   year_month || '-01' AS dateFrom,
   date(year_month || '-01', '+1 month', '-1 day') AS dateTo,
-  SUM(CASE WHEN account_type = 'Income' THEN -amount ELSE 0 END) AS income,
-  SUM(CASE WHEN account_type = 'Expenses' THEN amount ELSE 0 END) AS expenses,
-  SUM(CASE WHEN account_type = 'Income' THEN -amount ELSE 0 END) -
-    SUM(CASE WHEN account_type = 'Expenses' THEN amount ELSE 0 END) AS savings
+  SUM(CASE WHEN account_type = 'Income' THEN -CAST(amount AS REAL) ELSE 0 END) AS income,
+  SUM(CASE WHEN account_type = 'Expenses' THEN CAST(amount AS REAL) ELSE 0 END) AS expenses,
+  SUM(CASE WHEN account_type = 'Income' THEN -CAST(amount AS REAL) ELSE 0 END) -
+    SUM(CASE WHEN account_type = 'Expenses' THEN CAST(amount AS REAL) ELSE 0 END) AS savings
 FROM postings
 WHERE year = :year AND currency = :currency
   AND account_type IN ('Income', 'Expenses')
@@ -198,7 +218,7 @@ ORDER BY year_month
 
 #### Top expense categories
 ```sql
-SELECT account, SUM(amount) AS total
+SELECT account, SUM(CAST(amount AS REAL)) AS total
 FROM postings
 WHERE account_type = 'Expenses'
   AND year = :year AND currency = :currency
@@ -212,7 +232,7 @@ LIMIT :limit
 ```sql
 SELECT REPLACE(account, 'Expenses:', '') AS name,
   account,
-  SUM(amount) AS value
+  SUM(CAST(amount AS REAL)) AS value
 FROM postings
 WHERE account_type = 'Expenses'
   AND year = :year
@@ -232,7 +252,7 @@ WHERE year = :year
 
 #### Expenses by account and month (for pivot table)
 ```sql
-SELECT account, year_month, SUM(amount) AS amount
+SELECT account, year_month, SUM(CAST(amount AS REAL)) AS amount
 FROM postings
 WHERE account_type = 'Expenses'
   AND year = :year AND currency = :currency
@@ -243,8 +263,8 @@ ORDER BY account, year_month
 #### Savings rate (income minus expenses)
 ```sql
 SELECT currency,
-  SUM(CASE WHEN account_type = 'Income' THEN -amount ELSE 0 END) -
-  SUM(CASE WHEN account_type = 'Expenses' THEN amount ELSE 0 END) AS amount
+  SUM(CASE WHEN account_type = 'Income' THEN -CAST(amount AS REAL) ELSE 0 END) -
+  SUM(CASE WHEN account_type = 'Expenses' THEN CAST(amount AS REAL) ELSE 0 END) AS amount
 FROM postings
 WHERE year = :year AND account_type IN ('Income', 'Expenses')
 GROUP BY currency
@@ -255,7 +275,7 @@ ORDER BY currency
 :::tip[Computed columns for click-through links]
 In dashboard recipes, you can include computed date columns in your query that aren't displayed but are used by click-through links:
 ```sql
-SELECT account, SUM(amount) AS total,
+SELECT account, SUM(CAST(amount AS REAL)) AS total,
   :year || '-' || printf('%02d', :month) || '-01' AS dateFrom,
   date(:year || '-' || printf('%02d', :month) || '-01', '+1 month', '-1 day') AS dateTo
 FROM postings
@@ -561,7 +581,7 @@ These summarize multiple rows and require a `GROUP BY` clause (or apply to all r
   - `FROM year = 2026` — filters entire transactions by year before expanding to postings.
   - `WHERE account ~ 'Expenses'` — filters individual postings.
 - Use `~` for pattern matching, **not** `LIKE`. The `~` operator uses Python regex syntax.
-- Use `SUM(position)` for aggregating amounts, **not** `SUM(amount)`. Wrap in `COST()` to get a numeric total: `COST(SUM(position))`.
+- Use `SUM(position)` for aggregating amounts, **not** `SUM(amount)`. Wrap in `COST()` to get a numeric total: `COST(SUM(position))`. (This is BQL; the SQL-side `CAST(amount AS REAL)` convention does not apply here.)
 - Use `YEAR(date)`, `MONTH(date)` for date parts, **not** `strftime()`.
 - Dates are compared directly without quotes: `date >= 2026-01-01`.
 - `SELECT DISTINCT` and `SELECT *` are supported.
@@ -627,7 +647,7 @@ LIMIT 20
 
 SQL:
 ```sql
-SELECT SUM(amount) AS total
+SELECT SUM(CAST(amount AS REAL)) AS total
 FROM postings
 WHERE account_type = 'Expenses' AND year = 2026 AND currency = 'USD'
 ```
@@ -643,7 +663,7 @@ WHERE account ~ 'Expenses'
 
 SQL:
 ```sql
-SELECT account, SUM(amount) AS total
+SELECT account, SUM(CAST(amount AS REAL)) AS total
 FROM postings
 WHERE account_type = 'Expenses' AND currency = 'USD'
 GROUP BY account

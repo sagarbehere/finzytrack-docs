@@ -223,7 +223,7 @@ Each widget is defined inline within the dashboard's `widgets` array:
   "helpText": "Income amounts are shown as positive values",
   "parameters": [],
   "dbType": "sqlite",
-  "query": "SELECT currency, SUM(amount) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year GROUP BY currency HAVING amount != 0",
+  "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year GROUP BY currency HAVING amount != 0",
   "transform": "firstRow",
   "visualization": { "type": "kpi", "icon": "↑", "iconColor": "green" }
 }
@@ -326,7 +326,7 @@ Parameters add interactive controls (dropdowns, number inputs) to dashboards and
 Reference parameters in SQL using `:paramName`:
 
 ```sql
-SELECT account, SUM(amount) AS total
+SELECT account, SUM(CAST(amount AS REAL)) AS total
 FROM postings
 WHERE account_type = 'Expenses'
   AND year = :year
@@ -391,14 +391,14 @@ Here's a quick summary of what you need to know for writing recipe queries:
 - Use `:paramName` placeholders for parameter values in SQL queries (e.g., `:year`, `:currency`).
 - Always `GROUP BY currency` or filter `WHERE currency = :currency` when summing amounts — never sum across currencies.
 - Use `HAVING amount != 0` or `HAVING value > 0` to exclude zero-value rows.
-- Income amounts are negative (credit) — use `SUM(amount) * -1` to display as positive.
-- Expense amounts are positive (debit) — use `SUM(amount)` directly.
+- Income amounts are negative (credit) — use `SUM(CAST(amount AS REAL)) * -1` to display as positive.
+- Expense amounts are positive (debit) — use `SUM(CAST(amount AS REAL))` directly.
 - For treemap and pie charts, the query must return `name` and `value` columns, and must include `HAVING value > 0` to exclude negative/zero values (which these chart types cannot display).
 
 :::tip[Computed columns for click-through links]
 You can include computed date columns in your query that aren't displayed but are used by [click-through links](#click-through-links):
 ```sql
-SELECT account, SUM(amount) AS total,
+SELECT account, SUM(CAST(amount AS REAL)) AS total,
   :year || '-' || printf('%02d', :month) || '-01' AS dateFrom,
   date(:year || '-' || printf('%02d', :month) || '-01', '+1 month', '-1 day') AS dateTo
 FROM postings
@@ -522,7 +522,7 @@ The query returns one row per currency. Each currency is displayed stacked verti
 {
   "id": "total-income",
   "title": "Total Income",
-  "query": "SELECT currency, SUM(amount) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year GROUP BY currency HAVING amount != 0",
+  "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year GROUP BY currency HAVING amount != 0",
   "visualization": {
     "type": "kpi",
     "icon": "↑",
@@ -538,7 +538,7 @@ If your query uses different column names than `currency` and `amount`, specify 
 {
   "id": "assets-by-currency",
   "title": "Total Assets",
-  "query": "SELECT currency AS cur, SUM(amount) AS total FROM postings WHERE account_type = 'Assets' GROUP BY currency HAVING total != 0",
+  "query": "SELECT currency AS cur, SUM(CAST(amount AS REAL)) AS total FROM postings WHERE account_type = 'Assets' GROUP BY currency HAVING total != 0",
   "visualization": {
     "type": "kpi",
     "icon": "↑",
@@ -558,7 +558,7 @@ The query includes a trend column (typically a percentage change vs a prior peri
 {
   "id": "monthly-expenses",
   "title": "This Month's Expenses",
-  "query": "SELECT SUM(amount) AS value, ROUND((SUM(amount) - prev.total) * 100.0 / prev.total, 1) AS trend FROM postings, (SELECT SUM(amount) AS total FROM postings WHERE account_type = 'Expenses' AND year_month = strftime('%Y-%m', date('now', '-1 month'))) prev WHERE account_type = 'Expenses' AND year_month = strftime('%Y-%m', 'now')",
+  "query": "SELECT SUM(CAST(amount AS REAL)) AS value, ROUND((SUM(CAST(amount AS REAL)) - prev.total) * 100.0 / prev.total, 1) AS trend FROM postings, (SELECT SUM(CAST(amount AS REAL)) AS total FROM postings WHERE account_type = 'Expenses' AND year_month = strftime('%Y-%m', date('now', '-1 month'))) prev WHERE account_type = 'Expenses' AND year_month = strftime('%Y-%m', 'now')",
   "transform": "firstRow",
   "visualization": {
     "type": "kpi",
@@ -582,7 +582,7 @@ Values in `{{...}}` are template variables that get replaced at click time. For 
 {
   "id": "total-expenses",
   "title": "Total Expenses",
-  "query": "SELECT currency, SUM(amount) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year GROUP BY currency HAVING amount != 0",
+  "query": "SELECT currency, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year GROUP BY currency HAVING amount != 0",
   "visualization": {
     "type": "kpi",
     "icon": "↓",
@@ -1087,7 +1087,7 @@ A complete pivot widget requires both a pivot transform and a pivot visualizatio
       "optionsFrom": "currencies"
     }
   ],
-  "query": "SELECT account, year_month, SUM(amount) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year AND currency = :currency GROUP BY account, year_month ORDER BY account, year_month",
+  "query": "SELECT account, year_month, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year AND currency = :currency GROUP BY account, year_month ORDER BY account, year_month",
   "transform": {
     "type": "pivot",
     "rowField": "account",
@@ -1273,7 +1273,7 @@ A dashboard showing net worth, total assets, total liabilities, and breakdown pi
     {
       "id": "net-worth",
       "title": "Net Worth",
-      "query": "SELECT currency, SUM(CASE WHEN account_type IN ('Assets', 'Liabilities') THEN amount ELSE 0 END) AS amount FROM postings GROUP BY currency HAVING amount != 0 ORDER BY currency",
+      "query": "SELECT currency, SUM(CASE WHEN account_type IN ('Assets', 'Liabilities') THEN CAST(amount AS REAL) ELSE 0 END) AS amount FROM postings GROUP BY currency HAVING amount != 0 ORDER BY currency",
       "visualization": {
         "type": "kpi",
         "icon": "$",
@@ -1283,7 +1283,7 @@ A dashboard showing net worth, total assets, total liabilities, and breakdown pi
     {
       "id": "total-assets",
       "title": "Total Assets",
-      "query": "SELECT currency, SUM(amount) AS amount FROM postings WHERE account_type = 'Assets' GROUP BY currency HAVING amount != 0 ORDER BY currency",
+      "query": "SELECT currency, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Assets' GROUP BY currency HAVING amount != 0 ORDER BY currency",
       "visualization": {
         "type": "kpi",
         "icon": "↑",
@@ -1294,7 +1294,7 @@ A dashboard showing net worth, total assets, total liabilities, and breakdown pi
     {
       "id": "total-liabilities",
       "title": "Total Liabilities",
-      "query": "SELECT currency, SUM(amount) * -1 AS amount FROM postings WHERE account_type = 'Liabilities' GROUP BY currency HAVING amount != 0 ORDER BY currency",
+      "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Liabilities' GROUP BY currency HAVING amount != 0 ORDER BY currency",
       "visualization": {
         "type": "kpi",
         "icon": "↓",
@@ -1315,7 +1315,7 @@ A dashboard showing net worth, total assets, total liabilities, and breakdown pi
           "optionsFrom": "currencies"
         }
       ],
-      "query": "SELECT CASE WHEN account LIKE 'Assets:Liquid:%' THEN REPLACE(account, 'Assets:Liquid:', '') WHEN account LIKE 'Assets:Investments:%' THEN REPLACE(account, 'Assets:Investments:', '') ELSE REPLACE(account, 'Assets:', '') END AS name, account, ROUND(SUM(amount), 2) AS value FROM postings WHERE account_type = 'Assets' AND currency = :currency GROUP BY account HAVING value > 0 ORDER BY value DESC",
+      "query": "SELECT CASE WHEN account LIKE 'Assets:Liquid:%' THEN REPLACE(account, 'Assets:Liquid:', '') WHEN account LIKE 'Assets:Investments:%' THEN REPLACE(account, 'Assets:Investments:', '') ELSE REPLACE(account, 'Assets:', '') END AS name, account, ROUND(SUM(CAST(amount AS REAL)), 2) AS value FROM postings WHERE account_type = 'Assets' AND currency = :currency GROUP BY account HAVING value > 0 ORDER BY value DESC",
       "visualization": {
         "type": "chart",
         "chartType": "pie",
@@ -1354,7 +1354,7 @@ A dashboard showing net worth, total assets, total liabilities, and breakdown pi
           "optionsFrom": "currencies"
         }
       ],
-      "query": "SELECT REPLACE(account, 'Liabilities:', '') AS name, account, ROUND(SUM(amount) * -1, 2) AS value FROM postings WHERE account_type = 'Liabilities' AND currency = :currency GROUP BY account HAVING value > 0 ORDER BY value DESC",
+      "query": "SELECT REPLACE(account, 'Liabilities:', '') AS name, account, ROUND(SUM(CAST(amount AS REAL)) * -1, 2) AS value FROM postings WHERE account_type = 'Liabilities' AND currency = :currency GROUP BY account HAVING value > 0 ORDER BY value DESC",
       "visualization": {
         "type": "chart",
         "chartType": "pie",
@@ -1430,7 +1430,7 @@ An annual overview with income, expenses, savings KPIs, a monthly bar chart, and
     {
       "id": "total-income",
       "title": "Total Income",
-      "query": "SELECT currency, SUM(amount) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year GROUP BY currency HAVING amount != 0 ORDER BY currency",
+      "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year GROUP BY currency HAVING amount != 0 ORDER BY currency",
       "visualization": {
         "type": "kpi",
         "icon": "↑",
@@ -1449,7 +1449,7 @@ An annual overview with income, expenses, savings KPIs, a monthly bar chart, and
     {
       "id": "total-expenses",
       "title": "Total Expenses",
-      "query": "SELECT currency, SUM(amount) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year GROUP BY currency HAVING amount != 0 ORDER BY currency",
+      "query": "SELECT currency, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year GROUP BY currency HAVING amount != 0 ORDER BY currency",
       "visualization": {
         "type": "kpi",
         "icon": "↓",
@@ -1468,7 +1468,7 @@ An annual overview with income, expenses, savings KPIs, a monthly bar chart, and
     {
       "id": "savings",
       "title": "Savings",
-      "query": "SELECT currency, (SUM(CASE WHEN account_type = 'Income' THEN -amount ELSE 0 END)) - (SUM(CASE WHEN account_type = 'Expenses' THEN amount ELSE 0 END)) AS amount FROM postings WHERE year = :year AND account_type IN ('Income', 'Expenses') GROUP BY currency HAVING amount != 0 ORDER BY currency",
+      "query": "SELECT currency, (SUM(CASE WHEN account_type = 'Income' THEN -CAST(amount AS REAL) ELSE 0 END)) - (SUM(CASE WHEN account_type = 'Expenses' THEN CAST(amount AS REAL) ELSE 0 END)) AS amount FROM postings WHERE year = :year AND account_type IN ('Income', 'Expenses') GROUP BY currency HAVING amount != 0 ORDER BY currency",
       "visualization": {
         "type": "kpi",
         "icon": "$",
@@ -1489,7 +1489,7 @@ An annual overview with income, expenses, savings KPIs, a monthly bar chart, and
           "optionsFrom": "currencies"
         }
       ],
-      "query": "SELECT year_month, SUBSTR('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', year_month || '-01') AS INTEGER) - 1) * 3 + 1, 3) AS month_label, year_month || '-01' AS dateFrom, date(year_month || '-01', '+1 month', '-1 day') AS dateTo, SUM(CASE WHEN account_type = 'Income' THEN -amount ELSE 0 END) AS income, SUM(CASE WHEN account_type = 'Expenses' THEN amount ELSE 0 END) AS expenses, SUM(CASE WHEN account_type = 'Income' THEN -amount ELSE 0 END) - SUM(CASE WHEN account_type = 'Expenses' THEN amount ELSE 0 END) AS savings FROM postings WHERE year = :year AND currency = :currency AND account_type IN ('Income', 'Expenses') GROUP BY year_month ORDER BY year_month",
+      "query": "SELECT year_month, SUBSTR('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', year_month || '-01') AS INTEGER) - 1) * 3 + 1, 3) AS month_label, year_month || '-01' AS dateFrom, date(year_month || '-01', '+1 month', '-1 day') AS dateTo, SUM(CASE WHEN account_type = 'Income' THEN -CAST(amount AS REAL) ELSE 0 END) AS income, SUM(CASE WHEN account_type = 'Expenses' THEN CAST(amount AS REAL) ELSE 0 END) AS expenses, SUM(CASE WHEN account_type = 'Income' THEN -CAST(amount AS REAL) ELSE 0 END) - SUM(CASE WHEN account_type = 'Expenses' THEN CAST(amount AS REAL) ELSE 0 END) AS savings FROM postings WHERE year = :year AND currency = :currency AND account_type IN ('Income', 'Expenses') GROUP BY year_month ORDER BY year_month",
       "visualization": {
         "type": "chart",
         "chartType": "bar",
@@ -1562,7 +1562,7 @@ An annual overview with income, expenses, savings KPIs, a monthly bar chart, and
           "optionsFrom": "currencies"
         }
       ],
-      "query": "SELECT account, year_month, SUM(amount) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year AND currency = :currency GROUP BY account, year_month ORDER BY account, year_month",
+      "query": "SELECT account, year_month, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year AND currency = :currency GROUP BY account, year_month ORDER BY account, year_month",
       "transform": {
         "type": "pivot",
         "rowField": "account",
@@ -1639,7 +1639,7 @@ A monthly breakdown with KPIs and an expense treemap. This dashboard mixes inlin
     {
       "id": "monthly-income",
       "title": "Total Income",
-      "query": "SELECT currency, SUM(amount) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year AND CAST(strftime('%m', transaction_date) AS INTEGER) = :month GROUP BY currency HAVING amount != 0 ORDER BY currency",
+      "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year AND CAST(strftime('%m', transaction_date) AS INTEGER) = :month GROUP BY currency HAVING amount != 0 ORDER BY currency",
       "visualization": {
         "type": "kpi",
         "icon": "↑",
@@ -1658,7 +1658,7 @@ A monthly breakdown with KPIs and an expense treemap. This dashboard mixes inlin
     {
       "id": "monthly-expenses",
       "title": "Total Expenses",
-      "query": "SELECT currency, SUM(amount) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year AND CAST(strftime('%m', transaction_date) AS INTEGER) = :month GROUP BY currency HAVING amount != 0 ORDER BY currency",
+      "query": "SELECT currency, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year AND CAST(strftime('%m', transaction_date) AS INTEGER) = :month GROUP BY currency HAVING amount != 0 ORDER BY currency",
       "visualization": {
         "type": "kpi",
         "icon": "↓",
@@ -1677,7 +1677,7 @@ A monthly breakdown with KPIs and an expense treemap. This dashboard mixes inlin
     {
       "id": "monthly-savings",
       "title": "Savings",
-      "query": "SELECT currency, (SUM(CASE WHEN account_type = 'Income' THEN -amount ELSE 0 END)) - (SUM(CASE WHEN account_type = 'Expenses' THEN amount ELSE 0 END)) AS amount FROM postings WHERE year = :year AND CAST(strftime('%m', transaction_date) AS INTEGER) = :month AND account_type IN ('Income', 'Expenses') GROUP BY currency HAVING amount != 0 ORDER BY currency",
+      "query": "SELECT currency, (SUM(CASE WHEN account_type = 'Income' THEN -CAST(amount AS REAL) ELSE 0 END)) - (SUM(CASE WHEN account_type = 'Expenses' THEN CAST(amount AS REAL) ELSE 0 END)) AS amount FROM postings WHERE year = :year AND CAST(strftime('%m', transaction_date) AS INTEGER) = :month AND account_type IN ('Income', 'Expenses') GROUP BY currency HAVING amount != 0 ORDER BY currency",
       "visualization": {
         "type": "kpi",
         "icon": "$",
@@ -1737,7 +1737,7 @@ A treemap showing expense categories for a given month, with click-through to tr
       "optionsFrom": "currencies"
     }
   ],
-  "query": "SELECT REPLACE(account, 'Expenses:', '') AS name, account, SUM(amount) AS value, :year || '-' || printf('%02d', :month) || '-01' AS dateFrom, date(:year || '-' || printf('%02d', :month) || '-01', '+1 month', '-1 day') AS dateTo FROM postings WHERE account_type = 'Expenses' AND year = :year AND CAST(strftime('%m', transaction_date) AS INTEGER) = :month AND currency = :currency GROUP BY account HAVING value > 0 ORDER BY value DESC",
+  "query": "SELECT REPLACE(account, 'Expenses:', '') AS name, account, SUM(CAST(amount AS REAL)) AS value, :year || '-' || printf('%02d', :month) || '-01' AS dateFrom, date(:year || '-' || printf('%02d', :month) || '-01', '+1 month', '-1 day') AS dateTo FROM postings WHERE account_type = 'Expenses' AND year = :year AND CAST(strftime('%m', transaction_date) AS INTEGER) = :month AND currency = :currency GROUP BY account HAVING value > 0 ORDER BY value DESC",
   "visualization": {
     "type": "chart",
     "chartType": "treemap",
@@ -1803,7 +1803,7 @@ A horizontal bar chart of the highest expense accounts.
       "optionsFrom": "currencies"
     }
   ],
-  "query": "SELECT account, SUM(amount) AS total FROM postings WHERE account_type = 'Expenses' AND currency = :currency GROUP BY account ORDER BY total DESC LIMIT :limit",
+  "query": "SELECT account, SUM(CAST(amount AS REAL)) AS total FROM postings WHERE account_type = 'Expenses' AND currency = :currency GROUP BY account ORDER BY total DESC LIMIT :limit",
   "visualization": {
     "type": "chart",
     "chartType": "bar",
