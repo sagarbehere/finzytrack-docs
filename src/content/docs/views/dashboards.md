@@ -69,7 +69,9 @@ Dashboards and individual widgets can expose **parameters** — interactive cont
 
 **Widget-level parameters** appear in the widget header and affect only that widget. For example, a Currency parameter on a single chart lets you switch currencies without affecting other widgets.
 
-Parameter selections are remembered — dashboard parameters are encoded in the URL (so they survive page refreshes and browser navigation), and widget parameters are saved locally.
+Parameter selections are remembered. Both dashboard-level and widget-level selections are saved locally, so the values you pick are still there the next time you open the app. Dashboard parameters are also encoded in the URL, which makes them shareable and lets browser back/forward navigation restore the state of a particular session.
+
+Some parameters default to a **templated value** like *Current Year* or *Current Month* — these appear in italics at the top of the dropdown, with the current resolved value shown in parentheses (for example, *Current Month (May)*). Picking a templated value means the dropdown re-evaluates on every load (so *Current Month* will be March in March and April in April), whereas picking a specific value like "May" pins it until you change it. To go back to the templated behavior after pinning, just re-select the italicized templated option from the dropdown.
 
 ---
 

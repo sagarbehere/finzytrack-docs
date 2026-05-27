@@ -304,6 +304,18 @@ Parameters add interactive controls (dropdowns, number inputs) to dashboards and
 - If a widget defines a parameter with the same `name` as a dashboard parameter, the dashboard value takes precedence.
 - Parameters that the dashboard already provides are hidden from the widget header (no duplicate controls).
 
+### Persistence and Templated Defaults
+
+Parameter selections — both dashboard-level and widget-level — are saved to the browser's local storage so they survive across app launches. Dashboard-level selections are also reflected in the URL, which makes a particular view bookmarkable and shareable.
+
+When a parameter's `default` is a no-argument generator reference (for example `{ "$gen": "currentMonth" }` or `{ "$gen": "defaultCurrency" }`), the dropdown surfaces that generator as a sticky, **templated option** at the top of the list, rendered in italics. The label combines the generator's display name and the value it currently resolves to — for example "Current Month (May)" or "Default Currency (USD)".
+
+Picking the templated option means "always evaluate this generator on load." On the next dashboard load it produces the value that is current *then* — March in March, April in April. Picking a specific literal value (for example the month "May") pins that value until the user changes it. To go back to the templated behavior after pinning, the user re-selects the italicized templated option.
+
+This lets the same parameter satisfy two different intents — the dashboard author declares a sensible default behavior, and the user can override it (sticky) or stay with it (templated). It also means recipe authors don't need to choose between "this should always reflect the current month" and "the user's pick should stick" — both are reachable from a single `{ "$gen": "currentMonth" }` default.
+
+Generators that take config arguments (for example `{ "$gen": "startOfMonth", "offset": -1 }`) are resolved at load time and are not exposed as templated options — only no-argument generator defaults are templatable.
+
 ### Using Parameters in Queries
 
 Reference parameters in SQL using `:paramName`:
