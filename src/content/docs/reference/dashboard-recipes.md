@@ -34,7 +34,6 @@ Recipe files live in the `config/recipes/` directory:
 
 ```
 config/recipes/
-├── manifest.json                 # Index of all recipes
 ├── dashboards/
 │   ├── financial-overview.json
 │   ├── year-summary.json
@@ -45,23 +44,7 @@ config/recipes/
     └── top-spending-categories.json
 ```
 
-The `manifest.json` file lists all recipe files:
-
-```json
-{
-  "widgets": [
-    "widgets/expense-treemap.json",
-    "widgets/top-spending-categories.json"
-  ],
-  "dashboards": [
-    "dashboards/year-summary.json",
-    "dashboards/month-summary.json",
-    "dashboards/financial-overview.json"
-  ]
-}
-```
-
-When you add a new recipe file through the app's recipe editor, the manifest is updated automatically. If you add files manually, you must add their paths to the manifest for them to be loaded.
+Any `*.json` file under `dashboards/` or `widgets/` is automatically loaded as a recipe. There is no index file to keep in sync: drop a file in, refresh the app, and it appears. Move or delete a file and it goes away. Files that fail to parse or validate are reported in the notification panel against their path so you can fix them.
 
 ---
 
@@ -106,7 +89,7 @@ A dashboard recipe is a JSON file with the following top-level structure:
 When a dashboard layout references a `widgetId`, the app looks for the widget in this order:
 
 1. **Inline widgets** — the dashboard's own `widgets` array.
-2. **Standalone widget recipes** — widget recipe files listed in the manifest.
+2. **Standalone widget recipes** — widget recipe files in the `widgets/` directory.
 
 This means a dashboard can reference standalone widget recipes by ID without redefining them inline. For example, a dashboard can use the `expense-treemap` widget from `widgets/expense-treemap.json` simply by referencing it in the layout:
 
@@ -1702,7 +1685,7 @@ A monthly breakdown with KPIs and an expense treemap. This dashboard mixes inlin
 
 Widget recipes are standalone JSON files in `config/recipes/widgets/` that define a single widget. They have the same structure as inline widget definitions (see [Widget Structure](#widget-structure)) — the only difference is that they live in their own file rather than inside a dashboard's `widgets` array.
 
-Widget recipes are listed in `manifest.json` under the `"widgets"` array. Dashboards can reference standalone widget recipes by ID in their layout — see [Widget Resolution](#widget-resolution) for details.
+Any `*.json` file in `config/recipes/widgets/` is auto-discovered. Dashboards can reference standalone widget recipes by ID in their layout — see [Widget Resolution](#widget-resolution) for details.
 
 ### Example: Expense Treemap Widget
 
