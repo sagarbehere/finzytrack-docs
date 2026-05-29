@@ -22,6 +22,19 @@ Finzytrack provides two query engines for accessing your financial data: **SQL**
 
 In dashboard recipes, set the widget's `dbType` field to `"sqlite"` (default) or `"beanquery"` to choose the engine.
 
+### When the two engines disagree
+
+Both engines reflect your current ledger state at query time — there's no staleness difference. The asymmetry is **semantic**:
+
+- **SQL reads `amount` as raw units.** `SUM(amount)` over investment postings gives you "shares × cost-at-purchase" (the recorded transaction amount), not market value and not current cost basis. There's no automatic lot folding or cost reprojection. For pure-cash accounts (income, expenses, bank accounts) this doesn't matter — units *are* the value. For positions held at cost (`Assets:Investments:...` with `{cost}` syntax), it matters a lot.
+- **BQL knows about positions, lots, and costs.** `sum(position)` keeps each position as a `(units, cost)` pair you can reproject with `COST(...)` or `VALUE(...)`. BQL also understands account hierarchy (`root_account`, `leaf_account`) without you having to split strings.
+
+**Rule of thumb:**
+
+- Cash-only aggregates (spend by category, income by month, payee roll-ups) → SQL, because it's fast and indexed.
+- Portfolio queries (current holdings, cost basis by account, position-level inspection) → BQL, because it preserves cost semantics.
+- For dashboard recipes that need both worlds, you can split a dashboard across multiple widgets with different `dbType` values.
+
 ---
 
 ## SQL Reference
