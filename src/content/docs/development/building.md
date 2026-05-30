@@ -18,7 +18,13 @@ Before building, you need:
 
 ### Platform-specific prerequisites
 
-**macOS** — no additional system packages needed. Xcode Command Line Tools should be installed (`xcode-select --install`).
+**macOS** — verified on macOS Tahoe (26.x). A fresh macOS doesn't ship Python or Node, so install:
+
+1. **Xcode Command Line Tools** — `xcode-select --install`. Provides git, compilers, and `iconutil` (used to build the `.icns` icon bundle).
+2. **Homebrew** — see [brew.sh](https://brew.sh) for the install command.
+3. **Python 3.13 and Node.js 22** — `brew install python@3.13 node@22`.
+
+PyWebView on macOS uses Cocoa via `pyobjc` (pulled in automatically by `pip install pywebview`) — no extra system libraries are needed beyond Xcode Command Line Tools.
 
 **Linux (Ubuntu/Debian)** — verified on **Debian 13 (Trixie)** and **Ubuntu 22.04+**. Earlier Debian (Bookworm and older) ship only WebKit2GTK 4.0 in the main repos, so a build that targets 4.1 will not run without backports.
 
