@@ -5,7 +5,7 @@ description: How to download, install, and run Finzytrack on macOS, Linux, and W
 
 ## Platform support
 
-Finzytrack is actively developed and tested on **macOS Tahoe (26.x)**. It has been briefly tested on **Ubuntu 24.04 LTS**. The Windows build is currently **untested** — it may work, but expect rough edges.
+Finzytrack is actively developed and tested on **macOS Tahoe (26.x)**. The Linux build has been verified on **Debian 13 (Trixie)** and should also work on Ubuntu 22.04+ and other distributions that ship WebKit2GTK 4.1. Older releases such as Debian 12 (Bookworm) ship only WebKit2GTK 4.0 and will not run the prebuilt AppImage without backports. The Windows build is currently **untested** — it may work, but expect rough edges.
 
 ## Download
 
@@ -56,13 +56,36 @@ chmod +x FinzyTrack-x86_64.AppImage
 
 The AppImage is a single self-contained file — no installation step is needed. You can move it anywhere you like (e.g., `~/Applications/`).
 
-FUSE is required to run AppImages. On Ubuntu 22.04+, install it with:
+### Required runtime packages
+
+The AppImage relies on a few system libraries that are not bundled inside it. On Debian 13 (Trixie) install:
 
 ```bash
-sudo apt-get install libfuse2
+sudo apt-get install -y \
+    libfuse2t64 \
+    libwebkit2gtk-4.1-0 \
+    gir1.2-webkit2-4.1
 ```
 
+On Debian 12 / Ubuntu 22.04, the FUSE package is `libfuse2` rather than `libfuse2t64` (the rename was part of Debian 13's time_t 64-bit transition).
+
+- `libfuse2t64` / `libfuse2` is needed for AppImages to mount themselves at runtime. If it is missing, the launcher exits with a "FUSE setup" error.
+- `libwebkit2gtk-4.1-0` provides the actual WebKit rendering engine the app uses to display its UI.
+- `gir1.2-webkit2-4.1` is the GObject Introspection typelib that the bundled Python GTK bindings load at startup.
+
+If the AppImage starts but the window stays blank or fails with "cannot open shared object file: libwebkit2gtk-4.1.so.0", the WebKit packages are missing.
+
 To integrate Finzytrack with your desktop environment (application menu, file manager, etc.), you can use [AppImageLauncher](https://github.com/TheAssassin/AppImageLauncher).
+
+### Running without a graphical session
+
+On a server install with no X or Wayland, pass `--headless` to start the backend only:
+
+```bash
+./FinzyTrack-x86_64.AppImage --headless
+```
+
+The app is then reachable from any browser at `http://127.0.0.1:8001`.
 
 ### Uninstall
 

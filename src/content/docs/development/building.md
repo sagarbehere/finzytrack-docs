@@ -20,17 +20,32 @@ Before building, you need:
 
 **macOS** — no additional system packages needed. Xcode Command Line Tools should be installed (`xcode-select --install`).
 
-**Linux (Ubuntu/Debian)** — PyWebView requires GTK and WebKit system libraries:
+**Linux (Ubuntu/Debian)** — verified on **Debian 13 (Trixie)** and **Ubuntu 22.04+**. Earlier Debian (Bookworm and older) ship only WebKit2GTK 4.0 in the main repos, so a build that targets 4.1 will not run without backports.
+
+PyWebView needs GTK + WebKit system libraries, plus the headers required to build PyGObject and pycairo from source. Install:
 
 ```bash
 sudo apt-get update
 sudo apt-get install -y \
+    python3-venv python3-dev python3-pip \
+    build-essential pkg-config \
     libgirepository1.0-dev \
+    libcairo2-dev \
     gir1.2-webkit2-4.1 \
-    libfuse2
+    libwebkit2gtk-4.1-0 \
+    libfuse2t64    # use libfuse2 on Debian 12 / Ubuntu 22.04
 ```
 
-`libfuse2` is required for running and building AppImages.
+On Debian 13, `libfuse2` has been renamed `libfuse2t64` as part of the time_t 64-bit transition. The classic `libfuse2` name still exists as a transitional package, but the t64 variant is what apt will actually install.
+
+The Python-side GTK bindings (`pygobject`, `pycairo`) are installed automatically from `desktop/requirements.txt`. PyGObject is currently pinned `<3.51` because newer 3.5x crashes pywebview's GTK page-load callback; remove the pin once pywebview's GTK backend is updated upstream.
+
+Debian 13 ships Node.js 20 via apt, which meets the minimum. To match the version CI builds with (Node 22), install from NodeSource:
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
 
 **Windows** — no additional system packages needed. PyWebView uses EdgeChromium (EdgeWebView2), which is included with modern Windows.
 
