@@ -18,11 +18,11 @@ Before building, you need:
 
 ### Platform-specific prerequisites
 
-**macOS** — verified on macOS Tahoe (26.x). A fresh macOS doesn't ship Python or Node, so install:
+**macOS** — verified on macOS Tahoe (26.x). Install:
 
-1. **Xcode Command Line Tools** — `xcode-select --install`. Provides git, compilers, and `iconutil` (used to build the `.icns` icon bundle).
+1. **Xcode Command Line Tools** — `xcode-select --install`. Provides git, compilers, `iconutil` (used to build the `.icns` icon bundle), and a system `python3` (Apple-bundled, version varies with the Xcode release — recent Xcode 16 ships 3.12).
 2. **Homebrew** — see [brew.sh](https://brew.sh) for the install command.
-3. **Python 3.13 and Node.js 22** — `brew install python@3.13 node@22`.
+3. **A current Python and Node** — `brew install python@3.13 node@22`. macOS does not ship Node at all, and the Xcode-bundled Python may be older than our 3.11+ minimum depending on your Xcode version, so installing both via Homebrew is the most reliable way to match CI.
 
 PyWebView on macOS uses Cocoa via `pyobjc` (pulled in automatically by `pip install pywebview`) — no extra system libraries are needed beyond Xcode Command Line Tools.
 
