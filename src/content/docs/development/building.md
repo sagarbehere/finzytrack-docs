@@ -23,7 +23,6 @@ Before building, you need:
 1. **Xcode Command Line Tools** — `xcode-select --install`. Provides git, compilers, `iconutil` (used to build the `.icns` icon bundle), and a system `python3` (Apple-bundled, version varies with the Xcode release — recent Xcode 16 ships 3.12).
 2. **Homebrew** — see [brew.sh](https://brew.sh) for the install command.
 3. **A current Python and Node** — `brew install python@3.13 node@22`. macOS does not ship Node at all, and the Xcode-bundled Python may be older than our 3.11+ minimum depending on your Xcode version, so installing both via Homebrew is the most reliable way to match CI.
-4. **librsvg** — `brew install librsvg`. Provides `rsvg-convert`, which the icon generator (`assets/icons/generate.py`) uses to rasterise `master.svg` into platform-specific PNG and ICNS assets. Without it the generator falls back to a PIL-only path that produces a visually different (dark) icon.
 
 PyWebView on macOS uses Cocoa via `pyobjc` (pulled in automatically by `pip install pywebview`) — no extra system libraries are needed beyond Xcode Command Line Tools.
 
@@ -40,8 +39,7 @@ sudo apt-get install -y \
     libcairo2-dev \
     gir1.2-webkit2-4.1 \
     libwebkit2gtk-4.1-0 \
-    libfuse2t64 \   # use libfuse2 on Debian 12 / Ubuntu 22.04
-    librsvg2-bin    # rsvg-convert, used by assets/icons/generate.py
+    libfuse2t64    # use libfuse2 on Debian 12 / Ubuntu 22.04
 ```
 
 On Debian 13, `libfuse2` has been renamed `libfuse2t64` as part of the time_t 64-bit transition. The classic `libfuse2` name still exists as a transitional package, but the t64 variant is what apt will actually install.
@@ -55,7 +53,7 @@ curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
-**Windows** — verified on Windows 11. PyWebView uses EdgeChromium (EdgeWebView2), which is included with modern Windows, so no GUI runtime needs to be installed. You do need Python, Node.js, and Git, which a fresh Windows install does not ship. **No SVG renderer is required on Windows** — the build uses a pre-rendered `assets/icons/windows/app.ico` checked into the repo, regenerated periodically from `master.svg` on a machine with `rsvg-convert`.
+**Windows** — verified on Windows 11. PyWebView uses EdgeChromium (EdgeWebView2), which is included with modern Windows, so no GUI runtime needs to be installed. You do need Python, Node.js, and Git, which a fresh Windows install does not ship.
 
 The fastest way to install all three is via `winget` from an elevated PowerShell:
 
@@ -318,6 +316,24 @@ After a successful workflow run, artifacts are available for download from the w
 | `Finzytrack-Linux` | `Finzytrack-x86_64.AppImage` |
 | `Finzytrack-Windows` | `Finzytrack-windows.zip` |
 
+## Icons
+
+App icons are committed artifacts under `assets/icons/`. The source of truth is `assets/icons/master.svg`; the per-platform rasters (macOS `.iconset`, Linux PNGs at multiple sizes, Windows `.ico`) are pre-rendered and tracked in the repo so the build doesn't need an SVG renderer.
+
+When you change `master.svg`, regenerate the rasters and commit them. You need `rsvg-convert` (from `librsvg`) installed locally:
+
+```bash
+# macOS:  brew install librsvg
+# Linux:  sudo apt install librsvg2-bin
+
+cd assets/icons
+python generate.py
+git add macos/ linux/ windows/
+git commit -m "icons: regenerate from master.svg"
+```
+
+The generator also writes favicon, iOS, and Android assets; those are gitignored because they're not part of the desktop build.
+
 ## Key Files Reference
 
 | File | Purpose |
@@ -329,5 +345,6 @@ After a successful workflow run, artifacts are available for download from the w
 | `desktop/requirements.txt` | Build dependencies (PyInstaller, PyWebView) |
 | `desktop/linux/AppRun` | AppImage entry point |
 | `desktop/linux/finzytrack.desktop` | Linux desktop entry file |
-| `assets/icons/` | App icons for all platforms |
+| `assets/icons/master.svg` | Source-of-truth icon design |
+| `assets/icons/generate.py` | Renders `master.svg` into platform rasters (manual; not run during builds) |
 | `.github/workflows/build-desktop.yml` | CI workflow for building on all platforms |
