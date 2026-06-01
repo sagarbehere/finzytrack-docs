@@ -111,6 +111,8 @@ There is no installer. The app runs directly from the extracted folder. You can 
 
 Windows Defender SmartScreen may show a warning because the executable is not signed with a Windows code signing certificate. Click **More info** and then **Run anyway**.
 
+A small console window opens alongside the main application window. This is intentional in current builds: it shows diagnostic output while Finzytrack starts up, so if something goes wrong you can copy the text from it and share it when reporting an issue. Closing the console window also closes the app — close the main Finzytrack window instead. Later releases will hide it.
+
 ### Uninstall
 
 1. Quit Finzytrack if it is running.

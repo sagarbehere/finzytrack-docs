@@ -64,6 +64,10 @@ exactly how you think about your finances.
 Finzytrack runs entirely on your computer. Your financial data is yours — no third
 party has access to it, for any reason.
 
+**No telemetry.** The app makes no outbound network requests unless you initiate
+them: importing email goes directly to your mail provider, AI features go directly
+to the model provider you configured, and nothing else leaves your machine.
+
 **If you use AI**, you choose the model and the provider — including a local model
 if you prefer to keep everything on-device — or a cloud provider you trust. You decide what gets shared and
 with whom. See [What data is shared with AI](/reference/ai-data-sharing/) for the
