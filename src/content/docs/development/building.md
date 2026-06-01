@@ -80,7 +80,7 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 
 This is required before either `npm --version` or `.\venv\Scripts\Activate.ps1` will work. The change is permanent for your user account.
 
-**Antivirus.** Real-time scanning (Windows Defender included) can quarantine PyInstaller's output or dramatically slow the build. If `FinzyTrack.exe` mysteriously disappears from `desktop\dist\FinzyTrack\` after a successful build, add the repository folder to Defender's exclusions via **Settings → Privacy & Security → Windows Security → Virus & threat protection → Manage settings → Exclusions**.
+**Antivirus.** Real-time scanning (Windows Defender included) can quarantine PyInstaller's output or dramatically slow the build. If `Finzytrack.exe` mysteriously disappears from `desktop\dist\Finzytrack\` after a successful build, add the repository folder to Defender's exclusions via **Settings → Privacy & Security → Windows Security → Virus & threat protection → Manage settings → Exclusions**.
 
 **Short paths.** Some PyInstaller hooks and Node tooling struggle with very long Windows paths. Clone the repository at a short path like `C:\finzytrack` rather than a deep nested location under `Documents` or `OneDrive`.
 
@@ -210,7 +210,7 @@ This will:
 **macOS:**
 
 ```
-desktop/dist/FinzyTrack.app
+desktop/dist/Finzytrack.app
 ```
 
 The `.app` bundle is ad-hoc codesigned and has the quarantine attribute stripped so it launches without Gatekeeper warnings during development.
@@ -218,7 +218,7 @@ The `.app` bundle is ad-hoc codesigned and has the quarantine attribute stripped
 **Linux:**
 
 ```
-desktop/dist/FinzyTrack-x86_64.AppImage
+desktop/dist/Finzytrack-x86_64.AppImage
 ```
 
 The build script assembles an AppDir from the PyInstaller output, the `.desktop` file, and app icons, then uses `appimagetool` to create the AppImage. If `appimagetool` is not already present in `desktop/build/`, the script downloads it automatically.
@@ -226,10 +226,10 @@ The build script assembles an AppDir from the PyInstaller output, the `.desktop`
 **Windows:**
 
 ```
-desktop/dist/FinzyTrack-windows.zip
+desktop/dist/Finzytrack-windows.zip
 ```
 
-A zip archive containing the `FinzyTrack/` directory with `FinzyTrack.exe` and all dependencies.
+A zip archive containing the `Finzytrack/` directory with `Finzytrack.exe` and all dependencies.
 
 For instructions on installing and running the packaged app, see the [Installation](/installation/) page.
 
@@ -262,9 +262,9 @@ The build script detects the current OS and runs the appropriate packaging step:
 
 | Platform | PyInstaller output | Final artifact |
 |---|---|---|
-| macOS | `dist/FinzyTrack.app` (`.app` bundle) | Ad-hoc codesigned `.app` |
-| Linux | `dist/FinzyTrack/` (directory) | `FinzyTrack-x86_64.AppImage` |
-| Windows | `dist/FinzyTrack/` (directory) | `FinzyTrack-windows.zip` |
+| macOS | `dist/Finzytrack.app` (`.app` bundle) | Ad-hoc codesigned `.app` |
+| Linux | `dist/Finzytrack/` (directory) | `Finzytrack-x86_64.AppImage` |
+| Windows | `dist/Finzytrack/` (directory) | `Finzytrack-windows.zip` |
 
 ### The launcher
 
@@ -312,9 +312,9 @@ After a successful workflow run, artifacts are available for download from the w
 
 | Artifact | Contents |
 |---|---|
-| `FinzyTrack-macOS` | `FinzyTrack-macOS.zip` containing the `.app` bundle |
-| `FinzyTrack-Linux` | `FinzyTrack-x86_64.AppImage` |
-| `FinzyTrack-Windows` | `FinzyTrack-windows.zip` |
+| `Finzytrack-macOS` | `Finzytrack-macOS.zip` containing the `.app` bundle |
+| `Finzytrack-Linux` | `Finzytrack-x86_64.AppImage` |
+| `Finzytrack-Windows` | `Finzytrack-windows.zip` |
 
 ## Key Files Reference
 

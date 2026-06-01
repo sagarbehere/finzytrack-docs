@@ -16,17 +16,17 @@ Download the latest release for your platform:
 
 | Platform | Download |
 |---|---|
-| macOS | `FinzyTrack-macOS.zip` |
-| Linux | `FinzyTrack-x86_64.AppImage` |
-| Windows | `FinzyTrack-windows.zip` |
+| macOS | `Finzytrack-macOS.zip` |
+| Linux | `Finzytrack-x86_64.AppImage` |
+| Windows | `Finzytrack-windows.zip` |
 
 ## macOS
 
 ### Install
 
-1. Download `FinzyTrack-macOS.zip`.
-2. Extract the zip — this produces `FinzyTrack.app`.
-3. Drag `FinzyTrack.app` to your **Applications** folder.
+1. Download `Finzytrack-macOS.zip`.
+2. Extract the zip — this produces `Finzytrack.app`.
+3. Drag `Finzytrack.app` to your **Applications** folder.
 4. Double-click to launch.
 
 On first launch, macOS may show a security warning because the app is not signed with an Apple Developer certificate. Right-click the app, select **Open**, then click **Open** in the dialog. This is only needed once.
@@ -34,24 +34,24 @@ On first launch, macOS may show a security warning because the app is not signed
 ### Uninstall
 
 1. Quit Finzytrack if it is running.
-2. Delete `FinzyTrack.app` from your Applications folder.
-3. Delete your user data: `~/Library/Application Support/FinzyTrack/`
+2. Delete `Finzytrack.app` from your Applications folder.
+3. Delete your user data: `~/Library/Application Support/Finzytrack/`
 
 ## Linux
 
 ### Install
 
-1. Download `FinzyTrack-x86_64.AppImage`.
+1. Download `Finzytrack-x86_64.AppImage`.
 2. Make it executable:
 
 ```bash
-chmod +x FinzyTrack-x86_64.AppImage
+chmod +x Finzytrack-x86_64.AppImage
 ```
 
 3. Run it:
 
 ```bash
-./FinzyTrack-x86_64.AppImage
+./Finzytrack-x86_64.AppImage
 ```
 
 The AppImage is a single self-contained file — no installation step is needed. You can move it anywhere you like (e.g., `~/Applications/`).
@@ -82,7 +82,7 @@ To integrate Finzytrack with your desktop environment (application menu, file ma
 On a server install with no X or Wayland, pass `--headless` to start the backend only:
 
 ```bash
-./FinzyTrack-x86_64.AppImage --headless
+./Finzytrack-x86_64.AppImage --headless
 ```
 
 The app is then reachable from any browser at `http://127.0.0.1:8001`.
@@ -91,7 +91,7 @@ The app is then reachable from any browser at `http://127.0.0.1:8001`.
 
 1. Quit Finzytrack if it is running.
 2. Delete the AppImage file.
-3. Delete your user data: `~/.local/share/FinzyTrack/`
+3. Delete your user data: `~/.local/share/Finzytrack/`
 
 If you used AppImageLauncher, also remove the desktop entry from `~/.local/share/applications/`.
 
@@ -103,19 +103,19 @@ The Windows build has not been tested. It may not work correctly.
 
 ### Install
 
-1. Download `FinzyTrack-windows.zip`.
-2. Extract the zip — this produces a `FinzyTrack` folder.
-3. Open the folder and double-click `FinzyTrack.exe`.
+1. Download `Finzytrack-windows.zip`.
+2. Extract the zip — this produces a `Finzytrack` folder.
+3. Open the folder and double-click `Finzytrack.exe`.
 
-There is no installer. The app runs directly from the extracted folder. You can move the folder anywhere and create a shortcut to `FinzyTrack.exe` on your Desktop or pin it to the Start Menu.
+There is no installer. The app runs directly from the extracted folder. You can move the folder anywhere and create a shortcut to `Finzytrack.exe` on your Desktop or pin it to the Start Menu.
 
 Windows Defender SmartScreen may show a warning because the executable is not signed with a Windows code signing certificate. Click **More info** and then **Run anyway**.
 
 ### Uninstall
 
 1. Quit Finzytrack if it is running.
-2. Delete the `FinzyTrack` folder.
-3. Delete your user data: `%LOCALAPPDATA%\FinzyTrack\`
+2. Delete the `Finzytrack` folder.
+3. Delete your user data: `%LOCALAPPDATA%\Finzytrack\`
 
 ## User data
 
@@ -123,9 +123,9 @@ On first launch, Finzytrack creates a data directory and seeds it with default c
 
 | Platform | Path |
 |---|---|
-| macOS | `~/Library/Application Support/FinzyTrack/` |
-| Linux | `~/.local/share/FinzyTrack/` |
-| Windows | `%LOCALAPPDATA%\FinzyTrack\` |
+| macOS | `~/Library/Application Support/Finzytrack/` |
+| Linux | `~/.local/share/Finzytrack/` |
+| Windows | `%LOCALAPPDATA%\Finzytrack\` |
 
 Uninstalling the app does not remove this directory. Delete it manually if you want to remove all data.
 
