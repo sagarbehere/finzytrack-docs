@@ -113,6 +113,16 @@ Windows Defender SmartScreen may show a warning because the executable is not si
 
 A small console window opens alongside the main application window. This is intentional in current builds: it shows diagnostic output while Finzytrack starts up, so if something goes wrong you can copy the text from it and share it when reporting an issue. Closing the console window also closes the app — close the main Finzytrack window instead. Later releases will hide it.
 
+### If the app fails to start with a ".NET" error
+
+Windows tags every file extracted from a downloaded zip as untrusted ("Mark of the Web"), and this can prevent the bundled .NET assemblies from loading. The launcher tries to clear this marker on startup, but if you see an error mentioning `Python.Runtime.Loader.Initialize` or `clr_loader`, you can clear the markers manually. Open PowerShell, navigate to the extracted folder, and run:
+
+```powershell
+Get-ChildItem -Recurse . | Unblock-File
+```
+
+Then start `Finzytrack.exe` again.
+
 ### Uninstall
 
 1. Quit Finzytrack if it is running.
