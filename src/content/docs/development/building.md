@@ -106,6 +106,14 @@ On Windows, `Activate.ps1` requires the execution policy change noted under the 
 
 ### 3. Install dependencies
 
+Optionally, upgrade pip itself to the latest release before installing dependencies. The `python -m pip` form is required on Windows (the `pip.exe` shim can't overwrite itself while it's running) and works identically on macOS and Linux:
+
+```bash
+python -m pip install --upgrade pip
+```
+
+Then install the project dependencies:
+
 ```bash
 # Backend
 pip install -r backend/requirements.txt
