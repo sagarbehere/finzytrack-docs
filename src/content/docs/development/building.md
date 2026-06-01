@@ -53,7 +53,36 @@ curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
-**Windows** — no additional system packages needed. PyWebView uses EdgeChromium (EdgeWebView2), which is included with modern Windows.
+**Windows** — verified on Windows 11. PyWebView uses EdgeChromium (EdgeWebView2), which is included with modern Windows, so no GUI runtime needs to be installed. You do need Python, Node.js, and Git, which a fresh Windows install does not ship.
+
+The fastest way to install all three is via `winget` from an elevated PowerShell:
+
+```powershell
+winget install --id Git.Git -e
+winget install --id Python.Python.3.13 -e
+winget install --id OpenJS.NodeJS.LTS -e
+```
+
+Close and reopen PowerShell after installation so the new entries on `PATH` are picked up. Verify each tool is on `PATH`:
+
+```powershell
+git --version
+python --version    # 3.13.x
+node --version      # v22.x or v24.x — both work
+npm --version
+```
+
+**PowerShell execution policy.** Out of the box, Windows blocks unsigned PowerShell scripts, which prevents both `npm` (a `.ps1` shim) and the Python venv's `Activate.ps1` from running. Relax the policy once for the current user:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+This is required before either `npm --version` or `.\venv\Scripts\Activate.ps1` will work. The change is permanent for your user account.
+
+**Antivirus.** Real-time scanning (Windows Defender included) can quarantine PyInstaller's output or dramatically slow the build. If `FinzyTrack.exe` mysteriously disappears from `desktop\dist\FinzyTrack\` after a successful build, add the repository folder to Defender's exclusions via **Settings → Privacy & Security → Windows Security → Virus & threat protection → Manage settings → Exclusions**.
+
+**Short paths.** Some PyInstaller hooks and Node tooling struggle with very long Windows paths. Clone the repository at a short path like `C:\finzytrack` rather than a deep nested location under `Documents` or `OneDrive`.
 
 ## Setting Up the Repository
 
@@ -68,9 +97,12 @@ cd finzytrack
 
 ```bash
 python -m venv venv
-source venv/bin/activate        # macOS / Linux
-# venv\Scripts\activate         # Windows
+source venv/bin/activate                    # macOS / Linux
+# .\venv\Scripts\Activate.ps1               # Windows (PowerShell)
+# venv\Scripts\activate.bat                 # Windows (cmd.exe)
 ```
+
+On Windows, `Activate.ps1` requires the execution policy change noted under the [Windows prerequisites](#platform-specific-prerequisites) above. If you prefer to skip that, use `cmd.exe` and the `.bat` activator instead.
 
 ### 3. Install dependencies
 
