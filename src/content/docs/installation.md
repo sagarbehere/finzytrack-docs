@@ -37,9 +37,34 @@ Download the latest release for your platform:
 1. Download `Finzytrack-macOS.zip`.
 2. Extract the zip — this produces `Finzytrack.app`.
 3. Drag `Finzytrack.app` to your **Applications** folder.
-4. Double-click to launch.
+4. Open Finzytrack — see [First launch on macOS](#first-launch-on-macos) below for the one-time security step.
 
-On first launch, macOS may show a security warning because the app is not signed with an Apple Developer certificate. Right-click the app, select **Open**, then click **Open** in the dialog. This is only needed once.
+### First launch on macOS
+
+Finzytrack is not signed with an Apple Developer certificate yet (this will change in a future release). On macOS Sequoia (15) and Tahoe (26), Apple's Gatekeeper blocks unsigned apps downloaded from the internet and shows the dialog **"could not verify Finzytrack is free of malware…"** with only **Move to Trash** and **Done** as options. The right-click → Open workaround that worked on older macOS no longer exists.
+
+You only need to do this **once**, when you first launch the app after downloading it.
+
+**Recommended: Terminal (one command).**
+
+Open the Terminal app, type the following with a trailing space:
+
+```bash
+xattr -dr com.apple.quarantine 
+```
+
+Then drag `Finzytrack.app` from Finder into the Terminal window — the full path is pasted in automatically. Press Return. Then launch the app normally from Finder.
+
+The command strips Apple's "downloaded from the internet" marker. After this, the app launches without any warning.
+
+**Alternative: System Settings (GUI).**
+
+1. Try to launch the app — the security dialog appears. Click **Done**.
+2. Open **System Settings → Privacy & Security**.
+3. Scroll down to the **Security** section.
+4. You'll see a line referencing the blocked Finzytrack app with an **Open Anyway** button. Click it.
+5. Confirm with your password / Touch ID.
+6. Launch the app from Finder again — it'll open this time.
 
 ### Uninstall
 
