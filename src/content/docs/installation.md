@@ -21,14 +21,13 @@ The Linux AppImage should also work on similarly modern Debian/Ubuntu derivative
 
 Download the latest release for your platform:
 
-- [finzytrack.com/download](https://finzytrack.com/download)
-- [GitHub Releases](https://github.com/sagarbehere/finzytrack/releases)
-
-| Platform | Download |
+| Platform | Direct download |
 |---|---|
-| macOS | `Finzytrack-macOS.zip` |
-| Linux | `Finzytrack-x86_64.AppImage` |
-| Windows | `Finzytrack-windows.zip` |
+| macOS | [`Finzytrack-macOS.zip`](https://github.com/sagarbehere/finzytrack/releases/latest/download/Finzytrack-macOS.zip) |
+| Linux | [`Finzytrack-x86_64.AppImage`](https://github.com/sagarbehere/finzytrack/releases/latest/download/Finzytrack-x86_64.AppImage) |
+| Windows | [`Finzytrack-windows.zip`](https://github.com/sagarbehere/finzytrack/releases/latest/download/Finzytrack-windows.zip) |
+
+The links above always resolve to the most recent stable release. To browse historical releases, change logs, or pre-release builds, visit the [GitHub Releases page](https://github.com/sagarbehere/finzytrack/releases).
 
 ## macOS
 
