@@ -5,7 +5,17 @@ description: How to download, install, and run Finzytrack on macOS, Linux, and W
 
 ## Platform support
 
-Finzytrack is actively developed and tested on **macOS Tahoe (26.x)**. The Linux build has been verified on **Debian 13 (Trixie)** and should also work on Ubuntu 22.04+ and other distributions that ship WebKit2GTK 4.1. Older releases such as Debian 12 (Bookworm) ship only WebKit2GTK 4.0 and will not run the prebuilt AppImage without backports. The Windows build is currently **untested** — it may work, but expect rough edges.
+The prebuilt binaries have been tested on:
+
+| Platform | Tested on |
+|---|---|
+| macOS | macOS Tahoe (26.x) |
+| Linux | Debian 13 (Trixie), x86_64 |
+| Windows | Windows 11 Home |
+
+The Linux AppImage should also work on similarly modern Debian/Ubuntu derivatives that ship WebKit2GTK 4.1 (Ubuntu 22.04+, Linux Mint 21+, Pop!_OS 22.04+, recent Fedora). Older releases such as Debian 12 (Bookworm), Ubuntu 20.04, and RHEL 8 ship older system libraries and won't run the prebuilt AppImage.
+
+**If the prebuilt binary doesn't run on your system, build Finzytrack yourself from source.** This is much less involved than it sounds — the [Build Instructions](/development/building/) page walks through every step. The process takes 10–15 minutes once your build prerequisites are installed, and the result is a binary tailored to your system's library versions.
 
 ## Download
 
