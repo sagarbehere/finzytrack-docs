@@ -68,22 +68,26 @@ The AppImage is a single self-contained file — no installation step is needed.
 
 ### Required runtime packages
 
-The AppImage relies on a few system libraries that are not bundled inside it. On Debian 13 (Trixie) install:
+The AppImage doesn't bundle GTK, WebKit, or any other system libraries — it relies on the user's distro to supply them. The two packages you need are:
 
-```bash
-sudo apt-get install -y \
-    libfuse2t64 \
-    libwebkit2gtk-4.1-0 \
-    gir1.2-webkit2-4.1
-```
+- **`libwebkit2gtk-4.1`** — the WebKit rendering engine used to display the UI
+- **`libfuse2`** — required by AppImage itself to mount as a runtime filesystem
 
-On Debian 12 / Ubuntu 22.04, the FUSE package is `libfuse2` rather than `libfuse2t64` (the rename was part of Debian 13's time_t 64-bit transition).
+Use whichever line matches your distro:
 
-- `libfuse2t64` / `libfuse2` is needed for AppImages to mount themselves at runtime. If it is missing, the launcher exits with a "FUSE setup" error.
-- `libwebkit2gtk-4.1-0` provides the actual WebKit rendering engine the app uses to display its UI.
-- `gir1.2-webkit2-4.1` is the GObject Introspection typelib that the bundled Python GTK bindings load at startup.
+| Distro | Install command |
+|---|---|
+| Debian 13 / Ubuntu 24.04+ | `sudo apt install libwebkit2gtk-4.1-0 libfuse2t64` |
+| Debian 12 / Ubuntu 22.04 | `sudo apt install libwebkit2gtk-4.1-0 libfuse2` |
+| Fedora 36+ | `sudo dnf install webkit2gtk4.1 fuse-libs` |
+| Arch / Manjaro | `sudo pacman -S webkit2gtk-4.1 fuse2` |
+| openSUSE Tumbleweed | `sudo zypper install libwebkit2gtk-4_1-0 libfuse2` |
 
-If the AppImage starts but the window stays blank or fails with "cannot open shared object file: libwebkit2gtk-4.1.so.0", the WebKit packages are missing.
+The package manager will pull in everything else (GLib, GTK, Pango, Cairo, X11, font/icon libraries…) as transitive dependencies, so you don't need to list them yourself.
+
+If the AppImage fails to start with `cannot open shared object file: libwebkit2gtk-4.1.so.0`, install the package above. The launcher also prints a friendly install hint when it detects WebKit is missing.
+
+On Debian 13, the FUSE package is named `libfuse2t64` rather than `libfuse2` — part of Debian 13's time_t 64-bit transition. Older distros still use the `libfuse2` name.
 
 To integrate Finzytrack with your desktop environment (application menu, file manager, etc.), you can use [AppImageLauncher](https://github.com/TheAssassin/AppImageLauncher).
 
