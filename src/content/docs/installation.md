@@ -9,7 +9,7 @@ The prebuilt binaries have been tested on:
 
 | Platform | Tested on |
 |---|---|
-| macOS | macOS Tahoe (26.x) |
+| macOS | macOS Tahoe (26.x), Apple Silicon |
 | Linux | Debian 13 (Trixie), x86_64 |
 | Windows | Windows 11 Home |
 
@@ -30,6 +30,8 @@ Download the latest release for your platform:
 The links above always resolve to the most recent stable release. To browse historical releases, change logs, or pre-release builds, visit the [GitHub Releases page](https://github.com/sagarbehere/finzytrack/releases).
 
 ## macOS
+
+The macOS build is for **Apple Silicon (M-series) only**. Intel Macs are not supported by the prebuilt binary — build from source if you're on Intel.
 
 ### Install
 
@@ -134,10 +136,6 @@ The app is then reachable from any browser at `http://127.0.0.1:8001`.
 If you used AppImageLauncher, also remove the desktop entry from `~/.local/share/applications/`.
 
 ## Windows
-
-:::caution
-The Windows build has not been tested. It may not work correctly.
-:::
 
 ### Install
 

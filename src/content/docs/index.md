@@ -29,7 +29,7 @@ Get your financial data in — however it arrives.
 - **Manual and natural-language entry** — type a transaction by hand, or describe it
   in plain English and let AI parse it
 
-Transactions are autocategorized on import for you to review.
+Transactions can be autocategorized and reviewed during import.
 
 ### Search
 
@@ -55,7 +55,7 @@ accessible; AI is just a faster path to the same place.
 
 Turn any query or analysis into a dashboard widget — a chart, a table, a KPI — that
 updates automatically whenever your data changes. Build a dashboard that reflects
-exactly how you think about your finances.
+how you think about your finances.
 
 ---
 

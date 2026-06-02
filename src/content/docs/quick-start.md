@@ -17,10 +17,11 @@ Pick the currency you use most often. This becomes the default for new accounts 
 
 ### 2. Ledger Choice
 
-Finzytrack stores all your financial data in a single plain-text [Beancount](https://beancount.github.io/) ledger file. You have two options:
+Finzytrack stores all your financial data in a single plain-text [Beancount](https://beancount.github.io/) ledger file. You have three options:
 
-- **Start fresh** — The app creates a starter ledger pre-loaded with common accounts (checking, savings, credit card, and a set of expense categories like groceries, rent, utilities, and so on). You can rename, add, or remove accounts later.
-- **Use an existing Beancount file** — Point the app to a `.beancount` / `.bean` / `.bc` file you already have. The app uses the file directly (no copy is made), so back it up first.
+- **Start fresh** — The app creates a starter ledger pre-loaded with common accounts (checking, savings, credit card, and a set of expense categories like groceries, rent, utilities, and so on). You should rename, add, or remove accounts to personalize the ledger to your finances.
+- **Use demo data** — The app loads a sample ledger filled with realistic accounts and transactions. Pick this if you just want to kick the tires and get a feel for the app without bringing in your own data. You can switch to a fresh or existing ledger later from **Settings**.
+- **Use an existing Beancount file** — Point the app to a `.beancount` / `.bean` / `.bc` file you already have. The app uses the file directly (no copy is made), so back it up first. The file must be self-contained — `include` directives are not supported, so all transactions, accounts, and other directives must live literally in that one file.
 
 ### 3. AI Configuration (Optional)
 
@@ -32,11 +33,30 @@ After completing the wizard, you land on the **Accounts** view with your chart o
 
 ---
 
-## Two Starting Paths
+## Three Starting Paths
 
-What you do next depends on whether you brought an existing ledger or started fresh.
+What you do next depends on which ledger option you chose in the wizard.
 
-### Path A: You Have an Existing Ledger
+### Path A: Starting Fresh
+
+If you chose "Start fresh", your first task is to set up the right accounts:
+
+1. **Review the starter accounts.** The Accounts view shows the pre-loaded chart of accounts. Rename or remove accounts that do not apply to you, and add any that are missing (your specific bank accounts, credit cards, investment accounts, loan accounts, etc.). For guidance on structuring your accounts, see [Account Hierarchy Design](/reference/account-hierarchy/).
+
+2. **Import your first statement.** Once your accounts look right, head to the [Import](#importing-transactions) section below to bring in transactions from your financial institution.
+
+### Path B: Exploring with Demo Data
+
+If you chose "Use demo data", the app is pre-loaded with a sample ledger of realistic accounts and transactions. There's nothing to set up — just explore:
+
+- Open the [Dashboards](/views/dashboards/) view to see how charts and KPIs work against the sample data.
+- Browse the [Transactions](/views/transactions/) view to see how search, filtering, and categorization behave on a populated ledger.
+- Try the [Query](/views/query/) view to run SQL or BQL against the sample data.
+- Poke around **Settings → Import Rules** to see example CSV, XLS, and email rules you can use as templates later.
+
+When you're ready to use your own data, go to **Settings** and change the ledger file — either point to an existing Beancount file, or switch to a fresh starter ledger.
+
+### Path C: You Have an Existing Ledger
 
 If you pointed the wizard at an existing Beancount file, your data is already loaded. You can start exploring right away:
 
@@ -45,14 +65,6 @@ If you pointed the wizard at an existing Beancount file, your data is already lo
 - **Query** — Run SQL or BQL queries to answer specific questions — top expense categories, spending by month, account balances over time, and more. See [Querying Data](/reference/querying-data/) for the query reference.
 
 When you are ready to import new statements, continue to [Importing Transactions](#importing-transactions) below.
-
-### Path B: Starting Fresh
-
-If you chose "Start fresh", your first task is to set up the right accounts:
-
-1. **Review the starter accounts.** The Accounts view shows the pre-loaded chart of accounts. Rename or remove accounts that do not apply to you, and add any that are missing (your specific bank accounts, credit cards, investment accounts, loan accounts, etc.). For guidance on structuring your accounts, see [Account Hierarchy Design](/reference/account-hierarchy/).
-
-2. **Import your first statement.** Once your accounts look right, head to the [Import](#importing-transactions) section below to bring in transactions from your financial institution.
 
 ---
 
