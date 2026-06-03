@@ -85,10 +85,6 @@ No export step. No lock-in.
 If you stop using Finzytrack tomorrow, your data is right there: a plain text file,
 fully readable, yours forever.
 
-Beancount uses double-entry bookkeeping — a rigorous method for tracking money that
-has a long history in accounting. If those words mean nothing to you, don't worry —
-Finzytrack handles the bookkeeping mechanics so you don't have to think about them.
-
 ---
 
 ## Powerful with AI, complete without it.
@@ -111,14 +107,13 @@ or cloud-based. You decide what gets shared and with whom.
 
 ---
 
-## Open source and sustainable
+## Inspect the code, verify the privacy
 
-Finzytrack is GPLv2 open source and will remain so. You can always inspect the code,
-run it yourself, and use your own AI model.
-
-To keep development sustainable, we may in future offer optional paid services:
-a privacy-friendly hosted AI model, signed auto-updating binaries, or a hosted
-web version. These will always be optional — the core desktop app stays free and open.
+Finzytrack is open source (GPLv2). To keep development sustainable, we may offer
+optional paid services in future — a privacy-friendly hosted AI model, signed
+auto-updating binaries, or a hosted web version. The desktop app will remain
+open source, and you will always be able to choose which AI model to connect —
+including running one locally.
 
 ---
 
@@ -127,4 +122,4 @@ web version. These will always be optional — the core desktop app stays free a
 - [Installation](/installation/) — get Finzytrack running on your machine
 - [Quick Start](/quick-start/) — a guided tour from first launch to first import
 - [Views](/views/) — learn what each screen does
-- [Reference](/reference/dashboard-recipes/) — deep dives into configuration and queries
+- [Reference](/reference/) — deep dives into configuration and queries

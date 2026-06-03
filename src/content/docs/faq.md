@@ -27,6 +27,18 @@ No. Finzytrack caches the ledger in memory and writes it back as a whole file on
 
 If you want to edit the raw ledger directly, close Finzytrack first, make your changes in a text editor, and then restart the app. Finzytrack will load the updated file on startup.
 
+### Does Finzytrack automatically download transactions and balances from my bank?
+
+**Short answer:** Not at the moment.
+
+**Long answer:** Three obstacles, each currently blocking a different path:
+
+1. **US-style aggregators** (Plaid, Yodlee, etc.) require sharing your bank login credentials with a third party. We haven't yet found a way to do this that we're confident about from a privacy and risk standpoint. We'll enable it if/when we can.
+2. **Direct bank connections** are possible in some countries (e.g., open-banking APIs in the EU/UK). The developer doesn't currently hold accounts in those countries, so lacks both the testing access and the personal motivation to build this.
+3. **Regulated frameworks** like India's Account Aggregator system allow direct bank-to-app retrieval, but require a level of regulatory compliance (entity registration, security audits) that is impractical for a solo indie developer without a business entity.
+
+We're always watching for ways to enable one-click retrieval and will share updates when a promising direction emerges. In the meantime, [Import](/views/import/) supports OFX/QFX, CSV, XLS, PDF, and email-based ingest.
+
 ---
 
 ## Transactions
