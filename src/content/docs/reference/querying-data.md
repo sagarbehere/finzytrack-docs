@@ -18,7 +18,7 @@ Finzytrack provides two query engines for accessing your financial data: **SQL**
 | **Pattern matching** | `LIKE` operator | `~` (regex) operator |
 | **Date functions** | `strftime()` | `YEAR()`, `MONTH()`, `DAY()` |
 | **Best for** | Complex joins, window-style queries, dashboard recipes | Quick account lookups, register views, balance queries |
-| **Official docs** | [SQLite SQL](https://www.sqlite.org/lang.html) | [Beancount Query Language](https://beancount.github.io/docs/beancount_query_language.html) |
+| **Official docs** | [SQLite SQL](https://www.sqlite.org/lang.html) | [Beancount Query Language](https://beancount.github.io/docs/beancount_query_language/) |
 
 In dashboard recipes, set the widget's `dbType` field to `"sqlite"` (default) or `"beanquery"` to choose the engine.
 
@@ -496,7 +496,7 @@ ORDER BY date
 
 ## BQL Reference
 
-BQL (Beancount Query Language) is a query language native to Beancount. It queries your ledger entries directly — no SQLite export needed. BQL is SQL-like but has important differences. For the full official specification, see the [Beancount Query Language documentation](https://beancount.github.io/docs/beancount_query_language.html).
+BQL (Beancount Query Language) is a query language native to Beancount. It queries your ledger entries directly — no SQLite export needed. BQL is SQL-like but has important differences. For the full official specification, see the [Beancount Query Language documentation](https://beancount.github.io/docs/beancount_query_language/). For a more approachable, hands-on way to learn BQL, check out the [interactive beanquery manual](https://github.com/Ev2geny/beanquery-interactive-manual) by Ev2geny.
 
 ### Columns
 
