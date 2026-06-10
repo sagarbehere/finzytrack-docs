@@ -17,11 +17,11 @@ Pick the currency you use most often. This becomes the default for new accounts 
 
 ### 2. Ledger Choice
 
-Finzytrack stores all your financial data in a single plain-text [Beancount](https://beancount.github.io/) ledger file. You have three options:
+Finzytrack stores all your financial data in a plain-text [Beancount](https://beancount.github.io/) ledger. You have three options:
 
 - **Start fresh** — The app creates a starter ledger pre-loaded with common accounts (checking, savings, credit card, and a set of expense categories like groceries, rent, utilities, and so on). You should rename, add, or remove accounts to personalize the ledger to your finances.
 - **Use demo data** — The app loads a sample ledger filled with realistic accounts and transactions. Pick this if you just want to kick the tires and get a feel for the app without bringing in your own data. You can switch to a fresh or existing ledger later from **Settings**.
-- **Use an existing Beancount file** — Point the app to a `.beancount` / `.bean` / `.bc` file you already have. The app uses the file directly (no copy is made), so back it up first. The file must be self-contained — `include` directives are not supported, so all transactions, accounts, and other directives must live literally in that one file.
+- **Use an existing Beancount file** — Point the app to a `.beancount` / `.bean` / `.bc` file you already have. The app uses the file directly (no copy is made), so back it up first. Multi-file ledgers (linked by `include` directives) work too — see [Multi-file Ledgers](/reference/multi-file-ledgers/) for the specific behaviors to be aware of.
 
 ### 3. AI Configuration (Optional)
 
