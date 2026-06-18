@@ -53,6 +53,7 @@ These columns have the same value for all postings within a transaction.
 | `transaction_tags` | TEXT | JSON array of tag strings. |
 | `transaction_links` | TEXT | JSON array of link strings. |
 | `transaction_metadata_json` | TEXT | JSON object of transaction-level metadata from the ledger. |
+| `document_count` | INTEGER | Number of documents attached to the transaction. Filter with `document_count > 0` for transactions that have any. See [Documents](/reference/documents/). |
 
 #### Posting-Level Columns
 

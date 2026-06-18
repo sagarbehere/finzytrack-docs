@@ -30,6 +30,7 @@ Detailed reference material for the configurable parts of Finzytrack. Use these 
 | [Backups and Logs](/reference/backups-and-logs/) | Where Finzytrack writes backups and logs, and how to manage them |
 | [Ledger Rewrites](/reference/ledger-rewrites/) | What is retained and what is dropped when Finzytrack writes to your ledger |
 | [Multi-file Ledgers](/reference/multi-file-ledgers/) | How Finzytrack reads and writes ledgers split across files via `include` directives |
+| [Documents](/reference/documents/) | How files attached to transactions and accounts are stored, named, and cleared |
 | [Configuration](/reference/configuration/) | `config.yaml` settings and what each option controls |
 
 ## AI

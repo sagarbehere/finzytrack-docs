@@ -150,6 +150,10 @@ The table supports full keyboard navigation so you can review and edit all trans
 
 Use the **+** button on a transaction to add a posting, or the **x** button to remove one. Use the **−** button to remove an entire transaction from the import.
 
+### Documents
+
+You can attach supporting files to a transaction while reviewing it, before it is committed. Click the **paperclip** on a row to open the documents drawer and add files, or drag a file directly onto a row. Attached documents are staged with the draft and written to the ledger when you **Register Transactions**. See [Documents](/reference/documents/) for details on storage, naming, and clearing unreferenced files.
+
 ### Autocategorize
 
 Click the **Autocategorize** button above the table to let the app suggest expense/income accounts for each transaction. This runs the configured categorization engine — either a local classifier trained on your existing ledger history, or your AI model if configured. See [Auto-Categorization](/reference/auto-categorization/) for details on how both engines work.

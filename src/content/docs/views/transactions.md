@@ -50,6 +50,7 @@ All text filters are partial-match and case-insensitive.
 | Account Type | All, Assets, Liabilities, Expenses, Income, or Equity |
 | Year | Filter to a specific year |
 | Quarter | Filter to Q1, Q2, Q3, or Q4 |
+| Documents | Any, With documents, Without documents, or a count comparison (At least N / At most N, with a number field). Filters on how many documents are attached to each transaction. |
 
 ### Max Results
 
@@ -76,6 +77,17 @@ You can edit any transaction directly in the table — click a cell to change it
 When you have unsaved changes, the **Save Changes** button appears above the table showing the number of modified transactions (e.g., "Save Changes (3)"). Click it to write your edits back to the ledger. A **Reset** button is also available to discard all edits and reload from the ledger.
 
 If you try to navigate away with unsaved changes, a confirmation dialog asks whether you want to leave or stay.
+
+---
+
+## Documents
+
+You can attach supporting files — receipts, invoices, and the like — to a transaction:
+
+- A **paperclip column** shows an attachment count for transactions that have documents. Click it to open the documents drawer, where you can preview, add, or remove documents.
+- On desktop, you can also **drag a file directly onto a transaction row** to attach it.
+
+Attaching or removing a document marks the transaction as modified, so the change is written when you click **Save Changes**. See [Documents](/reference/documents/) for where files are stored, how they are named, what is written to the ledger, and how to clear unreferenced files.
 
 ---
 

@@ -110,6 +110,7 @@ Clicking an account name opens a slide-out drawer on the right side with detaile
 - **Banking details** — account number, IFSC code, and SWIFT/BIC, if configured.
 - **Custom fields** — any custom metadata key-value pairs.
 - **Notes** — the account description, if set.
+- **Documents** — files attached to this account, such as statements or contracts. Add a file by dragging it onto the upload area or browsing for it, open one in a preview, or remove it. Accounts with documents also show a paperclip badge next to their name in the table; clicking the badge opens this drawer. See [Documents](/reference/documents/) for how the files are stored and named.
 
 An **Edit Account** button at the bottom opens the edit form directly from the drawer.
 
