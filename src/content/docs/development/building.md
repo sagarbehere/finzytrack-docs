@@ -2,7 +2,7 @@
 title: Build Instructions
 description: How to build the Finzytrack desktop app for macOS, Linux, and Windows.
 sidebar:
-  order: 3
+  order: 2
 ---
 
 Finzytrack ships as a standalone desktop app that bundles the FastAPI backend, the Vue 3 frontend, and a native window shell into a single distributable binary. This page covers how to set up the repository, run Finzytrack in development mode, and produce builds for macOS, Windows, and Linux.

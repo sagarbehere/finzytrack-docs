@@ -23,7 +23,7 @@ No. Finzytrack handles the Beancount details for you. However, familiarity with 
 
 ### Can I edit the ledger file directly in a text editor while the app is running?
 
-No. Finzytrack caches the ledger in memory and writes it back as a whole file on every change. If you edit the ledger file externally while the app is running, your edits will be silently overwritten the next time the app writes to the file.
+No. Every time you make a change, Finzytrack rewrites the entire ledger file from the version it parsed when it last loaded or wrote it. If you edit the ledger file externally while the app is running, your edits will be silently overwritten the next time the app writes to the file.
 
 If you want to edit the raw ledger directly, close Finzytrack first, make your changes in a text editor, and then restart the app. Finzytrack will load the updated file on startup.
 
@@ -38,6 +38,14 @@ If you want to edit the raw ledger directly, close Finzytrack first, make your c
 3. **Regulated frameworks** like India's Account Aggregator system allow direct bank-to-app retrieval, but require a level of regulatory compliance (entity registration, security audits) that is impractical for a solo indie developer without a business entity.
 
 We're always watching for ways to enable one-click retrieval and will share updates when a promising direction emerges. In the meantime, [Import](/views/import/) supports OFX/QFX, CSV, XLS, PDF, and email-based ingest.
+
+### Will Finzytrack support hledger (or Ledger)?
+
+**Short answer:** Not for the foreseeable future.
+
+**Long answer:** Finzytrack was designed from the start as a graphical front-end for [Beancount](https://beancount.github.io/), and it leans directly on Beancount's data model and libraries rather than sitting behind a backend-neutral abstraction. Supporting [hledger](https://hledger.org/) or [Ledger](https://ledger-cli.org/) properly would mean rebuilding the app around a neutral accounting model, taking on the correctness of a second accounting engine, and maintaining all of that — including the AI workflows — across two backends forever. That is a large, permanent cost that works against what makes Finzytrack pleasant: being a focused, easy-to-use front-end for one plain-text system, done well.
+
+This isn't a judgement about hledger or Ledger, which are excellent tools. It's a focus decision. For the full technical reasoning — how Finzytrack uses Beancount today, why the obvious shortcuts don't hold up, and what the various levels of support would actually require — see [hledger and Other Ledger Backends](/development/other-backends/).
 
 ---
 
