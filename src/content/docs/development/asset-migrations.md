@@ -47,6 +47,22 @@ python scripts/migrate_recipes.py config/recipes        # apply
 python scripts/migrate_recipes.py --check config/recipes # preview only
 ```
 
+## Self-hosted and headless
+
+The consent step happens in your **browser**, so it works the same whether
+Finzytrack runs on your own machine or on a server you reach from another
+computer — a server having no display doesn't matter, because the browser
+provides the dialog. When you next open the app after updating, you'll get the
+upgrade prompt as usual.
+
+The only case with no consent UI is something truly non-interactive (a scheduled
+import or an API-only integration with nobody ever opening the app). That's not a
+problem for the dashboard upgrade, because dashboards are only ever read by the
+app's interface — a background import never touches them. If a future upgrade
+ever affects something a background task *does* use, Finzytrack will provide a
+command you can run to apply it deliberately (the same idea as the `migrate_recipes.py`
+command above) rather than changing your files unattended.
+
 ## Where it lives (for contributors)
 
 - `backend/app/migrations/` — the versioned conversions (e.g. the recipe v1→v2 migration) and the backup-aware apply path.
