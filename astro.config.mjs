@@ -33,6 +33,7 @@ export default defineConfig({
 				{ label: 'Quick Start', slug: 'quick-start' },
 				{ label: 'Views', autogenerate: { directory: 'views' } },
 				{ label: 'Reference', autogenerate: { directory: 'reference' } },
+				{ label: 'Upgrade Notes', autogenerate: { directory: 'upgrade-notes' } },
 				{ label: 'Development', autogenerate: { directory: 'development' } },
 				{ label: 'FAQ', slug: 'faq' },
 			],
