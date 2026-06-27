@@ -13,38 +13,42 @@ If you have [AI configured](/quick-start/#configuring-ai), you can [build dashbo
 The bundled **Widget Gallery** dashboard contains a working example of every widget type the app supports (kpi, bar, line, area, pie, scatter, treemap, table, pivot, funnel, gauge, calendar heatmap, sankey, radar, sunburst). When building a new recipe, the fastest path is to find the closest gallery widget, copy its JSON, and adapt the SQL and titles. The gallery's source lives at `backend/resources/seed_config/recipes/dashboards/widget-gallery.json` (or open it from the Dashboard panel and use the recipe editor to inspect each widget). Each gallery widget has a `helpText` field describing the type's specific gotchas — those notes are the most reliable distillation of what works for that chart type.
 :::
 
-Dashboards and widgets in Finzytrack are defined using **JSON recipe files**. There are two types of recipes:
-
-- **Dashboard recipes** define a grid layout containing multiple widgets — KPI cards, charts, tables, and pivot tables.
-- **Widget recipes** define a single, self-contained visualization that can be reused across multiple dashboards.
-
-Both types are plain JSON files — no code changes or rebuilds required.
+Dashboards in Finzytrack are defined using **JSON recipe files**. The dashboard is the only recipe type: each dashboard defines a grid layout and the widgets it contains **inline** — there are no separate, standalone widget files. Recipe files are plain JSON — no code changes or rebuilds required.
 
 ## Concepts
 
-A **widget** is the fundamental building block. Each widget runs a query (SQL or BQL) against your ledger data and displays the results as a KPI card, chart, table, or pivot table. Widgets can have interactive **parameters** (dropdowns, number inputs) that filter the data.
+A **widget** is the fundamental building block — a KPI card, chart, table, or pivot table. Each widget is a small **pipeline of steps** feeding a visualization. A step is one of:
 
-A **dashboard** arranges multiple widgets in a grid layout. Dashboards can define shared parameters that cascade to all contained widgets. A dashboard can define widgets inline in its own file, reference standalone widget recipes by ID, or mix both approaches (see [Widget Resolution](#widget-resolution)).
+- **`sql`** — a read-only SQL query against your ledger data (the common case).
+- **`compute`** — a server-side function that returns computed values (for example `budget_for_range`, which supplies budget numbers). The available functions are a fixed catalog.
+- **`transform`** — a client-side function that reshapes or combines the outputs of earlier steps (sort, limit, pivot, budget-vs-actual, and so on).
 
-**Widget recipes** are standalone JSON files that define a single widget. They are useful when you want a reusable visualization (e.g., an expense treemap or a top-spending bar chart) that can be shared across multiple dashboards without duplicating the definition.
+The widget names an `output` step whose result is drawn. Most widgets are simply one `sql` step feeding the visualization; multi-source widgets (such as budget vs actual) combine a `sql` step and a `compute` step in a `transform`. Widgets can have interactive **parameters** (dropdowns, date and number inputs) that flow into steps.
+
+A **dashboard** arranges its widgets in a grid layout and can define shared parameters that cascade to every widget. It can also define **shared steps** that are computed once and fed to multiple widgets.
+
+:::tip
+The most reliable, always-current description of the recipe format is built into the app: when you ask the AI assistant to build a dashboard it loads the schema on demand, and **Settings → Dashboards** validates your JSON with live preview. The deeper examples below predate the step-based format and are being refreshed; the in-app schema is authoritative.
+:::
 
 ### File Structure
 
-Recipe files live in the `config/recipes/` directory:
+Recipe files live in the `config/recipes/dashboards/` directory:
 
 ```
 config/recipes/
-├── dashboards/
-│   ├── financial-overview.json
-│   ├── year-summary.json
-│   ├── month-summary.json
-│   └── widget-gallery.json       # Reference: one example per widget type
-└── widgets/
-    ├── expense-treemap.json
-    └── top-spending-categories.json
+└── dashboards/
+    ├── financial-overview.json
+    ├── year-summary.json
+    ├── month-summary.json
+    └── widget-gallery.json       # Reference: one example per widget type
 ```
 
-Any `*.json` file under `dashboards/` or `widgets/` is automatically loaded as a recipe. There is no index file to keep in sync: drop a file in, refresh the app, and it appears. Move or delete a file and it goes away. Files that fail to parse or validate are reported in the notification panel against their path so you can fix them.
+Any `*.json` file under `dashboards/` is automatically loaded. There is no index file to keep in sync: drop a file in, refresh the app, and it appears. Move or delete a file and it goes away. Files that fail to parse or validate are reported in the notification panel against their path so you can fix them.
+
+:::note[Format version]
+Every dashboard carries `"schemaVersion": 2` — the current step-based format. Recipes written for an earlier Finzytrack version are upgraded automatically on first launch (a timestamped `.bak` copy of each is kept beside it). A file without `schemaVersion: 2` is rejected with a "run the migration" message.
+:::
 
 ---
 
@@ -54,10 +58,12 @@ A dashboard recipe is a JSON file with the following top-level structure:
 
 ```json
 {
+  "schemaVersion": 2,
   "id": "my-dashboard",
   "title": "My Dashboard",
   "description": "Optional description shown in the dashboard picker",
   "parameters": [],
+  "steps": [],
   "layout": {
     "columns": 12,
     "gap": "1.5rem",
@@ -72,10 +78,11 @@ A dashboard recipe is a JSON file with the following top-level structure:
 
 | Field | Type | Description |
 |-------|------|-------------|
+| `schemaVersion` | number | Recipe format version. Always `2`. |
 | `id` | string | Unique identifier. Lowercase letters, numbers, and hyphens only (e.g., `my-dashboard`). |
 | `title` | string | Display title shown in the dashboard picker and header. |
 | `layout` | object | Grid layout configuration (see [Layout](#layout)). |
-| `widgets` | array | Inline widget definitions (see [Widget Structure](#widget-structure)). |
+| `widgets` | array | Inline widget definitions, non-empty (see [Widget Structure](#widget-structure)). |
 
 ### Optional Fields
 
@@ -83,33 +90,11 @@ A dashboard recipe is a JSON file with the following top-level structure:
 |-------|------|-------------|
 | `description` | string | One-line description shown in the dashboard picker. |
 | `parameters` | array | Dashboard-level parameters shared by all widgets (see [Parameters](#parameters)). |
+| `steps` | array | Dashboard **shared steps** — computed once and fed to multiple widgets (see [Shared steps](#dashboard-shared-steps)). |
 
-### Widget Resolution
+### Widgets are inline only
 
-When a dashboard layout references a `widgetId`, the app looks for the widget in this order:
-
-1. **Inline widgets** — the dashboard's own `widgets` array.
-2. **Standalone widget recipes** — widget recipe files in the `widgets/` directory.
-
-This means a dashboard can reference standalone widget recipes by ID without redefining them inline. For example, a dashboard can use the `expense-treemap` widget from `widgets/expense-treemap.json` simply by referencing it in the layout:
-
-```json
-{
-  "layout": {
-    "columns": 12,
-    "widgets": [
-      { "widgetId": "expense-treemap", "gridArea": "2 / 1 / 6 / 13" }
-    ]
-  },
-  "widgets": []
-}
-```
-
-The `widgets` array can be empty (or contain only the other widgets) — the `expense-treemap` widget will be resolved from the standalone recipe file. You can mix inline and standalone widgets freely in the same dashboard.
-
-:::caution
-If a dashboard defines an inline widget with the same ID as a standalone widget recipe, the inline definition takes precedence and the standalone recipe is silently ignored for that dashboard. This can cause confusion — the app will warn you about such conflicts (see [ID Conflict Detection](#id-conflict-detection)).
-:::
+Every widget a dashboard shows is defined **inline** in its `widgets` array. There are no standalone widget files and no by-ID lookup across files: each `layout.widgets[].widgetId` must match the `id` of a widget defined in this dashboard's own `widgets` array. To reuse a widget across dashboards, copy its definition (cheap) — or, to share the *expensive* part of a computation, use a [dashboard shared step](#dashboard-shared-steps).
 
 ---
 
@@ -196,7 +181,9 @@ KPIs typically occupy 1 row. Charts and tables need 3-4 rows to have enough heig
 
 ## Widget Structure
 
-Each widget is defined inline within the dashboard's `widgets` array:
+Each widget is defined inline within the dashboard's `widgets` array. A widget is a **pipeline of named steps** (`steps`) plus an `output` pointer naming the step whose result is visualized.
+
+The simplest widget is one SQL step feeding the visualization. Here a transform step (`firstRow`) reduces the rows to a single one for a KPI:
 
 ```json
 {
@@ -205,10 +192,30 @@ Each widget is defined inline within the dashboard's `widgets` array:
   "description": "Sum of all income for the selected year",
   "helpText": "Income amounts are shown as positive values",
   "parameters": [],
-  "dbType": "sqlite",
-  "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year GROUP BY currency HAVING amount != 0",
-  "transform": "firstRow",
+  "steps": [
+    {
+      "id": "rows",
+      "kind": "sql",
+      "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year GROUP BY currency HAVING amount != 0"
+    },
+    { "id": "out", "kind": "transform", "fn": "firstRow", "inputs": ["{{steps.rows}}"] }
+  ],
+  "output": "out",
   "visualization": { "type": "kpi", "icon": "↑", "iconColor": "green" }
+}
+```
+
+A widget that needs no transformation just points `output` at its SQL step directly:
+
+```json
+{
+  "id": "assets-pie",
+  "title": "Assets Breakdown",
+  "steps": [
+    { "id": "rows", "kind": "sql", "query": "SELECT account AS name, ROUND(SUM(CAST(amount AS REAL)), 2) AS value FROM postings WHERE account_type = 'Assets' GROUP BY account HAVING value > 0" }
+  ],
+  "output": "rows",
+  "visualization": { "type": "chart", "chartType": "pie", "options": { /* ... */ } }
 }
 ```
 
@@ -218,8 +225,9 @@ Each widget is defined inline within the dashboard's `widgets` array:
 |-------|------|-------------|
 | `id` | string | Unique identifier within the dashboard. Lowercase letters, numbers, hyphens. |
 | `title` | string | Display title shown in the widget header. |
-| `query` | string | Query to execute — SQL or BQL depending on `dbType` (see [Queries](#queries)). |
-| `visualization` | object | How to display results (see [Visualizations](#visualizations)). |
+| `steps` | array | The widget's data pipeline — a non-empty array of step objects (see [Steps](#steps)). |
+| `output` | string | The `id` of the step whose result feeds the visualization. Must name a step in `steps`. |
+| `visualization` | object | How to display the output (see [Visualizations](#visualizations)). |
 
 ### Optional Fields
 
@@ -228,8 +236,70 @@ Each widget is defined inline within the dashboard's `widgets` array:
 | `description` | string | Description shown below the title. |
 | `helpText` | string | Tooltip text shown when hovering the info icon. |
 | `parameters` | array | Widget-level parameters (see [Parameters](#parameters)). |
-| `dbType` | string | Query engine: `"sqlite"` (default) or `"beanquery"`. See [Querying Data](/reference/querying-data/) for details on each engine. |
-| `transform` | string or object | Data transformation before visualization (see [Transforms](#transforms)). |
+
+---
+
+## Steps
+
+A widget's `steps` array is a small **directed graph**: each step produces a value, and later steps consume earlier steps' values by reference. Array order is just for readability — the app runs the steps in dependency order (and independent steps concurrently). There are three kinds:
+
+| `kind` | Runs | Purpose |
+|--------|------|---------|
+| `sql` | server (SQLite mirror) | A leaf data source: a read-only SQL query. |
+| `compute` | server | A vetted function that returns computed values (e.g. budget numbers). |
+| `transform` | browser | Reshapes or combines the outputs of earlier steps. |
+
+Every step has a unique, lowercase-hyphen `id`. A step's output is referenced elsewhere as **`{{steps.<id>}}`** (or `{{dashboard.steps.<id>}}` for a [shared step](#dashboard-shared-steps)).
+
+### `sql` step
+
+```json
+{ "id": "actuals", "kind": "sql", "query": "SELECT account, SUM(CAST(amount AS REAL)) AS spent FROM postings WHERE year = :year GROUP BY account", "dbType": "sqlite" }
+```
+
+| Field | Description |
+|-------|-------------|
+| `query` | The SQL (or BQL) query. Uses `:paramName` placeholders for parameters. |
+| `dbType` | Optional engine: `"sqlite"` (default) or `"beanquery"`. See [Querying Data](/reference/querying-data/). |
+
+A SQL step is a **leaf** — it reads the ledger mirror and **cannot read another step's rows** (`{{...}}` references are not allowed inside `query`). To combine a SQL result with anything else, do it in a `transform`. See [SQL queries](#sql-queries) for the rules.
+
+### `compute` step
+
+```json
+{ "id": "budgets", "kind": "compute", "fn": "budget_for_range", "args": { "from": "{{params.from}}", "to": "{{params.to}}", "currency": "{{params.currency}}" } }
+```
+
+| Field | Description |
+|-------|-------------|
+| `fn` | Name of a server-side compute function. The catalog is **fixed** — you select from it. |
+| `args` | Object of small scalar arguments. Values may be literals or `{{params.x}}` / `{{steps.x}}` templates. |
+
+Compute functions do calculations SQL can't express — budget normalization, projections — and return JSON. The first one is `budget_for_range` (see [Budgets](/views/budgets/)). When the AI assistant is configured it discovers the catalog with its `get_compute_functions` tool; you can't invent new function names.
+
+### `transform` step
+
+```json
+{ "id": "variance", "kind": "transform", "fn": "joinBudgetActual", "inputs": ["{{steps.budgets}}", "{{steps.actuals}}"], "config": { "totalAccount": "Expenses:Insurance" } }
+```
+
+| Field | Description |
+|-------|-------------|
+| `fn` | Name of a transform from the [catalog](#transforms) (fixed). |
+| `inputs` | Ordered `{{steps.<id>}}` / `{{dashboard.steps.<id>}}` references to the step outputs this transform consumes. |
+| `config` | Optional transform-specific configuration; `{{...}}` templates inside it are resolved. |
+
+Transforms run in the browser over already-computed step outputs. Unlike SQL steps, a transform can take **multiple inputs** — that's how a widget combines a SQL result with a compute result (for example budget vs actual).
+
+### References & interpolation
+
+Three reference scopes are available in `args`, `inputs`, and `config` via `{{...}}`:
+
+- `{{params.<name>}}` — a resolved parameter value.
+- `{{steps.<id>}}` — the output of another step in this widget.
+- `{{dashboard.steps.<id>}}` — the output of a [dashboard shared step](#dashboard-shared-steps).
+
+A string that is *exactly* one token (`"{{steps.actuals}}"`) resolves to the actual value (object/array). A token inside a larger string resolves to its text. SQL steps are the exception — their `query` uses only `:name` parameter placeholders and never `{{...}}`.
 
 ---
 
@@ -374,9 +444,9 @@ These return arrays of `{ "value": ..., "label": "..." }` objects, suitable for 
 
 ---
 
-## Queries
+## SQL queries
 
-Each widget's `query` field contains a query that fetches data from your ledger. By default, queries use SQL against a SQLite export of your Beancount ledger. You can also use BQL (Beancount Query Language) by setting `dbType: "beanquery"` on the widget.
+A `sql` step's `query` field fetches data from your ledger. By default queries use SQL against a SQLite export of your Beancount ledger; you can also use BQL (Beancount Query Language) by setting `dbType: "beanquery"` on the step.
 
 For the complete query reference — table schema, sign conventions, multi-currency rules, SQL syntax, BQL syntax, and common query patterns — see the **[Querying Data](/reference/querying-data/)** reference.
 
@@ -406,64 +476,83 @@ These columns can then be referenced in `clickLink` templates as `{{data.dateFro
 
 ## Transforms
 
-Transforms modify query results before they are passed to the visualization. Most widgets don't need a transform — the query results are used directly.
+A `transform` step calls one named function from a **fixed catalog** over the outputs of the steps named in its `inputs`. The first input is the primary rowset; `config` shapes behavior. The simplest is `none` (pass rows through); reducers like `firstRow` adapt rows for a KPI; and multi-input transforms (the budget family) merge two step outputs.
 
-### Simple Transforms
-
-Specify as a string in the widget's `transform` field:
-
-| Transform | Description |
-|-----------|-------------|
-| `"none"` | No transform (default). Rows passed as-is. |
-| `"firstRow"` | Extracts the first row as a single object. Use for single-value KPIs from multi-row queries. |
-| `"firstValue"` | Extracts the first numeric value from the first row. |
-
-### Configurable Transforms
-
-Specify as an object:
-
-**Sort rows:**
 ```json
-{ "type": "sortBy", "field": "total", "order": "desc" }
-```
-| Property | Type | Description |
-|----------|------|-------------|
-| `field` | string | Column name to sort by. |
-| `order` | string | `"asc"` or `"desc"` (default: `"asc"`). |
-
-**Limit rows:**
-```json
-{ "type": "limit", "count": 10 }
+{ "id": "out", "kind": "transform", "fn": "sortBy", "inputs": ["{{steps.rows}}"], "config": { "field": "total", "order": "desc" } }
 ```
 
-**Pivot (cross-tabulation):**
+### Catalog
+
+| `fn` | `inputs` | `config` | Output |
+|------|----------|----------|--------|
+| `none` | `[rows]` | — | the rows unchanged |
+| `firstRow` | `[rows]` | — | the first row as a single object (single-value KPIs) |
+| `firstValue` | `[rows]` | — | the first value of the first row |
+| `sortBy` | `[rows]` | `{ field, order? }` | sorted rows (`order`: `asc`/`desc`) |
+| `limit` | `[rows]` | `{ count }` | the first `count` rows |
+| `pluck` | `[rows]` | `{ field }` | an array of one field's values |
+| `pivot` | `[rows]` | `{ rowField, columnField, valueField, formatColumn?, sortRowsBy? }` | a cross-tabulation (see below) |
+| `joinBudgetActual` | `[budgets, actuals]` | `{ totalAccount?, periodStart?, periodEnd? }` | budget-vs-actual variance rows |
+| `joinByPeriod` | `[budgetsByPeriod, actualsByPeriod]` | — | `[{ period, budget, actual }]` |
+| `runningSum` | `[rows]` | `{ fields, orderBy }` | rows plus a cumulative column per field |
+| `envelopeRollover` | `[budgetsByPeriod, actualsByPeriod]` | — | per-period `{ budget, actual, available, carryover, overspent }` |
+
+### `pivot`
+
+Required by the `pivot` visualization. Restructures flat rows (one per account+month) into a cross-tabulation:
+
+| Property | Description |
+|----------|-------------|
+| `rowField` | Column to use as row labels (default: `"account"`). |
+| `columnField` | Column whose values become column headers (default: `"year_month"`). |
+| `valueField` | Column containing the numeric values (default: `"amount"`). |
+| `formatColumn` | Header format: `"monthYear"` ("Jan 2026") or `"yearMonth"` ("2026-01"). |
+| `sortRowsBy` | `"total_desc"` (default), `"total_asc"`, `"label_asc"`, `"label_desc"`. |
+
+When `columnField` holds `YYYY-MM` values, the pivot generates per-column metadata (`columnMeta.rawValue`, `columnMeta.startDate`, `columnMeta.endDate`) available in pivot click-through templates (see [Click-Through Links](#click-through-links)).
+
+### Budget transforms
+
+`joinBudgetActual`, `joinByPeriod`, `runningSum`, and `envelopeRollover` pair a `sql` step (actuals) with a `compute` step (`budget_for_range`) to build budget dashboards. `joinBudgetActual` in **remainder mode** (set `config.totalAccount`) adds synthetic "Unbudgeted" and "Total" rows for catch-all/zero-based budgeting. See the [Budgets guide](/views/budgets/) for the styles and the seeded demo dashboards that use each.
+
+---
+
+## Compute steps
+
+A `compute` step calls a vetted server-side function that returns values SQL can't compute directly. The catalog is fixed and currently centers on budgeting:
+
+- **`budget_for_range`** — resolves budgets from `custom "budget"` directives over a date range (or per calendar month with `groupBy: "period"`). Returns `[{ account, currency, budget }]`. Pair it with a `sql` actuals step and a budget transform.
+
+```json
+{ "id": "budgets", "kind": "compute", "fn": "budget_for_range",
+  "args": { "from": "2026-01-01", "to": "2026-12-31", "currency": "USD" } }
+```
+
+`args` are small scalars (dates, a currency, an account). Bulk data is read by the function on the server — don't pass large rowsets into `args`. When the AI assistant is configured it lists the available functions with `get_compute_functions`.
+
+---
+
+## Dashboard shared steps
+
+A dashboard may declare a top-level `steps` array (the same step kinds, but no `output`). These run **once per dashboard render** and their outputs are available to every widget via `{{dashboard.steps.<id>}}`. Use them to compute an expensive value once and feed several widgets — for example one projection shared by a line chart, a KPI, and a table.
+
 ```json
 {
-  "type": "pivot",
-  "rowField": "account",
-  "columnField": "year_month",
-  "valueField": "amount",
-  "formatColumn": "monthYear",
-  "sortRowsBy": "total_desc"
+  "schemaVersion": 2,
+  "id": "net-worth-projection",
+  "title": "Net Worth Projection",
+  "parameters": [ /* horizonYears, growthRate */ ],
+  "steps": [
+    { "id": "projection", "kind": "compute", "fn": "project_balances",
+      "args": { "years": "{{params.horizonYears}}", "growth": "{{params.growthRate}}" } }
+  ],
+  "layout": { "columns": 12, "widgets": [ /* line chart, KPI, table */ ] },
+  "widgets": [ /* each references {{dashboard.steps.projection}} */ ]
 }
 ```
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `rowField` | string | Column to use as row labels (default: `"account"`). |
-| `columnField` | string | Column to use as column headers (default: `"year_month"`). |
-| `valueField` | string | Column containing the numeric values (default: `"amount"`). |
-| `formatColumn` | string | Column header format: `"monthYear"` (e.g., "Jan 2026") or `"yearMonth"` (e.g., "2026-01"). |
-| `sortRowsBy` | string | Row sort order. `total` sorts by the sum of all values across columns for each row; `label` sorts alphabetically by the row label. Options: `"total_desc"`, `"total_asc"`, `"label_asc"`, `"label_desc"`. Default: `"total_desc"`. |
-
-The pivot transform is required when using the `pivot` visualization type. It restructures flat query results (one row per account+month) into a cross-tabulation structure.
-
-When `columnField` contains `YYYY-MM` values (e.g., `"2026-01"`, `"2026-02"`), the pivot transform automatically generates **column metadata** for each column:
-- `columnMeta.rawValue` — the original column key (e.g., `"2026-01"`)
-- `columnMeta.startDate` — the first day of that month (e.g., `"2026-01-01"`)
-- `columnMeta.endDate` — the last day of that month (e.g., `"2026-01-31"`)
-
-This metadata is available in pivot table click-through link templates (see [Click-Through Links](#click-through-links)).
+Shared steps are parameterized by **dashboard** parameters only. If a widget needs its own parameterization of a computation, it uses its own widget step instead.
 
 ---
 
@@ -491,14 +580,17 @@ Displays a single value prominently, with an optional icon and color.
 
 #### Single-value KPI
 
-The query returns one row with a numeric column. Use `transform: "firstRow"` and `valueField` to extract the value.
+The SQL step returns one row with a numeric column. A `firstRow` transform reduces it to a single object, and `valueField` extracts the value.
 
 ```json
 {
   "id": "transaction-count",
   "title": "Transaction Count",
-  "query": "SELECT COUNT(DISTINCT transaction_id) AS value FROM postings WHERE year = :year",
-  "transform": "firstRow",
+  "steps": [
+    { "id": "rows", "kind": "sql", "query": "SELECT COUNT(DISTINCT transaction_id) AS value FROM postings WHERE year = :year" },
+    { "id": "out", "kind": "transform", "fn": "firstRow", "inputs": ["{{steps.rows}}"] }
+  ],
+  "output": "out",
   "visualization": {
     "type": "kpi",
     "icon": "#",
@@ -517,7 +609,10 @@ The query returns one row per currency. Each currency is displayed stacked verti
 {
   "id": "total-income",
   "title": "Total Income",
-  "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year GROUP BY currency HAVING amount != 0",
+  "steps": [
+    { "id": "rows", "kind": "sql", "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year GROUP BY currency HAVING amount != 0" }
+  ],
+  "output": "rows",
   "visualization": {
     "type": "kpi",
     "icon": "↑",
@@ -533,7 +628,10 @@ If your query uses different column names than `currency` and `amount`, specify 
 {
   "id": "assets-by-currency",
   "title": "Total Assets",
-  "query": "SELECT currency AS cur, SUM(CAST(amount AS REAL)) AS total FROM postings WHERE account_type = 'Assets' GROUP BY currency HAVING total != 0",
+  "steps": [
+    { "id": "rows", "kind": "sql", "query": "SELECT currency AS cur, SUM(CAST(amount AS REAL)) AS total FROM postings WHERE account_type = 'Assets' GROUP BY currency HAVING total != 0" }
+  ],
+  "output": "rows",
   "visualization": {
     "type": "kpi",
     "icon": "↑",
@@ -553,8 +651,11 @@ The query includes a trend column (typically a percentage change vs a prior peri
 {
   "id": "monthly-expenses",
   "title": "This Month's Expenses",
-  "query": "SELECT SUM(CAST(amount AS REAL)) AS value, ROUND((SUM(CAST(amount AS REAL)) - prev.total) * 100.0 / prev.total, 1) AS trend FROM postings, (SELECT SUM(CAST(amount AS REAL)) AS total FROM postings WHERE account_type = 'Expenses' AND year_month = strftime('%Y-%m', date('now', '-1 month'))) prev WHERE account_type = 'Expenses' AND year_month = strftime('%Y-%m', 'now')",
-  "transform": "firstRow",
+  "steps": [
+    { "id": "rows", "kind": "sql", "query": "SELECT SUM(CAST(amount AS REAL)) AS value, ROUND((SUM(CAST(amount AS REAL)) - prev.total) * 100.0 / prev.total, 1) AS trend FROM postings, (SELECT SUM(CAST(amount AS REAL)) AS total FROM postings WHERE account_type = 'Expenses' AND year_month = strftime('%Y-%m', date('now', '-1 month'))) prev WHERE account_type = 'Expenses' AND year_month = strftime('%Y-%m', 'now')" },
+    { "id": "out", "kind": "transform", "fn": "firstRow", "inputs": ["{{steps.rows}}"] }
+  ],
+  "output": "out",
   "visualization": {
     "type": "kpi",
     "icon": "↓",
@@ -577,7 +678,10 @@ Values in `{{...}}` are template variables that get replaced at click time. For 
 {
   "id": "total-expenses",
   "title": "Total Expenses",
-  "query": "SELECT currency, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year GROUP BY currency HAVING amount != 0",
+  "steps": [
+    { "id": "rows", "kind": "sql", "query": "SELECT currency, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year GROUP BY currency HAVING amount != 0" }
+  ],
+  "output": "rows",
   "visualization": {
     "type": "kpi",
     "icon": "↓",
@@ -1082,15 +1186,12 @@ A complete pivot widget requires both a pivot transform and a pivot visualizatio
       "optionsFrom": "currencies"
     }
   ],
-  "query": "SELECT account, year_month, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year AND currency = :currency GROUP BY account, year_month ORDER BY account, year_month",
-  "transform": {
-    "type": "pivot",
-    "rowField": "account",
-    "columnField": "year_month",
-    "valueField": "amount",
-    "formatColumn": "monthYear",
-    "sortRowsBy": "total_desc"
-  },
+  "steps": [
+    { "id": "rows", "kind": "sql", "query": "SELECT account, year_month, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year AND currency = :currency GROUP BY account, year_month ORDER BY account, year_month" },
+    { "id": "pivoted", "kind": "transform", "fn": "pivot", "inputs": ["{{steps.rows}}"],
+      "config": { "rowField": "account", "columnField": "year_month", "valueField": "amount", "formatColumn": "monthYear", "sortRowsBy": "total_desc" } }
+  ],
+  "output": "pivoted",
   "visualization": {
     "type": "pivot",
     "rowHeader": "Account",
@@ -1243,593 +1344,118 @@ For charts with multiple series, you can specify different click-through links f
 
 ## Complete Examples
 
-### Example: Financial Overview Dashboard
+The bundled dashboards under `config/recipes/dashboards/` are the living, validated reference — open any of them in **Settings → Dashboards** to see a full recipe in the current format. The examples below show the shapes you'll use most.
 
-A dashboard showing net worth, total assets, total liabilities, and breakdown pie charts.
+### Example: a simple multi-widget dashboard
+
+Three KPI cards over one chart. Each widget is a single `sql` step; the KPIs reduce to one row with a `firstRow` transform, the chart points `output` straight at its SQL step.
 
 ```json
 {
-  "id": "financial-overview",
-  "title": "Financial Overview",
-  "description": "Overview of your financial status with net worth, assets, liabilities, and breakdowns",
+  "schemaVersion": 2,
+  "id": "overview",
+  "title": "Overview",
+  "parameters": [
+    { "name": "currency", "label": "Currency", "type": "select",
+      "default": { "$gen": "defaultCurrency" }, "optionsFrom": "currencies" }
+  ],
   "layout": {
-    "columns": 12,
-    "gap": "1.5rem",
-    "rowHeight": "140px",
+    "columns": 12, "gap": "1.5rem", "rowHeight": "140px",
     "widgets": [
       { "widgetId": "net-worth", "gridArea": "1 / 1 / 2 / 5" },
-      { "widgetId": "total-assets", "gridArea": "1 / 5 / 2 / 9" },
-      { "widgetId": "total-liabilities", "gridArea": "1 / 9 / 2 / 13" },
-      { "widgetId": "assets-pie", "gridArea": "2 / 1 / 5 / 7" },
-      { "widgetId": "liabilities-pie", "gridArea": "2 / 7 / 5 / 13" }
+      { "widgetId": "assets", "gridArea": "1 / 5 / 2 / 9" },
+      { "widgetId": "liabilities", "gridArea": "1 / 9 / 2 / 13" },
+      { "widgetId": "assets-pie", "gridArea": "2 / 1 / 5 / 13" }
     ]
   },
   "widgets": [
     {
-      "id": "net-worth",
-      "title": "Net Worth",
-      "query": "SELECT currency, SUM(CASE WHEN account_type IN ('Assets', 'Liabilities') THEN CAST(amount AS REAL) ELSE 0 END) AS amount FROM postings GROUP BY currency HAVING amount != 0 ORDER BY currency",
-      "visualization": {
-        "type": "kpi",
-        "icon": "$",
-        "multiCurrency": true
-      }
-    },
-    {
-      "id": "total-assets",
-      "title": "Total Assets",
-      "query": "SELECT currency, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Assets' GROUP BY currency HAVING amount != 0 ORDER BY currency",
-      "visualization": {
-        "type": "kpi",
-        "icon": "↑",
-        "iconColor": "green",
-        "multiCurrency": true
-      }
-    },
-    {
-      "id": "total-liabilities",
-      "title": "Total Liabilities",
-      "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Liabilities' GROUP BY currency HAVING amount != 0 ORDER BY currency",
-      "visualization": {
-        "type": "kpi",
-        "icon": "↓",
-        "iconColor": "red",
-        "multiCurrency": true
-      }
-    },
-    {
-      "id": "assets-pie",
-      "title": "Assets Breakdown",
-      "helpText": "Only shows accounts with a positive balance",
-      "parameters": [
-        {
-          "name": "currency",
-          "label": "Currency",
-          "type": "select",
-          "default": { "$gen": "defaultCurrency" },
-          "optionsFrom": "currencies"
-        }
+      "id": "net-worth", "title": "Net Worth",
+      "steps": [
+        { "id": "rows", "kind": "sql", "query": "SELECT currency, SUM(CASE WHEN account_type IN ('Assets','Liabilities') THEN CAST(amount AS REAL) ELSE 0 END) AS amount FROM postings WHERE currency = :currency GROUP BY currency HAVING amount != 0" },
+        { "id": "out", "kind": "transform", "fn": "firstRow", "inputs": ["{{steps.rows}}"] }
       ],
-      "query": "SELECT CASE WHEN account LIKE 'Assets:Liquid:%' THEN REPLACE(account, 'Assets:Liquid:', '') WHEN account LIKE 'Assets:Investments:%' THEN REPLACE(account, 'Assets:Investments:', '') ELSE REPLACE(account, 'Assets:', '') END AS name, account, ROUND(SUM(CAST(amount AS REAL)), 2) AS value FROM postings WHERE account_type = 'Assets' AND currency = :currency GROUP BY account HAVING value > 0 ORDER BY value DESC",
-      "visualization": {
-        "type": "chart",
-        "chartType": "pie",
-        "options": {
-          "tooltip": { "trigger": "item" },
-          "legend": { "show": false },
-          "series": [
-            {
-              "type": "pie",
-              "radius": ["35%", "65%"],
-              "encode": { "itemName": "name", "value": "value" },
-              "label": { "show": true, "formatter": "{b}", "minShowLabelAngle": 15 },
-              "labelLine": { "show": true, "length": 8, "length2": 8 },
-              "emphasis": {
-                "label": { "show": true, "fontWeight": "bold", "formatter": "{b}\n{d}%" }
-              }
-            }
-          ]
-        },
-        "clickLink": {
-          "name": "transactions",
-          "query": { "accountContains": "{{data.account}}" }
-        }
-      }
+      "output": "out",
+      "visualization": { "type": "kpi", "icon": "$", "multiCurrency": true }
     },
     {
-      "id": "liabilities-pie",
-      "title": "Liabilities Breakdown",
-      "helpText": "Only shows accounts with outstanding balances",
-      "parameters": [
-        {
-          "name": "currency",
-          "label": "Currency",
-          "type": "select",
-          "default": { "$gen": "defaultCurrency" },
-          "optionsFrom": "currencies"
-        }
+      "id": "assets", "title": "Total Assets",
+      "steps": [
+        { "id": "rows", "kind": "sql", "query": "SELECT currency, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Assets' AND currency = :currency GROUP BY currency HAVING amount != 0" },
+        { "id": "out", "kind": "transform", "fn": "firstRow", "inputs": ["{{steps.rows}}"] }
       ],
-      "query": "SELECT REPLACE(account, 'Liabilities:', '') AS name, account, ROUND(SUM(CAST(amount AS REAL)) * -1, 2) AS value FROM postings WHERE account_type = 'Liabilities' AND currency = :currency GROUP BY account HAVING value > 0 ORDER BY value DESC",
+      "output": "out",
+      "visualization": { "type": "kpi", "icon": "↑", "iconColor": "green", "multiCurrency": true }
+    },
+    {
+      "id": "liabilities", "title": "Total Liabilities",
+      "steps": [
+        { "id": "rows", "kind": "sql", "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Liabilities' AND currency = :currency GROUP BY currency HAVING amount != 0" },
+        { "id": "out", "kind": "transform", "fn": "firstRow", "inputs": ["{{steps.rows}}"] }
+      ],
+      "output": "out",
+      "visualization": { "type": "kpi", "icon": "↓", "iconColor": "red", "multiCurrency": true }
+    },
+    {
+      "id": "assets-pie", "title": "Assets Breakdown",
+      "steps": [
+        { "id": "rows", "kind": "sql", "query": "SELECT REPLACE(account, 'Assets:', '') AS name, account, ROUND(SUM(CAST(amount AS REAL)), 2) AS value FROM postings WHERE account_type = 'Assets' AND currency = :currency GROUP BY account HAVING value > 0 ORDER BY value DESC" }
+      ],
+      "output": "rows",
       "visualization": {
-        "type": "chart",
-        "chartType": "pie",
-        "options": {
-          "tooltip": { "trigger": "item" },
-          "legend": { "show": false },
-          "series": [
-            {
-              "type": "pie",
-              "radius": ["35%", "65%"],
-              "encode": { "itemName": "name", "value": "value" },
-              "label": { "show": true, "formatter": "{b}", "minShowLabelAngle": 15 },
-              "labelLine": { "show": true, "length": 8, "length2": 8 },
-              "emphasis": {
-                "label": { "show": true, "fontWeight": "bold", "formatter": "{b}\n{d}%" }
-              }
-            }
-          ]
-        },
-        "clickLink": {
-          "name": "transactions",
-          "query": { "accountContains": "{{data.account}}" }
-        }
+        "type": "chart", "chartType": "pie",
+        "options": { "series": [{ "type": "pie", "radius": ["35%", "65%"], "encode": { "itemName": "name", "value": "value" } }] }
       }
     }
   ]
 }
 ```
 
-**What this demonstrates:**
-- Three multi-currency KPI widgets across the top row
-- Two half-width pie charts in the second section
-- Widget-level currency parameter on pie charts (not shared at dashboard level, since KPIs show all currencies)
-- `CASE WHEN` to strip `Assets:Liquid:` and `Assets:Investments:` prefixes for shorter, unambiguous display names
-- Liabilities multiplied by `-1` to show as positive values in pie chart
-- `HAVING value > 0` to exclude negative/zero entries from pie charts
-- `minShowLabelAngle` to hide labels on tiny slices, preventing overlap
-- `emphasis` label to show name + percentage on hover
-- `legend: { "show": false }` since slice labels provide sufficient context
-- Click-through links using `{{data.account}}`
+### Example: budget vs actual (sql + compute + transform)
 
-### Example: Year Summary Dashboard
-
-An annual overview with income, expenses, savings KPIs, a monthly bar chart, and an expense pivot table.
+This is the canonical multi-source widget: a `sql` step for actuals, a `compute` step for budgets, and a `transform` that merges them into a variance table. The `joinBudgetActual` transform rolls actuals up to each budgeted account inclusively and emits `budget`, `actual`, `remaining`, and `pctUsed`.
 
 ```json
 {
-  "id": "year-summary",
-  "title": "Year Summary",
-  "description": "Annual financial summary with income, expenses, and savings breakdown",
+  "schemaVersion": 2,
+  "id": "budget-vs-actual",
+  "title": "Budget vs Actual",
   "parameters": [
-    {
-      "name": "year",
-      "label": "Year",
-      "type": "select",
-      "default": { "$gen": "currentYear" },
-      "optionsFrom": "years"
-    }
+    { "name": "monthStart", "label": "From", "type": "date", "default": { "$gen": "startOfMonth" } },
+    { "name": "monthEnd", "label": "To", "type": "date", "default": { "$gen": "endOfMonth" } },
+    { "name": "currency", "label": "Currency", "type": "select",
+      "default": { "$gen": "defaultCurrency" }, "optionsFrom": "currencies" }
   ],
-  "layout": {
-    "columns": 12,
-    "gap": "1.5rem",
-    "rowHeight": "140px",
-    "widgets": [
-      { "widgetId": "total-income", "gridArea": "1 / 1 / 2 / 5" },
-      { "widgetId": "total-expenses", "gridArea": "1 / 5 / 2 / 9" },
-      { "widgetId": "savings", "gridArea": "1 / 9 / 2 / 13" },
-      { "widgetId": "monthly-income-expenses", "gridArea": "2 / 1 / 5 / 13" },
-      { "widgetId": "expenses-pivot-table", "gridArea": "5 / 1 / 9 / 13" }
-    ]
-  },
+  "layout": { "columns": 12, "rowHeight": "320px", "widgets": [{ "widgetId": "variance", "gridArea": "1 / 1 / 2 / 13" }] },
   "widgets": [
     {
-      "id": "total-income",
-      "title": "Total Income",
-      "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year GROUP BY currency HAVING amount != 0 ORDER BY currency",
-      "visualization": {
-        "type": "kpi",
-        "icon": "↑",
-        "iconColor": "green",
-        "multiCurrency": true,
-        "clickLink": {
-          "name": "transactions",
-          "query": {
-            "accountContains": "Income",
-            "dateFrom": "{{dateFrom}}",
-            "dateTo": "{{dateTo}}"
-          }
-        }
-      }
-    },
-    {
-      "id": "total-expenses",
-      "title": "Total Expenses",
-      "query": "SELECT currency, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year GROUP BY currency HAVING amount != 0 ORDER BY currency",
-      "visualization": {
-        "type": "kpi",
-        "icon": "↓",
-        "iconColor": "red",
-        "multiCurrency": true,
-        "clickLink": {
-          "name": "transactions",
-          "query": {
-            "accountContains": "Expenses",
-            "dateFrom": "{{dateFrom}}",
-            "dateTo": "{{dateTo}}"
-          }
-        }
-      }
-    },
-    {
-      "id": "savings",
-      "title": "Savings",
-      "query": "SELECT currency, (SUM(CASE WHEN account_type = 'Income' THEN -CAST(amount AS REAL) ELSE 0 END)) - (SUM(CASE WHEN account_type = 'Expenses' THEN CAST(amount AS REAL) ELSE 0 END)) AS amount FROM postings WHERE year = :year AND account_type IN ('Income', 'Expenses') GROUP BY currency HAVING amount != 0 ORDER BY currency",
-      "visualization": {
-        "type": "kpi",
-        "icon": "$",
-        "iconColor": "blue",
-        "multiCurrency": true
-      }
-    },
-    {
-      "id": "monthly-income-expenses",
-      "title": "Monthly Income & Expenses",
-      "description": "Monthly comparison of income, expenses, and savings",
-      "parameters": [
-        {
-          "name": "currency",
-          "label": "Currency",
-          "type": "select",
-          "default": { "$gen": "defaultCurrency" },
-          "optionsFrom": "currencies"
-        }
+      "id": "variance",
+      "title": "This Month",
+      "steps": [
+        { "id": "actuals", "kind": "sql",
+          "query": "SELECT account, currency, SUM(CAST(amount AS REAL)) AS actual FROM postings WHERE account_type = 'Expenses' AND transaction_date BETWEEN :monthStart AND :monthEnd AND currency = :currency GROUP BY account, currency" },
+        { "id": "budgets", "kind": "compute", "fn": "budget_for_range",
+          "args": { "from": "{{params.monthStart}}", "to": "{{params.monthEnd}}", "currency": "{{params.currency}}" } },
+        { "id": "out", "kind": "transform", "fn": "joinBudgetActual",
+          "inputs": ["{{steps.budgets}}", "{{steps.actuals}}"] }
       ],
-      "query": "SELECT year_month, SUBSTR('JanFebMarAprMayJunJulAugSepOctNovDec', (CAST(strftime('%m', year_month || '-01') AS INTEGER) - 1) * 3 + 1, 3) AS month_label, year_month || '-01' AS dateFrom, date(year_month || '-01', '+1 month', '-1 day') AS dateTo, SUM(CASE WHEN account_type = 'Income' THEN -CAST(amount AS REAL) ELSE 0 END) AS income, SUM(CASE WHEN account_type = 'Expenses' THEN CAST(amount AS REAL) ELSE 0 END) AS expenses, SUM(CASE WHEN account_type = 'Income' THEN -CAST(amount AS REAL) ELSE 0 END) - SUM(CASE WHEN account_type = 'Expenses' THEN CAST(amount AS REAL) ELSE 0 END) AS savings FROM postings WHERE year = :year AND currency = :currency AND account_type IN ('Income', 'Expenses') GROUP BY year_month ORDER BY year_month",
+      "output": "out",
       "visualization": {
-        "type": "chart",
-        "chartType": "bar",
-        "seriesLabelFormat": "compact",
-        "yAxisLabelFormat": "compact",
-        "seriesClickLinks": {
-          "Income": {
-            "name": "transactions",
-            "query": {
-              "accountContains": "Income",
-              "dateFrom": "{{data.dateFrom}}",
-              "dateTo": "{{data.dateTo}}"
-            }
-          },
-          "Expenses": {
-            "name": "transactions",
-            "query": {
-              "accountContains": "Expenses",
-              "dateFrom": "{{data.dateFrom}}",
-              "dateTo": "{{data.dateTo}}"
-            }
-          },
-          "Savings": null
-        },
-        "options": {
-          "legend": { "data": ["Expenses", "Income", "Savings"], "top": 0, "left": "left", "itemGap": 20 },
-          "grid": { "top": 40, "bottom": 40, "left": 50, "right": 20 },
-          "xAxis": { "type": "category" },
-          "yAxis": {
-            "type": "value",
-            "splitLine": { "lineStyle": { "type": "dashed", "opacity": 0.6 } }
-          },
-          "series": [
-            {
-              "name": "Expenses",
-              "type": "bar",
-              "encode": { "x": "month_label", "y": "expenses" },
-              "itemStyle": { "color": "#E8A951" },
-              "barGap": "10%",
-              "label": { "show": true, "position": "top", "fontSize": 10 }
-            },
-            {
-              "name": "Income",
-              "type": "bar",
-              "encode": { "x": "month_label", "y": "income" },
-              "itemStyle": { "color": "#7DD3C0" },
-              "label": { "show": true, "position": "top", "fontSize": 10 }
-            },
-            {
-              "name": "Savings",
-              "type": "bar",
-              "encode": { "x": "month_label", "y": "savings" },
-              "itemStyle": { "color": "#7B83AD" },
-              "label": { "show": true, "position": "top", "fontSize": 10 }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "id": "expenses-pivot-table",
-      "title": "Expenses Pivot Table",
-      "description": "Monthly breakdown of expenses by account",
-      "parameters": [
-        {
-          "name": "currency",
-          "label": "Currency",
-          "type": "select",
-          "default": { "$gen": "defaultCurrency" },
-          "optionsFrom": "currencies"
-        }
-      ],
-      "query": "SELECT account, year_month, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year AND currency = :currency GROUP BY account, year_month ORDER BY account, year_month",
-      "transform": {
-        "type": "pivot",
-        "rowField": "account",
-        "columnField": "year_month",
-        "valueField": "amount",
-        "formatColumn": "monthYear",
-        "sortRowsBy": "total_desc"
-      },
-      "visualization": {
-        "type": "pivot",
-        "rowHeader": "Account",
-        "showRowTotals": true,
-        "showColumnTotals": true,
-        "valueLink": {
-          "name": "transactions",
-          "query": {
-            "accountContains": "{{row.label}}",
-            "dateFrom": "{{columnMeta.startDate}}",
-            "dateTo": "{{columnMeta.endDate}}"
-          }
-        }
+        "type": "table",
+        "columns": [
+          { "key": "account", "label": "Account", "format": "accountName2" },
+          { "key": "budget", "label": "Budget", "format": "currency", "align": "right" },
+          { "key": "actual", "label": "Actual", "format": "currency", "align": "right" },
+          { "key": "remaining", "label": "Remaining", "format": "signedCurrency", "align": "right" },
+          { "key": "pctUsed", "label": "% Used", "format": "percent", "align": "right" }
+        ]
       }
     }
   ]
 }
 ```
 
-**What this demonstrates:**
-- Dashboard-level `year` parameter shared by all widgets
-- Widget-level `currency` parameter on the chart and pivot (KPIs show all currencies)
-- Multi-series bar chart with per-series click links (`seriesClickLinks`)
-- Savings series with click disabled (`null`)
-- Computed `dateFrom`/`dateTo` columns in SQL for click-through links
-- Pivot table with month-formatted columns and cell-level click-through links
-- `{{dateFrom}}`/`{{dateTo}}` shorthand in KPI click links (auto-computed from year parameter)
-
-### Example: Month Summary Dashboard
-
-A monthly breakdown with KPIs and an expense treemap. This dashboard mixes inline widgets with a reference to a standalone widget recipe.
-
-```json
-{
-  "id": "month-summary",
-  "title": "Month Summary",
-  "description": "Monthly financial summary with income, expenses, and expense treemap breakdown",
-  "parameters": [
-    {
-      "name": "year",
-      "label": "Year",
-      "type": "select",
-      "default": { "$gen": "currentYear" },
-      "optionsFrom": "years"
-    },
-    {
-      "name": "month",
-      "label": "Month",
-      "type": "select",
-      "default": { "$gen": "currentMonth" },
-      "options": { "$gen": "monthOptions" }
-    }
-  ],
-  "layout": {
-    "columns": 12,
-    "gap": "1.5rem",
-    "rowHeight": "140px",
-    "widgets": [
-      { "widgetId": "monthly-income", "gridArea": "1 / 1 / 2 / 5" },
-      { "widgetId": "monthly-expenses", "gridArea": "1 / 5 / 2 / 9" },
-      { "widgetId": "monthly-savings", "gridArea": "1 / 9 / 2 / 13" },
-      { "widgetId": "expense-treemap", "gridArea": "2 / 1 / 6 / 13" }
-    ]
-  },
-  "widgets": [
-    {
-      "id": "monthly-income",
-      "title": "Total Income",
-      "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year AND CAST(strftime('%m', transaction_date) AS INTEGER) = :month GROUP BY currency HAVING amount != 0 ORDER BY currency",
-      "visualization": {
-        "type": "kpi",
-        "icon": "↑",
-        "iconColor": "green",
-        "multiCurrency": true,
-        "clickLink": {
-          "name": "transactions",
-          "query": {
-            "accountContains": "Income",
-            "dateFrom": "{{dateFrom}}",
-            "dateTo": "{{dateTo}}"
-          }
-        }
-      }
-    },
-    {
-      "id": "monthly-expenses",
-      "title": "Total Expenses",
-      "query": "SELECT currency, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year AND CAST(strftime('%m', transaction_date) AS INTEGER) = :month GROUP BY currency HAVING amount != 0 ORDER BY currency",
-      "visualization": {
-        "type": "kpi",
-        "icon": "↓",
-        "iconColor": "red",
-        "multiCurrency": true,
-        "clickLink": {
-          "name": "transactions",
-          "query": {
-            "accountContains": "Expenses",
-            "dateFrom": "{{dateFrom}}",
-            "dateTo": "{{dateTo}}"
-          }
-        }
-      }
-    },
-    {
-      "id": "monthly-savings",
-      "title": "Savings",
-      "query": "SELECT currency, (SUM(CASE WHEN account_type = 'Income' THEN -CAST(amount AS REAL) ELSE 0 END)) - (SUM(CASE WHEN account_type = 'Expenses' THEN CAST(amount AS REAL) ELSE 0 END)) AS amount FROM postings WHERE year = :year AND CAST(strftime('%m', transaction_date) AS INTEGER) = :month AND account_type IN ('Income', 'Expenses') GROUP BY currency HAVING amount != 0 ORDER BY currency",
-      "visualization": {
-        "type": "kpi",
-        "icon": "$",
-        "iconColor": "blue",
-        "multiCurrency": true
-      }
-    }
-  ]
-}
-```
-
-**What this demonstrates:**
-- Dashboard-level `year` and `month` parameters (shared by all widgets)
-- **Mixing inline and standalone widgets** — the three KPI widgets are defined inline, while `expense-treemap` is referenced by ID from the standalone [Expense Treemap widget recipe](#example-expense-treemap-widget). It is not defined in this dashboard's `widgets` array — it is resolved via [widget resolution](#widget-resolution) from `widgets/expense-treemap.json`.
-- The dashboard's `year` and `month` parameters cascade to the standalone treemap widget, overriding its own defaults. The treemap's `currency` parameter (not provided by the dashboard) appears as a widget-level control in the treemap header.
-- Month filtering with `CAST(strftime('%m', transaction_date) AS INTEGER) = :month`
-- `{{dateFrom}}`/`{{dateTo}}` shorthand in KPI click links (auto-computed from year + month parameters)
-
----
-
-## Widget Recipes
-
-Widget recipes are standalone JSON files in `config/recipes/widgets/` that define a single widget. They have the same structure as inline widget definitions (see [Widget Structure](#widget-structure)) — the only difference is that they live in their own file rather than inside a dashboard's `widgets` array.
-
-Any `*.json` file in `config/recipes/widgets/` is auto-discovered. Dashboards can reference standalone widget recipes by ID in their layout — see [Widget Resolution](#widget-resolution) for details.
-
-### Example: Expense Treemap Widget
-
-A treemap showing expense categories for a given month, with click-through to transactions.
-
-```json
-{
-  "id": "expense-treemap",
-  "title": "Expense Treemap",
-  "description": "Treemap visualization of expenses by account for a given month",
-  "helpText": "Only shows categories with net positive expenses",
-  "parameters": [
-    {
-      "name": "year",
-      "label": "Year",
-      "type": "select",
-      "default": { "$gen": "currentYear" },
-      "optionsFrom": "years"
-    },
-    {
-      "name": "month",
-      "label": "Month",
-      "type": "select",
-      "default": { "$gen": "currentMonth" },
-      "options": { "$gen": "monthOptions" }
-    },
-    {
-      "name": "currency",
-      "label": "Currency",
-      "type": "select",
-      "default": { "$gen": "defaultCurrency" },
-      "optionsFrom": "currencies"
-    }
-  ],
-  "query": "SELECT REPLACE(account, 'Expenses:', '') AS name, account, SUM(CAST(amount AS REAL)) AS value, :year || '-' || printf('%02d', :month) || '-01' AS dateFrom, date(:year || '-' || printf('%02d', :month) || '-01', '+1 month', '-1 day') AS dateTo FROM postings WHERE account_type = 'Expenses' AND year = :year AND CAST(strftime('%m', transaction_date) AS INTEGER) = :month AND currency = :currency GROUP BY account HAVING value > 0 ORDER BY value DESC",
-  "visualization": {
-    "type": "chart",
-    "chartType": "treemap",
-    "options": {
-      "tooltip": { "trigger": "item" },
-      "series": [
-        {
-          "type": "treemap",
-          "roam": false,
-          "breadcrumb": { "show": false },
-          "label": { "show": true, "formatter": "{b}" },
-          "itemStyle": { "borderColor": "#fff", "borderWidth": 2, "gapWidth": 2 },
-          "levels": [
-            {
-              "itemStyle": { "borderColor": "#555", "borderWidth": 2, "gapWidth": 2 }
-            }
-          ]
-        }
-      ]
-    },
-    "clickLink": {
-      "name": "transactions",
-      "query": {
-        "accountContains": "{{data.account}}",
-        "dateFrom": "{{data.dateFrom}}",
-        "dateTo": "{{data.dateTo}}"
-      }
-    }
-  }
-}
-```
-
-**What this demonstrates:**
-- Three parameters: year using `optionsFrom: "years"`, month using `$gen` generator, currency using `optionsFrom: "currencies"`
-- `optionsFrom` to dynamically load year and currency options from the ledger
-- `REPLACE(account, 'Expenses:', '')` for cleaner treemap labels
-- Computed `dateFrom`/`dateTo` columns in SQL for click-through links
-- Treemap-specific rules: `name`/`value` columns, no `encode`, `HAVING value > 0`
-
-### Example: Top Spending Categories Widget
-
-A horizontal bar chart of the highest expense accounts.
-
-```json
-{
-  "id": "top-spending-categories",
-  "title": "Top Spending Categories",
-  "description": "Highest expense accounts by total amount",
-  "parameters": [
-    {
-      "name": "limit",
-      "label": "Show Top",
-      "type": "number",
-      "default": 10,
-      "min": 5,
-      "max": 20
-    },
-    {
-      "name": "currency",
-      "label": "Currency",
-      "type": "select",
-      "default": { "$gen": "defaultCurrency" },
-      "optionsFrom": "currencies"
-    }
-  ],
-  "query": "SELECT account, SUM(CAST(amount AS REAL)) AS total FROM postings WHERE account_type = 'Expenses' AND currency = :currency GROUP BY account ORDER BY total DESC LIMIT :limit",
-  "visualization": {
-    "type": "chart",
-    "chartType": "bar",
-    "seriesLabelFormat": "currency",
-    "xAxisLabelFormat": "compact",
-    "yAxisLabelFormat": "accountName",
-    "options": {
-      "grid": { "left": 120, "right": 24, "top": 16, "bottom": 16 },
-      "xAxis": { "type": "value" },
-      "yAxis": { "type": "category", "inverse": true, "axisLabel": { "width": 100, "overflow": "truncate" } },
-      "series": [
-        {
-          "name": "Amount",
-          "type": "bar",
-          "encode": { "x": "total", "y": "account" },
-          "itemStyle": { "color": "#6366f1" },
-          "label": { "show": true, "position": "right" }
-        }
-      ]
-    }
-  }
-}
-```
-
-**What this demonstrates:**
-- A `number` parameter with `min`/`max` constraints
-- A `select` parameter with `optionsFrom` to dynamically populate from ledger currencies
-- Horizontal bar chart (value on X, category on Y)
-- `ORDER BY total DESC` with `"inverse": true` on yAxis so the highest spending categories appear at the top of the chart (ECharts renders category axes bottom-to-top by default)
-- `accountName` format on Y-axis labels to show only the last segment of account paths
-- `currency` format on series labels for formatted amounts
+The bundled `budget-this-month`, `budget-zero-based`, `budget-burndown`, and `budget-envelopes` dashboards build on this pattern with the other budget transforms — see the [Budgets guide](/views/budgets/).
 
 ---
 
@@ -1838,37 +1464,35 @@ A horizontal bar chart of the highest expense accounts.
 Recipes are validated when saved. Here's a summary of the validation rules:
 
 ### Dashboard Validation
+- `schemaVersion`: Required, must be `2`.
 - `id`: Required, non-empty, must match `^[a-z0-9][a-z0-9-]*[a-z0-9]$`.
 - `title`: Required, non-empty string.
 - `layout`: Required object with `columns` (number), `widgets` (array).
 - Each layout widget must have `widgetId` (string) and `gridArea` (string).
-- Every `widgetId` must match an `id` in the `widgets` array.
+- `widgets`: Required, non-empty. Every `widgetId` in the layout must match an `id` in the `widgets` array (widgets are inline only).
 
 ### Widget Validation
 - `id`: Required, non-empty, must match the same pattern as dashboard IDs.
 - `title`: Required, non-empty string.
-- `query`: Required, non-empty string. Must be a SELECT statement.
+- `steps`: Required, non-empty. Each step has a unique lowercase-hyphen `id` and a `kind` (`sql`/`compute`/`transform`).
+  - `sql` steps need a non-empty `query` and may not contain `{{...}}` references.
+  - `compute` steps need an `fn`; `transform` steps need an `fn` and non-empty `inputs`.
+  - `{{steps.x}}` references must resolve to a declared step, and the step graph must be acyclic.
+- `output`: Required. Must name a step in `steps`.
 - `visualization`: Required object with `type` in `["kpi", "chart", "table", "pivot"]`.
 - For `chart`: `chartType` must be in `["bar", "line", "pie", "area", "scatter", "treemap", "funnel", "gauge", "calendar", "sankey", "radar", "sunburst"]`.
 - For `kpi`: `iconColor` must be in `["blue", "green", "red", "purple", "amber"]`.
 - `format` and label format strings must be valid format names.
-- `transform`: Must be a valid simple string or object transform.
 
-### SQL Validation
-- Queries are dry-run against the database at save time to catch syntax errors.
-- Only SELECT (and WITH) statements are allowed.
+### Step Validation
+- `sql` steps are dry-run against the database at save time to catch syntax errors (SELECT/WITH only).
+- `compute` `fn` names must exist in the server's function catalog, and their `args` must satisfy the function's schema.
+- `transform` `fn` names must exist in the transform catalog.
+- The output's shape is checked against the visualization at render time — if a step returns the wrong shape for the chosen viz (e.g. a plain row list wired to a pivot), the widget shows a clear error instead of a blank panel.
 
 ### ID Conflict Detection
 
-Widget and dashboard IDs must be unique across all recipe files. Finzytrack detects the following conflicts:
-
-- **Duplicate widget IDs** — two standalone widget files with the same `id`.
-- **Duplicate dashboard IDs** — two dashboard files with the same `id`.
-- **Inline widget conflicts** — a standalone widget file with an `id` that matches an inline widget definition inside a dashboard.
-
-When conflicts are detected at load time, an amber warning banner appears at the top of the Dashboards view listing each conflict and the files involved.
-
-When saving a recipe in the Settings view, the editor checks for ID conflicts and shows a confirmation dialog if a conflict is found, giving you the option to go back and change the ID or save anyway.
+Dashboard IDs must be unique across recipe files; step IDs must be unique within a widget. When two dashboard files share an `id`, an amber warning banner appears at the top of the Dashboards view listing the conflict and the files involved. When saving in the Settings editor, a confirmation dialog appears if the dashboard ID is already in use, letting you change it or save anyway.
 
 ---
 
