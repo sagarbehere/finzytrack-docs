@@ -1455,7 +1455,7 @@ This is the canonical multi-source widget: a `sql` step for actuals, a `compute`
 }
 ```
 
-The bundled `budget-this-month`, `budget-zero-based`, `budget-burndown`, and `budget-envelopes` dashboards build on this pattern with the other budget transforms — see the [Budgets guide](/views/budgets/).
+The bundled `budget-this-month`, `budget-zero-based`, `budget-burndown`, and `budget-envelopes` dashboards build on this pattern with the other budget transforms. For the user-facing workflow — copying a demo and re-pointing it at your own accounts — see [Build your own budget dashboard](/views/budgets/#build-your-own-budget-dashboard).
 
 ---
 

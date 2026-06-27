@@ -77,7 +77,7 @@ Some parameters default to a **templated value** like *Current Year* or *Current
 
 ## Included Dashboards
 
-Finzytrack ships with four dashboards out of the box. The first three are designed to give you a useful overview from day one and serve as examples of what dashboards can do. The fourth — the **Widget Gallery** — is a reference of every supported widget type, useful both for visual inspection and as a starting point when creating your own dashboards.
+Finzytrack ships with several dashboards out of the box: three **overview** dashboards that give you a useful picture from day one, a **Widget Gallery** reference of every supported widget type, and a set of **budget** dashboards (one per common budgeting style).
 
 ### Financial Overview
 
@@ -119,7 +119,18 @@ Treat the gallery as both:
 
 Editing the user-facing copy of the gallery (in `config/recipes/dashboards/widget-gallery.json`) only affects what *you* see in the app — the AI assistant always reads its own copy from the bundled seed and is unaffected.
 
-All four dashboards support multiple currencies and include click-through links — clicking on KPI values, chart elements, or table cells navigates you to the Transactions view with the appropriate filters pre-applied.
+### Budget dashboards
+
+Four budget dashboards, one per common budgeting style. They render against your `custom "budget"` directives, so they show data once you've set budgets (see the **[Budgets](/views/budgets/)** view). They're calibrated to the example ledger, so treat them as templates to copy and re-point at your own accounts.
+
+- **Budget — This Month** — budget vs actual per account for a month, with remaining and % used. The basis for the no-rollover, 50/30/20, and pay-yourself-first styles.
+- **Budget — Zero-based (catch-all)** — a total budget on an account plus named carve-outs, with everything else collapsed into a single **Unbudgeted** bucket that reconciles to the total.
+- **Budget — Burn-down** — cumulative actual vs cumulative budget, month by month, for one account — to see whether you're pacing over or under.
+- **Budget — Envelopes** — envelope budgeting with rollover: each month's available, spent, and carryover for one account.
+
+The **[Budgets guide](/views/budgets/#build-your-own-budget-dashboard)** walks through copying one of these and adapting it to your accounts.
+
+These dashboards support multiple currencies and include click-through links — clicking on KPI values, chart elements, or table cells navigates you to the Transactions view with the appropriate filters pre-applied.
 
 ---
 
