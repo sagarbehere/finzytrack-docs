@@ -19,11 +19,11 @@ Dashboards in Finzytrack are defined using **JSON recipe files**. The dashboard 
 
 A **widget** is the fundamental building block — a KPI card, chart, table, or pivot table. Each widget is a small **pipeline of steps** feeding a visualization. A step is one of:
 
-- **`sql`** — a read-only SQL query against your ledger data (the common case).
+- **`query`** — a read-only SQL query against your ledger data (the common case).
 - **`compute`** — a server-side function that returns computed values (for example `budget_for_range`, which supplies budget numbers). The available functions are a fixed catalog.
 - **`transform`** — a client-side function that reshapes or combines the outputs of earlier steps (sort, limit, pivot, budget-vs-actual, and so on).
 
-The widget names an `output` step whose result is drawn. Most widgets are simply one `sql` step feeding the visualization; multi-source widgets (such as budget vs actual) combine a `sql` step and a `compute` step in a `transform`. Widgets can have interactive **parameters** (dropdowns, date and number inputs) that flow into steps.
+The widget names an `output` step whose result is drawn. Most widgets are simply one `query` step feeding the visualization; multi-source widgets (such as budget vs actual) combine a `query` step and a `compute` step in a `transform`. Widgets can have interactive **parameters** (dropdowns, date and number inputs) that flow into steps.
 
 A **dashboard** arranges its widgets in a grid layout and can define shared parameters that cascade to every widget. It can also define **shared steps** that are computed once and fed to multiple widgets.
 
@@ -183,7 +183,7 @@ KPIs typically occupy 1 row. Charts and tables need 3-4 rows to have enough heig
 
 Each widget is defined inline within the dashboard's `widgets` array. A widget is a **pipeline of named steps** (`steps`) plus an `output` pointer naming the step whose result is visualized.
 
-The simplest widget is one SQL step feeding the visualization. Here a transform step (`firstRow`) reduces the rows to a single one for a KPI:
+The simplest widget is one query step feeding the visualization. Here a transform step (`firstRow`) reduces the rows to a single one for a KPI:
 
 ```json
 {
@@ -195,7 +195,7 @@ The simplest widget is one SQL step feeding the visualization. Here a transform 
   "steps": [
     {
       "id": "rows",
-      "kind": "sql",
+      "kind": "query",
       "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year GROUP BY currency HAVING amount != 0"
     },
     { "id": "out", "kind": "transform", "fn": "firstRow", "inputs": ["{{steps.rows}}"] }
@@ -205,14 +205,14 @@ The simplest widget is one SQL step feeding the visualization. Here a transform 
 }
 ```
 
-A widget that needs no transformation just points `output` at its SQL step directly:
+A widget that needs no transformation just points `output` at its query step directly:
 
 ```json
 {
   "id": "assets-pie",
   "title": "Assets Breakdown",
   "steps": [
-    { "id": "rows", "kind": "sql", "query": "SELECT account AS name, ROUND(SUM(CAST(amount AS REAL)), 2) AS value FROM postings WHERE account_type = 'Assets' GROUP BY account HAVING value > 0" }
+    { "id": "rows", "kind": "query", "query": "SELECT account AS name, ROUND(SUM(CAST(amount AS REAL)), 2) AS value FROM postings WHERE account_type = 'Assets' GROUP BY account HAVING value > 0" }
   ],
   "output": "rows",
   "visualization": { "type": "chart", "chartType": "pie", "options": { /* ... */ } }
@@ -245,24 +245,24 @@ A widget's `steps` array is a small **directed graph**: each step produces a val
 
 | `kind` | Runs | Purpose |
 |--------|------|---------|
-| `sql` | server (SQLite mirror) | A leaf data source: a read-only SQL query. |
+| `query` | server (SQLite mirror) | A leaf data source: a read-only SQL query. |
 | `compute` | server | A vetted function that returns computed values (e.g. budget numbers). |
 | `transform` | browser | Reshapes or combines the outputs of earlier steps. |
 
 Every step has a unique, lowercase-hyphen `id`. A step's output is referenced elsewhere as **`{{steps.<id>}}`** (or `{{dashboard.steps.<id>}}` for a [shared step](#dashboard-shared-steps)).
 
-### `sql` step
+### `query` step
 
 ```json
-{ "id": "actuals", "kind": "sql", "query": "SELECT account, SUM(CAST(amount AS REAL)) AS spent FROM postings WHERE year = :year GROUP BY account", "dbType": "sqlite" }
+{ "id": "actuals", "kind": "query", "query": "SELECT account, SUM(CAST(amount AS REAL)) AS spent FROM postings WHERE year = :year GROUP BY account", "engine": "sqlite" }
 ```
 
 | Field | Description |
 |-------|-------------|
 | `query` | The SQL (or BQL) query. Uses `:paramName` placeholders for parameters. |
-| `dbType` | Optional engine: `"sqlite"` (default) or `"beanquery"`. See [Querying Data](/reference/querying-data/). |
+| `engine` | Optional engine: `"sqlite"` (default) or `"beanquery"`. See [Querying Data](/reference/querying-data/). |
 
-A SQL step is a **leaf** — it reads the ledger mirror and **cannot read another step's rows** (`{{...}}` references are not allowed inside `query`). To combine a SQL result with anything else, do it in a `transform`. See [SQL queries](#sql-queries) for the rules.
+A query step is a **leaf** — it reads the ledger mirror and **cannot read another step's rows** (`{{...}}` references are not allowed inside `query`). To combine a SQL result with anything else, do it in a `transform`. See [SQL queries](#sql-queries) for the rules.
 
 ### `compute` step
 
@@ -289,7 +289,7 @@ Compute functions do calculations SQL can't express — budget normalization, pr
 | `inputs` | Ordered `{{steps.<id>}}` / `{{dashboard.steps.<id>}}` references to the step outputs this transform consumes. |
 | `config` | Optional transform-specific configuration; `{{...}}` templates inside it are resolved. |
 
-Transforms run in the browser over already-computed step outputs. Unlike SQL steps, a transform can take **multiple inputs** — that's how a widget combines a SQL result with a compute result (for example budget vs actual).
+Transforms run in the browser over already-computed step outputs. Unlike query steps, a transform can take **multiple inputs** — that's how a widget combines a SQL result with a compute result (for example budget vs actual).
 
 ### References & interpolation
 
@@ -299,7 +299,7 @@ Three reference scopes are available in `args`, `inputs`, and `config` via `{{..
 - `{{steps.<id>}}` — the output of another step in this widget.
 - `{{dashboard.steps.<id>}}` — the output of a [dashboard shared step](#dashboard-shared-steps).
 
-A string that is *exactly* one token (`"{{steps.actuals}}"`) resolves to the actual value (object/array). A token inside a larger string resolves to its text. SQL steps are the exception — their `query` uses only `:name` parameter placeholders and never `{{...}}`.
+A string that is *exactly* one token (`"{{steps.actuals}}"`) resolves to the actual value (object/array). A token inside a larger string resolves to its text. query steps are the exception — their `query` uses only `:name` parameter placeholders and never `{{...}}`.
 
 ---
 
@@ -446,7 +446,7 @@ These return arrays of `{ "value": ..., "label": "..." }` objects, suitable for 
 
 ## SQL queries
 
-A `sql` step's `query` field fetches data from your ledger. By default queries use SQL against a SQLite export of your Beancount ledger; you can also use BQL (Beancount Query Language) by setting `dbType: "beanquery"` on the step.
+A `query` step's `query` field fetches data from your ledger. By default queries use SQL against a SQLite export of your Beancount ledger; you can also use BQL (Beancount Query Language) by setting `engine: "beanquery"` on the step.
 
 For the complete query reference — table schema, sign conventions, multi-currency rules, SQL syntax, BQL syntax, and common query patterns — see the **[Querying Data](/reference/querying-data/)** reference.
 
@@ -514,7 +514,7 @@ When `columnField` holds `YYYY-MM` values, the pivot generates per-column metada
 
 ### Budget transforms
 
-`joinBudgetActual`, `joinByPeriod`, `runningSum`, and `envelopeRollover` pair a `sql` step (actuals) with a `compute` step (`budget_for_range`) to build budget dashboards. `joinBudgetActual` in **remainder mode** (set `config.totalAccount`) adds synthetic "Unbudgeted" and "Total" rows for catch-all/zero-based budgeting. See the [Budgets guide](/views/budgets/) for the styles and the seeded demo dashboards that use each.
+`joinBudgetActual`, `joinByPeriod`, `runningSum`, and `envelopeRollover` pair a `query` step (actuals) with a `compute` step (`budget_for_range`) to build budget dashboards. `joinBudgetActual` in **remainder mode** (set `config.totalAccount`) adds synthetic "Unbudgeted" and "Total" rows for catch-all/zero-based budgeting. See the [Budgets guide](/views/budgets/) for the styles and the seeded demo dashboards that use each.
 
 ---
 
@@ -522,7 +522,7 @@ When `columnField` holds `YYYY-MM` values, the pivot generates per-column metada
 
 A `compute` step calls a vetted server-side function that returns values SQL can't compute directly. The catalog is fixed and currently centers on budgeting:
 
-- **`budget_for_range`** — resolves budgets from `custom "budget"` directives over a date range (or per calendar month with `groupBy: "period"`). Returns `[{ account, currency, budget }]`. Pair it with a `sql` actuals step and a budget transform.
+- **`budget_for_range`** — resolves budgets from `custom "budget"` directives over a date range (or per calendar month with `groupBy: "period"`). Returns `[{ account, currency, budget }]`. Pair it with a `query` actuals step and a budget transform.
 
 ```json
 { "id": "budgets", "kind": "compute", "fn": "budget_for_range",
@@ -580,14 +580,14 @@ Displays a single value prominently, with an optional icon and color.
 
 #### Single-value KPI
 
-The SQL step returns one row with a numeric column. A `firstRow` transform reduces it to a single object, and `valueField` extracts the value.
+The query step returns one row with a numeric column. A `firstRow` transform reduces it to a single object, and `valueField` extracts the value.
 
 ```json
 {
   "id": "transaction-count",
   "title": "Transaction Count",
   "steps": [
-    { "id": "rows", "kind": "sql", "query": "SELECT COUNT(DISTINCT transaction_id) AS value FROM postings WHERE year = :year" },
+    { "id": "rows", "kind": "query", "query": "SELECT COUNT(DISTINCT transaction_id) AS value FROM postings WHERE year = :year" },
     { "id": "out", "kind": "transform", "fn": "firstRow", "inputs": ["{{steps.rows}}"] }
   ],
   "output": "out",
@@ -610,7 +610,7 @@ The query returns one row per currency. Each currency is displayed stacked verti
   "id": "total-income",
   "title": "Total Income",
   "steps": [
-    { "id": "rows", "kind": "sql", "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year GROUP BY currency HAVING amount != 0" }
+    { "id": "rows", "kind": "query", "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Income' AND year = :year GROUP BY currency HAVING amount != 0" }
   ],
   "output": "rows",
   "visualization": {
@@ -629,7 +629,7 @@ If your query uses different column names than `currency` and `amount`, specify 
   "id": "assets-by-currency",
   "title": "Total Assets",
   "steps": [
-    { "id": "rows", "kind": "sql", "query": "SELECT currency AS cur, SUM(CAST(amount AS REAL)) AS total FROM postings WHERE account_type = 'Assets' GROUP BY currency HAVING total != 0" }
+    { "id": "rows", "kind": "query", "query": "SELECT currency AS cur, SUM(CAST(amount AS REAL)) AS total FROM postings WHERE account_type = 'Assets' GROUP BY currency HAVING total != 0" }
   ],
   "output": "rows",
   "visualization": {
@@ -652,7 +652,7 @@ The query includes a trend column (typically a percentage change vs a prior peri
   "id": "monthly-expenses",
   "title": "This Month's Expenses",
   "steps": [
-    { "id": "rows", "kind": "sql", "query": "SELECT SUM(CAST(amount AS REAL)) AS value, ROUND((SUM(CAST(amount AS REAL)) - prev.total) * 100.0 / prev.total, 1) AS trend FROM postings, (SELECT SUM(CAST(amount AS REAL)) AS total FROM postings WHERE account_type = 'Expenses' AND year_month = strftime('%Y-%m', date('now', '-1 month'))) prev WHERE account_type = 'Expenses' AND year_month = strftime('%Y-%m', 'now')" },
+    { "id": "rows", "kind": "query", "query": "SELECT SUM(CAST(amount AS REAL)) AS value, ROUND((SUM(CAST(amount AS REAL)) - prev.total) * 100.0 / prev.total, 1) AS trend FROM postings, (SELECT SUM(CAST(amount AS REAL)) AS total FROM postings WHERE account_type = 'Expenses' AND year_month = strftime('%Y-%m', date('now', '-1 month'))) prev WHERE account_type = 'Expenses' AND year_month = strftime('%Y-%m', 'now')" },
     { "id": "out", "kind": "transform", "fn": "firstRow", "inputs": ["{{steps.rows}}"] }
   ],
   "output": "out",
@@ -679,7 +679,7 @@ Values in `{{...}}` are template variables that get replaced at click time. For 
   "id": "total-expenses",
   "title": "Total Expenses",
   "steps": [
-    { "id": "rows", "kind": "sql", "query": "SELECT currency, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year GROUP BY currency HAVING amount != 0" }
+    { "id": "rows", "kind": "query", "query": "SELECT currency, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year GROUP BY currency HAVING amount != 0" }
   ],
   "output": "rows",
   "visualization": {
@@ -1187,7 +1187,7 @@ A complete pivot widget requires both a pivot transform and a pivot visualizatio
     }
   ],
   "steps": [
-    { "id": "rows", "kind": "sql", "query": "SELECT account, year_month, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year AND currency = :currency GROUP BY account, year_month ORDER BY account, year_month" },
+    { "id": "rows", "kind": "query", "query": "SELECT account, year_month, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Expenses' AND year = :year AND currency = :currency GROUP BY account, year_month ORDER BY account, year_month" },
     { "id": "pivoted", "kind": "transform", "fn": "pivot", "inputs": ["{{steps.rows}}"],
       "config": { "rowField": "account", "columnField": "year_month", "valueField": "amount", "formatColumn": "monthYear", "sortRowsBy": "total_desc" } }
   ],
@@ -1348,7 +1348,7 @@ The bundled dashboards under `config/recipes/dashboards/` are the living, valida
 
 ### Example: a simple multi-widget dashboard
 
-Three KPI cards over one chart. Each widget is a single `sql` step; the KPIs reduce to one row with a `firstRow` transform, the chart points `output` straight at its SQL step.
+Three KPI cards over one chart. Each widget is a single `query` step; the KPIs reduce to one row with a `firstRow` transform, the chart points `output` straight at its query step.
 
 ```json
 {
@@ -1372,7 +1372,7 @@ Three KPI cards over one chart. Each widget is a single `sql` step; the KPIs red
     {
       "id": "net-worth", "title": "Net Worth",
       "steps": [
-        { "id": "rows", "kind": "sql", "query": "SELECT currency, SUM(CASE WHEN account_type IN ('Assets','Liabilities') THEN CAST(amount AS REAL) ELSE 0 END) AS amount FROM postings WHERE currency = :currency GROUP BY currency HAVING amount != 0" },
+        { "id": "rows", "kind": "query", "query": "SELECT currency, SUM(CASE WHEN account_type IN ('Assets','Liabilities') THEN CAST(amount AS REAL) ELSE 0 END) AS amount FROM postings WHERE currency = :currency GROUP BY currency HAVING amount != 0" },
         { "id": "out", "kind": "transform", "fn": "firstRow", "inputs": ["{{steps.rows}}"] }
       ],
       "output": "out",
@@ -1381,7 +1381,7 @@ Three KPI cards over one chart. Each widget is a single `sql` step; the KPIs red
     {
       "id": "assets", "title": "Total Assets",
       "steps": [
-        { "id": "rows", "kind": "sql", "query": "SELECT currency, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Assets' AND currency = :currency GROUP BY currency HAVING amount != 0" },
+        { "id": "rows", "kind": "query", "query": "SELECT currency, SUM(CAST(amount AS REAL)) AS amount FROM postings WHERE account_type = 'Assets' AND currency = :currency GROUP BY currency HAVING amount != 0" },
         { "id": "out", "kind": "transform", "fn": "firstRow", "inputs": ["{{steps.rows}}"] }
       ],
       "output": "out",
@@ -1390,7 +1390,7 @@ Three KPI cards over one chart. Each widget is a single `sql` step; the KPIs red
     {
       "id": "liabilities", "title": "Total Liabilities",
       "steps": [
-        { "id": "rows", "kind": "sql", "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Liabilities' AND currency = :currency GROUP BY currency HAVING amount != 0" },
+        { "id": "rows", "kind": "query", "query": "SELECT currency, SUM(CAST(amount AS REAL)) * -1 AS amount FROM postings WHERE account_type = 'Liabilities' AND currency = :currency GROUP BY currency HAVING amount != 0" },
         { "id": "out", "kind": "transform", "fn": "firstRow", "inputs": ["{{steps.rows}}"] }
       ],
       "output": "out",
@@ -1399,7 +1399,7 @@ Three KPI cards over one chart. Each widget is a single `sql` step; the KPIs red
     {
       "id": "assets-pie", "title": "Assets Breakdown",
       "steps": [
-        { "id": "rows", "kind": "sql", "query": "SELECT REPLACE(account, 'Assets:', '') AS name, account, ROUND(SUM(CAST(amount AS REAL)), 2) AS value FROM postings WHERE account_type = 'Assets' AND currency = :currency GROUP BY account HAVING value > 0 ORDER BY value DESC" }
+        { "id": "rows", "kind": "query", "query": "SELECT REPLACE(account, 'Assets:', '') AS name, account, ROUND(SUM(CAST(amount AS REAL)), 2) AS value FROM postings WHERE account_type = 'Assets' AND currency = :currency GROUP BY account HAVING value > 0 ORDER BY value DESC" }
       ],
       "output": "rows",
       "visualization": {
@@ -1413,7 +1413,7 @@ Three KPI cards over one chart. Each widget is a single `sql` step; the KPIs red
 
 ### Example: budget vs actual (sql + compute + transform)
 
-This is the canonical multi-source widget: a `sql` step for actuals, a `compute` step for budgets, and a `transform` that merges them into a variance table. The `joinBudgetActual` transform rolls actuals up to each budgeted account inclusively and emits `budget`, `actual`, `remaining`, and `pctUsed`.
+This is the canonical multi-source widget: a `query` step for actuals, a `compute` step for budgets, and a `transform` that merges them into a variance table. The `joinBudgetActual` transform rolls actuals up to each budgeted account inclusively and emits `budget`, `actual`, `remaining`, and `pctUsed`.
 
 ```json
 {
@@ -1432,7 +1432,7 @@ This is the canonical multi-source widget: a `sql` step for actuals, a `compute`
       "id": "variance",
       "title": "This Month",
       "steps": [
-        { "id": "actuals", "kind": "sql",
+        { "id": "actuals", "kind": "query",
           "query": "SELECT account, currency, SUM(CAST(amount AS REAL)) AS actual FROM postings WHERE account_type = 'Expenses' AND transaction_date BETWEEN :monthStart AND :monthEnd AND currency = :currency GROUP BY account, currency" },
         { "id": "budgets", "kind": "compute", "fn": "budget_for_range",
           "args": { "from": "{{params.monthStart}}", "to": "{{params.monthEnd}}", "currency": "{{params.currency}}" } },
@@ -1474,8 +1474,8 @@ Recipes are validated when saved. Here's a summary of the validation rules:
 ### Widget Validation
 - `id`: Required, non-empty, must match the same pattern as dashboard IDs.
 - `title`: Required, non-empty string.
-- `steps`: Required, non-empty. Each step has a unique lowercase-hyphen `id` and a `kind` (`sql`/`compute`/`transform`).
-  - `sql` steps need a non-empty `query` and may not contain `{{...}}` references.
+- `steps`: Required, non-empty. Each step has a unique lowercase-hyphen `id` and a `kind` (`query`/`compute`/`transform`).
+  - `query` steps need a non-empty `query` and may not contain `{{...}}` references.
   - `compute` steps need an `fn`; `transform` steps need an `fn` and non-empty `inputs`.
   - `{{steps.x}}` references must resolve to a declared step, and the step graph must be acyclic.
 - `output`: Required. Must name a step in `steps`.
@@ -1485,7 +1485,7 @@ Recipes are validated when saved. Here's a summary of the validation rules:
 - `format` and label format strings must be valid format names.
 
 ### Step Validation
-- `sql` steps are dry-run against the database at save time to catch syntax errors (SELECT/WITH only).
+- `query` steps are dry-run against the database at save time to catch syntax errors (SELECT/WITH only).
 - `compute` `fn` names must exist in the server's function catalog, and their `args` must satisfy the function's schema.
 - `transform` `fn` names must exist in the transform catalog.
 - The output's shape is checked against the visualization at render time — if a step returns the wrong shape for the chosen viz (e.g. a plain row list wired to a pivot), the widget shows a clear error instead of a blank panel.

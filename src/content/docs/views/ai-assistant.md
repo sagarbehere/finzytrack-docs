@@ -176,7 +176,7 @@ Before previewing or saving, dashboard and widget recipes are validated:
 
 - **Structural validation** — required fields must be present, enum values (widget types, chart types, transform names) must be valid, and the layout must be consistent (grid areas must reference defined widgets, grid positions must be within bounds).
 - **ID format** — recipe IDs must contain only lowercase letters, hyphens, and numbers.
-- **Step dry-run** — each widget's `sql` steps are executed with placeholder parameter values to catch SQL errors before saving; `compute` and `transform` steps are checked against the function catalog and their step references. Typos, bad columns, or an unknown function are caught at preview time, not after saving.
+- **Step dry-run** — each widget's `query` steps are executed with placeholder parameter values to catch SQL errors before saving; `compute` and `transform` steps are checked against the function catalog and their step references. Typos, bad columns, or an unknown function are caught at preview time, not after saving.
 - **Widget-to-layout mapping** — for dashboards, every widget referenced in the layout must be defined inline in the dashboard's `widgets` array, and every defined widget must be referenced in the layout.
 
 If validation fails, the assistant receives the error details and attempts to fix the recipe automatically before re-previewing.

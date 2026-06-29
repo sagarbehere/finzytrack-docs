@@ -20,7 +20,7 @@ Finzytrack provides two query engines for accessing your financial data: **SQL**
 | **Best for** | Complex joins, window-style queries, dashboard recipes | Quick account lookups, register views, balance queries |
 | **Official docs** | [SQLite SQL](https://www.sqlite.org/lang.html) | [Beancount Query Language](https://beancount.github.io/docs/beancount_query_language/) |
 
-In dashboard recipes, set the widget's `dbType` field to `"sqlite"` (default) or `"beanquery"` to choose the engine.
+In dashboard recipes, set the widget's `engine` field to `"sqlite"` (default) or `"beanquery"` to choose the engine.
 
 ---
 
@@ -699,7 +699,7 @@ Use **BQL** when:
 - You don't need the query output for a dashboard widget (BQL works but SQL is more common in recipes)
 
 :::note
-Both engines are fully supported in dashboard recipe widgets via the `dbType` field. However, most recipe examples use SQL because it gives more control over column names, date formatting, and multi-currency output format.
+Both engines are fully supported in dashboard recipe widgets via the `engine` field. However, most recipe examples use SQL because it gives more control over column names, date formatting, and multi-currency output format.
 :::
 
 ---
@@ -715,4 +715,4 @@ Both engines reflect your current ledger state at query time — there's no stal
 
 - Cash-only aggregates (spend by category, income by month, payee roll-ups) → SQL, because it's fast and indexed.
 - Portfolio queries (current holdings, cost basis by account, position-level inspection) → BQL, because it preserves cost semantics.
-- For dashboard recipes that need both worlds, you can split a dashboard across multiple widgets with different `dbType` values.
+- For dashboard recipes that need both worlds, you can split a dashboard across multiple widgets with different `engine` values.
