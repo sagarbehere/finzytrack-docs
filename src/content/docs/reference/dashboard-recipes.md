@@ -492,6 +492,7 @@ A `transform` step calls one named function from a **fixed catalog** over the ou
 | `sortBy` | `[rows]` | `{ field, order? }` | sorted rows (`order`: `asc`/`desc`) |
 | `limit` | `[rows]` | `{ count }` | the first `count` rows |
 | `pluck` | `[rows]` | `{ field }` | an array of one field's values |
+| `where` | `[rows]` | `{ field, equals? \| notEquals? \| in? }` | the rows matching the predicate (chain `firstRow`/`limit` to reduce to one) |
 | `pivot` | `[rows]` | `{ rowField, columnField, valueField, formatColumn?, sortRowsBy? }` | a cross-tabulation (see below) |
 | `joinBudgetActual` | `[budgets, actuals]` | `{ totalAccount?, periodStart?, periodEnd? }` | budget-vs-actual variance rows |
 | `joinByPeriod` | `[budgetsByPeriod, actualsByPeriod]` | — | `[{ period, budget, actual }]` |
@@ -514,7 +515,7 @@ When `columnField` holds `YYYY-MM` values, the pivot generates per-column metada
 
 ### Budget transforms
 
-`joinBudgetActual`, `joinByPeriod`, `runningSum`, and `envelopeRollover` pair a `query` step (actuals) with a `compute` step (`budget_for_range`) to build budget dashboards. `joinBudgetActual` in **remainder mode** (set `config.totalAccount`) adds synthetic "Unbudgeted" and "Total" rows for catch-all/zero-based budgeting. See the [Budgets guide](/views/budgets/) for the styles and the seeded demo dashboards that use each.
+`joinBudgetActual`, `joinByPeriod`, `runningSum`, and `envelopeRollover` pair a `query` step (actuals) with a `compute` step (`budget_for_range`) to build budget dashboards. `joinBudgetActual` in **remainder mode** (set `config.totalAccount`) adds synthetic "Unbudgeted" and "Total" rows for catch-all/zero-based budgeting. To feed one of those roll-up rows to a single-value widget, slice it out with `where` — e.g. `where { field: "kind", equals: "total" }` yields the grand-total row for a KPI (see the Budget — Overview dashboard under [Dashboard shared steps](#dashboard-shared-steps)). See the [Budgets guide](/views/budgets/) for the styles and the seeded demo dashboards that use each.
 
 ---
 
@@ -535,24 +536,49 @@ A `compute` step calls a vetted server-side function that returns values SQL can
 
 ## Dashboard shared steps
 
-A dashboard may declare a top-level `steps` array (the same step kinds, but no `output`). These run **once per dashboard render** and their outputs are available to every widget via `{{dashboard.steps.<id>}}`. Use them to compute an expensive value once and feed several widgets — for example one projection shared by a line chart, a KPI, and a table.
+A dashboard may declare a top-level `steps` array (the same step kinds, but no `output`). These run **once per dashboard render** and their outputs are available to every widget via `{{dashboard.steps.<id>}}`. Use them to compute an expensive value once and feed several widgets — instead of every widget repeating the same query, resolve, and join.
+
+The seeded **Budget — Overview** dashboard is the worked example: it resolves budgets, queries actuals, and joins them into a variance table **once** at the dashboard level, then six widgets (three KPIs, a breakdown table, a chart, and a reconciliation) each render a slice of that single result.
 
 ```json
 {
   "schemaVersion": 2,
-  "id": "net-worth-projection",
-  "title": "Net Worth Projection",
-  "parameters": [ /* horizonYears, growthRate */ ],
+  "id": "budget-overview",
+  "title": "Budget — Overview",
+  "parameters": [ /* monthStart, monthEnd, currency */ ],
+
   "steps": [
-    { "id": "projection", "kind": "compute", "fn": "project_balances",
-      "args": { "years": "{{params.horizonYears}}", "growth": "{{params.growthRate}}" } }
+    { "id": "actuals", "kind": "query",
+      "query": "SELECT account, currency, SUM(CAST(amount AS REAL)) AS actual FROM postings WHERE account_type = 'Expenses' AND transaction_date BETWEEN :monthStart AND :monthEnd AND currency = :currency GROUP BY account, currency" },
+    { "id": "budgets", "kind": "compute", "fn": "budget_for_range",
+      "args": { "from": "{{params.monthStart}}", "to": "{{params.monthEnd}}", "currency": "{{params.currency}}" } },
+    { "id": "totals", "kind": "transform", "fn": "joinBudgetActual",
+      "inputs": ["{{steps.budgets}}", "{{steps.actuals}}"], "config": { "totalAccount": "Expenses" } }
   ],
-  "layout": { "columns": 12, "widgets": [ /* line chart, KPI, table */ ] },
-  "widgets": [ /* each references {{dashboard.steps.projection}} */ ]
+
+  "layout": { "columns": 12, "widgets": [ /* … */ ] },
+  "widgets": [
+    {
+      "id": "kpi-spent",
+      "title": "Spent This Month",
+      "steps": [
+        { "id": "row", "kind": "transform", "fn": "where",
+          "inputs": ["{{dashboard.steps.totals}}"], "config": { "field": "kind", "equals": "total" } }
+      ],
+      "output": "row",
+      "visualization": { "type": "kpi", "multiCurrency": true, "amountField": "actual", "currencyField": "currency" }
+    }
+    /* … more widgets, each a thin transform over {{dashboard.steps.totals}} … */
+  ]
 }
 ```
 
-Shared steps are parameterized by **dashboard** parameters only. If a widget needs its own parameterization of a computation, it uses its own widget step instead.
+Two things to note in the shared steps themselves:
+
+- **Sibling shared steps reference each other with `{{steps.<id>}}`** (as in the `totals` transform above), exactly like widget steps. It's only *widgets* that reach the shared outputs via `{{dashboard.steps.<id>}}`.
+- A shared step can be any kind — `query`, `compute`, or `transform`. The expensive one here is `budget_for_range` (the compute), which now runs once instead of once per widget.
+
+Shared steps are parameterized by **dashboard** parameters only. If a widget locally overrides a parameter a shared step depends on, it still sees the shared output computed with the *dashboard* value — the shared step does not re-run per widget. When a widget needs its own parameterization of a computation, give it its own widget step instead.
 
 ---
 
