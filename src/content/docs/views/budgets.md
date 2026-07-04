@@ -1,11 +1,11 @@
 ---
 title: Budgets
-description: Set budgets for any account and track spending against them.
+description: Set budgets per account and currency, and track spending against them.
 sidebar:
   order: 6
 ---
 
-The Budgets view lets you set a budget for any account, effective from a date, and track actual spending against it. Budgets are stored directly in your ledger as standard Beancount `custom "budget"` directives, so they stay compatible with Fava and travel with your data.
+The Budgets view lets you set a budget for any account — separately for each currency — effective from a date, and track actual spending against it. The unit of a budget is an **(account, currency)** pair, so the same account can carry an independent budget in each currency you use (see [Multiple currencies](#multiple-currencies)). Budgets are stored directly in your ledger as standard Beancount `custom "budget"` directives, so they stay compatible with Fava and travel with your data.
 
 ---
 
@@ -48,7 +48,14 @@ Beancount accounts need at least one subaccount, so you cannot budget the bare `
 
 ### Multiple currencies
 
-A budget applies only to its own currency; spending in other currencies is ignored for that budget. One account can carry several budgets — one per currency — and they're tracked side by side.
+A budget applies only to its own currency; spending in other currencies is ignored for that budget. The **same account can carry a separate budget in each currency**, tracked side by side — for example a USD budget and an INR budget on `Expenses:Food`:
+
+```
+2026-01-01 custom "budget" Expenses:Food "monthly"   500 USD
+2026-01-01 custom "budget" Expenses:Food "monthly" 30000 INR
+```
+
+Each is compared only against `Expenses:Food` spending in its own currency. Budget dashboards pick one currency at a time (a **Currency** parameter), since amounts in different currencies can't be summed into a single variance.
 
 ### Period normalization
 
