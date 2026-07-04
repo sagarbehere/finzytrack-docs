@@ -70,6 +70,7 @@ Budget *tracking* is done with dashboards. Finzytrack ships a demo dashboard for
 | If you budget like this… | Use this demo dashboard | What it shows |
 |---|---|---|
 | A fixed amount per account each month | **Budget — This Month** | Budget vs actual per account, with remaining and % used |
+| An at-a-glance monthly summary | **Budget — Overview** | Headline KPIs — total spent, unbudgeted spending, biggest overspend — plus a per-category breakdown, a %-used chart, and a reconciliation |
 | One total for an area, a few named sub-budgets, rest lumped together | **Budget — Zero-based (catch-all)** | Named carve-outs plus a single "Unbudgeted" bucket that sums back to the total |
 | "Am I pacing to budget?" over a span | **Budget — Burn-down** | Cumulative actual vs cumulative budget, month by month |
 | Unspent money rolls over to next month | **Budget — Envelopes** | Per-month available, spent, and carryover |
@@ -94,7 +95,7 @@ Open **Settings → Dashboards**, select the demo from the list (e.g. *Budget �
 
 What you change depends on the style:
 
-- **This Month / 50-30-20 / pay-yourself-first** — nothing structural. The widget already lists *every* budgeted expense account, so once your budgets are set it just works. Adjust the **From/To** and **Currency** parameters to taste.
+- **This Month / Overview / 50-30-20 / pay-yourself-first** — nothing structural. These already cover *every* budgeted expense account (and, for Overview, the whole-expenses "unbudgeted" remainder), so once your budgets are set they just work. Adjust the **From/To** and **Currency** parameters to taste.
 - **Zero-based (catch-all)** — change `totalAccount` (in the `joinBudgetActual` step's `config`) from `Expenses:Insurance` to the account you want as the total (a real account that has sub-accounts — Beancount can't budget the bare `Expenses` root). Set a budget on that total account and on the children you want named; everything else rolls into **Unbudgeted**.
 - **Burn-down** and **Envelopes** — replace the **Account** parameter's option list with your own accounts, and set a budget for each. These track one account at a time.
 
