@@ -11,14 +11,24 @@ The Budgets view lets you set a budget for any account — separately for each c
 
 ## Setting a budget
 
-Open **Budgets** from the sidebar. The view is a single editable table of every budget you've set.
+Open **Budgets** from the sidebar. The view lists one row per **(account, currency)** pair you budget, with two amount columns:
 
-- **Quick-add row** (top): enter an account, currency, interval, amount, and effective date, then **Add**.
-- **Inline editing:** change an existing budget's amount, interval, or effective date directly in its row. Edited rows are highlighted; click **Save Changes** to commit them all at once.
-- **Delete:** remove a budget with the row's **Delete** button.
-- **Filter:** narrow the table by account name.
+- **Current budget** — what's in effect for that account and currency, as of the date in the **Current budget as of** filter (today by default). This column is read-only.
+- **New budget** — enter an amount here (with an interval and effective date) to change the budget *going forward*. Saving writes a new directive effective from that date; the earlier budget still governs the earlier period. A row with a pending entry is marked **Edited**.
 
-You can also set a budget for a single account from the **Accounts** view: open an account's detail drawer and use the **Budget** section's **Manage** link, which jumps to the Budgets view pre-filtered to that account.
+Stage as many changes as you like across rows, then click **Save Changes** below the table to commit them together; **Reset** discards the staged entries. A per-row status icon shows Edited, Saved, or — if a write fails — an error you can hover for the reason.
+
+- **Quick-add row** (top): budget an account and currency you haven't budgeted yet — enter account, currency, interval, amount, and effective date, then **Add**.
+- **Filters:** narrow by account name, set the **Current budget as of** date, and — when you budget in more than one currency — filter by **Currency**.
+
+### Editing or removing past budgets — Manage history
+
+Setting a **New budget** always adds a directive going forward; it never rewrites the past. To correct or remove an earlier directive, expand a row with its **▸** chevron to open **Manage history** — the full timeline of directives for that account and currency. There you can:
+
+- **Edit or delete** an individual past or current directive in place. These changes apply immediately (they are corrections to the record, not staged forward changes).
+- **End budget** — stop budgeting this account and currency from a date you choose, keeping the past directives (see [Ending a budget](#ending-a-budget)).
+
+The same per-account budget editor is available from the **Accounts** view: open an account's detail drawer and use its **Budget** section.
 
 A budget you set is written to your ledger as a directive like:
 
@@ -37,6 +47,24 @@ These semantics determine what your budget numbers *mean*.
 ### Effective-dating
 
 A budget applies from its effective date until a later budget for the **same account and currency** supersedes it. To change an amount mid-year, add a second directive with a later date — the earlier one still governs the earlier months.
+
+### Ending a budget
+
+To stop budgeting an account and currency from a certain date — without deleting the record of what you budgeted before — use **End budget** in a row's [Manage history](#editing-or-removing-past-budgets--manage-history). From that date the account is no longer budgeted: it drops out of budget-vs-actual tracking, while the earlier directives remain for the periods they governed.
+
+Ending is different from budgeting **0**. A budget of 0 is a real target of zero — spending against it counts as over budget. An end means there is *no budget at all* from that date.
+
+An end is stored as a budget directive with a `none` interval, for example:
+
+```
+2026-07-01 custom "budget" Expenses:Food "none" 0 USD
+```
+
+The `0` amount is inert — it exists only to name the currency, so you can end one currency's budget for an account while keeping another. To resume budgeting, set a new budget with a later effective date (it supersedes the end); to undo the end entirely, delete the end marker in **Manage history**.
+
+:::note
+The end marker is specific to Finzytrack. The directive stays valid in any Beancount tool, but a tool that doesn't recognize the `none` interval (such as Fava) simply ignores it and shows the previous budget as continuing.
+:::
 
 ### Inheritance (inclusive-parent)
 
