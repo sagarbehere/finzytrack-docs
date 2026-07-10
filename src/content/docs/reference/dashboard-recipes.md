@@ -10,14 +10,14 @@ If you have [AI configured](/quick-start/#configuring-ai), you can [build dashbo
 :::
 
 :::tip[Quickest way in: copy from the Widget Gallery]
-The bundled **Widget Gallery** dashboard contains a working example of every widget type the app supports (kpi, bar, line, area, pie, scatter, treemap, table, pivot, funnel, gauge, calendar heatmap, sankey, radar, sunburst). When building a new recipe, the fastest path is to find the closest gallery widget, copy its JSON, and adapt the SQL and titles. The gallery's source lives at `backend/resources/seed_config/recipes/dashboards/widget-gallery.json` (or open it from the Dashboard panel and use the recipe editor to inspect each widget). Each gallery widget has a `helpText` field describing the type's specific gotchas — those notes are the most reliable distillation of what works for that chart type.
+The bundled **Widget Gallery** dashboard contains a working example of every widget type the app supports (kpi, bar, line, area, pie, scatter, treemap, table, pivot, funnel, gauge, calendar heatmap, sankey, radar, sunburst, budget progress). When building a new recipe, the fastest path is to find the closest gallery widget, copy its JSON, and adapt the SQL and titles. The gallery's source lives at `backend/resources/seed_config/recipes/dashboards/widget-gallery.json` (or open it from the Dashboard panel and use the recipe editor to inspect each widget). Each gallery widget has a `helpText` field describing the type's specific gotchas — those notes are the most reliable distillation of what works for that chart type.
 :::
 
 Dashboards in Finzytrack are defined using **JSON recipe files**. The dashboard is the only recipe type: each dashboard defines a grid layout and the widgets it contains **inline** — there are no separate, standalone widget files. Recipe files are plain JSON — no code changes or rebuilds required.
 
 ## Concepts
 
-A **widget** is the fundamental building block — a KPI card, chart, table, or pivot table. Each widget is a small **pipeline of steps** feeding a visualization. A step is one of:
+A **widget** is the fundamental building block — a KPI card, chart, table, pivot table, or budget-progress list. Each widget is a small **pipeline of steps** feeding a visualization. A step is one of:
 
 - **`query`** — a read-only SQL query against your ledger data (the common case).
 - **`compute`** — a server-side function that returns computed values (for example `budget_for_range`, which supplies budget numbers). The available functions are a fixed catalog.
@@ -1231,6 +1231,58 @@ A complete pivot widget requires both a pivot transform and a pivot visualizatio
         "dateTo": "{{columnMeta.endDate}}"
       }
     }
+  }
+}
+```
+
+### Budget Progress
+
+A purpose-built budget-vs-actual list — **not an ECharts chart**, but a dedicated widget type. It shows one row per budgeted account, each with a fill bar (spent vs budget, over-budget in red) and `$spent / $budget` with the amount remaining. It reads the flat rows a [`joinBudgetActual`](#budget-transforms) transform produces, so a typical widget is a `query` (actuals) + `compute` (`budget_for_range`) + `joinBudgetActual` feeding this visualization.
+
+```json
+{
+  "type": "budget-progress",
+  "accountFormat": "accountName2",
+  "emptyText": "No budgets for this period.",
+  "link": {
+    "name": "transactions",
+    "query": { "accountContains": "{{row.account}}", "dateFrom": "{{parameters.monthStart}}", "dateTo": "{{parameters.monthEnd}}" }
+  }
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `type` | string | **Required.** Must be `"budget-progress"`. |
+| `accountField` | string | Row field for the category label (default: `"account"`). |
+| `budgetField` | string | Row field for the budget amount (default: `"budget"`). |
+| `actualField` | string | Row field for the actual spend (default: `"actual"`). |
+| `remainingField` | string | Row field for `budget − actual` (default: `"remaining"`). |
+| `pctUsedField` | string | Row field for the fraction of budget used, e.g. `1.23` = 123% (default: `"pctUsed"`). |
+| `currencyField` | string | Row field for the currency code (default: `"currency"`). |
+| `directionField` | string | Row field holding `"under-good"` or `"over-good"` (expenses vs income). Default `"direction"`; absent → under-good. |
+| `accountFormat` | string | Optional [format](#formats) for the category label (e.g. `"accountName2"`). |
+| `link` | object | Optional per-row click-through (see [Click-Through Links](#click-through-links)); templates can use `{{row.<field>}}` and `{{parameters.<name>}}`. |
+| `emptyText` | string | Message shown when there are no rows. |
+
+The defaults match the `joinBudgetActual` flat output (`account`, `budget`, `actual`, `remaining`, `pctUsed`, `direction`, `currency`), so a widget usually needs only `accountFormat`, `emptyText`, and an optional `link`. Bar colours are a traffic light on how much of the budget is used — green (comfortable, under 85%), amber (approaching, 85–100%), red (over) — flipped for income (`over-good`), where reaching the target is good.
+
+A complete widget:
+
+```json
+{
+  "id": "budget-progress",
+  "title": "Budget vs Actual",
+  "steps": [
+    { "id": "actuals", "kind": "query", "query": "SELECT account, currency, SUM(CAST(amount AS REAL)) AS actual FROM postings WHERE account_type = 'Expenses' AND transaction_date BETWEEN :monthStart AND :monthEnd AND currency = :currency GROUP BY account, currency" },
+    { "id": "budgets", "kind": "compute", "fn": "budget_for_range", "args": { "from": "{{params.monthStart}}", "to": "{{params.monthEnd}}", "currency": "{{params.currency}}" } },
+    { "id": "variance", "kind": "transform", "fn": "joinBudgetActual", "inputs": ["{{steps.budgets}}", "{{steps.actuals}}"] }
+  ],
+  "output": "variance",
+  "visualization": {
+    "type": "budget-progress",
+    "accountFormat": "accountName2",
+    "link": { "name": "transactions", "query": { "accountContains": "{{row.account}}", "dateFrom": "{{parameters.monthStart}}", "dateTo": "{{parameters.monthEnd}}" } }
   }
 }
 ```
