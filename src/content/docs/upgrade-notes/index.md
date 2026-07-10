@@ -18,6 +18,7 @@ This section has one entry per version-to-version change that needs your attenti
 ## Notes
 
 - [Dashboards move to the step-based format](/upgrade-notes/dashboards-step-format/) — the dashboard recipe format changed; saved dashboards are upgraded on first launch of the new version.
+- [New demo content](/upgrade-notes/seed-content/) — new and updated demo dashboards and demo data are offered to existing installs, without touching anything you've edited.
 
 ---
 

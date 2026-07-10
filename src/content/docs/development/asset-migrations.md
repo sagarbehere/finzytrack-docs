@@ -70,3 +70,16 @@ command above) rather than changing your files unattended.
 - `GET /api/startup/tasks` and `POST /api/startup/tasks/{id}/apply` — the endpoints the app uses.
 
 The full design is recorded in `dev-docs/upgrades.md` in the main repository.
+
+## Related: bundled demo content
+
+A sibling system, **seed-content refresh**, rides the same startup-task framework
+to deliver *new and updated bundled demo content* (demo dashboards and demo
+ledgers) to existing installs — as a non-blocking `info` notice rather than a
+gate, and never overwriting files you've edited (provenance decides). It shares
+the one `config/.upgrade-state.json` store (under a `seed` section) and the same
+backup-before-write guarantee. Contributor entry points: `backend/app/seed_refresh/`
+(bundle walk + provenance refresh), `backend/app/startup_tasks/tasks/seed_content_task.py`
+(the notice), and `POST /api/startup/seed/reset` (Settings → "Reset demo data").
+User-facing note: [New demo content](/upgrade-notes/seed-content/). Full design:
+`dev-docs/seed-content-refresh.md`.
