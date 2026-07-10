@@ -13,12 +13,12 @@ When you update Finzytrack, a new version occasionally needs to convert some of 
 
 So an upgrade is always informed and reversible. If you ever want to roll back, the backups are right next to your data (each note says exactly where).
 
-This section has one entry per version-to-version change that needs your attention.
+This section has one entry per change that needs your attention, each labeled with the Finzytrack version it landed in. It isn't a full changelog — for everything that changed in a release, see the [GitHub release notes](https://github.com/sagarbehere/finzytrack/releases).
 
 ## Notes
 
-- [Dashboards move to the step-based format](/upgrade-notes/dashboards-step-format/) — the dashboard recipe format changed; saved dashboards are upgraded on first launch of the new version.
-- [New demo content](/upgrade-notes/seed-content/) — new and updated demo dashboards and demo data are offered to existing installs, without touching anything you've edited.
+- **v0.2.0** — [Dashboards move to the step-based format](/upgrade-notes/dashboards-step-format/): the dashboard recipe format changed; saved dashboards are upgraded on first launch after you confirm.
+- **v0.2.0** — [New demo content](/upgrade-notes/seed-content/): new and updated demo dashboards and demo data are offered to existing installs, without touching anything you've edited.
 
 ---
 

@@ -5,6 +5,8 @@ sidebar:
   order: 1
 ---
 
+*Introduced in Finzytrack v0.2.0.*
+
 This version of Finzytrack uses a new, more powerful **dashboard recipe format**. Widgets are now small pipelines of steps (a SQL query, plus optional computed values and transforms) instead of a single query — which is what makes features like budget-vs-actual possible. Because of the change, your existing saved dashboards need a one-time upgrade before they can be shown.
 
 ## What you'll see

@@ -5,6 +5,8 @@ sidebar:
   order: 2
 ---
 
+*Introduced in Finzytrack v0.2.0.*
+
 Finzytrack ships with **demo content** — example dashboards and a demo ledger — so a new install has something to look at. When you update to a version that adds or improves that demo content (for example, new budget dashboards and a demo ledger that carries budgets), Finzytrack offers to add it to your install. It never overwrites anything you've changed.
 
 ## What you'll see
