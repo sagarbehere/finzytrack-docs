@@ -11,7 +11,7 @@ Finzytrack ships with **demo content** — example dashboards and a demo ledger 
 
 After updating, if new or updated demo content is available you'll see a dismissible **"New demo content available"** notice. It's not a gate — the app runs normally either way. The notice tells you how many demo files would be added or updated, and you can:
 
-- **Apply** — add the new demo content now. A timestamped backup of every replaced file is saved first, and anything you've edited yourself is left untouched.
+- **Add now** — add the new demo content. A timestamped backup of every replaced file is saved first, and anything you've edited yourself is left untouched. A short summary then shows what was added, refreshed, or kept because you'd edited it.
 - **Dismiss** — skip it. The notice won't nag you again for this update; it only returns when a *later* version ships different demo content.
 
 ## What gets added or updated
@@ -25,7 +25,7 @@ This covers both the demo dashboards (in `config/recipes/`) and the demo ledgers
 
 ## Backups — nothing is lost
 
-Before replacing any file, Finzytrack saves a timestamped copy beside it, e.g. `config/recipes/dashboards/budget-overview.json.20260709_141103.backup`. To roll back, quit Finzytrack, delete the updated file, and rename its `.backup` copy back.
+Before replacing any file, Finzytrack saves a timestamped copy beside it, e.g. `config/recipes/dashboards/budget-overview.json.20260709_141103_512847.backup`. To roll back, quit Finzytrack, delete the updated file, and rename its `.backup` copy back.
 
 ## Reset demo data
 

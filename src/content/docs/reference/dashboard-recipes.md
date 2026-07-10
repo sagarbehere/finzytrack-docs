@@ -47,7 +47,7 @@ config/recipes/
 Any `*.json` file under `dashboards/` is automatically loaded. There is no index file to keep in sync: drop a file in, refresh the app, and it appears. Move or delete a file and it goes away. Files that fail to parse or validate are reported in the notification panel against their path so you can fix them.
 
 :::note[Format version]
-Every dashboard carries `"schemaVersion": 2` — the current step-based format. Recipes written for an earlier Finzytrack version are upgraded automatically on first launch (a timestamped `.bak` copy of each is kept beside it). A file without `schemaVersion: 2` is rejected with a "run the migration" message.
+Every dashboard carries `"schemaVersion": 2` — the current step-based format. Recipes written for an earlier Finzytrack version are upgraded on first launch after you confirm a one-time upgrade prompt (a timestamped `.backup` copy of each is kept beside it). A file without `schemaVersion: 2` is rejected with a "run the migration" message.
 :::
 
 ---

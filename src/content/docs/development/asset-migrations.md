@@ -12,8 +12,8 @@ Finzytrack stores your dashboards, rules, and settings as plain files under `con
 Earlier, format upgrades ran automatically at startup and rewrote your files before you ever saw the app. Finzytrack no longer does that. Instead:
 
 1. **Detect** — on launch the app checks, *read-only*, whether anything is below the current format. Nothing is touched.
-2. **Inform & consent** — if something needs upgrading, the whole app waits behind a dialog that explains what will change and links to the relevant Upgrade Note. Nothing happens until you click **Upgrade & continue**.
-3. **Apply** — the migration runs, saving a backup of every changed or removed file first.
+2. **Inform & consent** — if something needs upgrading, the whole app waits behind a dialog that explains what will change, lists the affected files behind **See details**, and links to the relevant Upgrade Note. Nothing happens until you click **Upgrade & continue**.
+3. **Apply** — the migration runs, saving a backup of every changed or removed file first, then shows a per-file summary of what succeeded (and, if any file couldn't be converted, which).
 
 ## Two layers
 
@@ -21,6 +21,10 @@ Earlier, format upgrades ran automatically at startup and rewrote your files bef
 - **Startup tasks** are the consent layer. Each is a small object that can *detect* whether action is needed (read-only) and *apply* it on consent. The app asks the backend for pending tasks at launch and gates on any that require consent.
 
 A startup task is deliberately thin: it just asks "is this asset class behind?" and, on consent, runs the migration.
+
+## A partial failure never wedges the app
+
+A migration is best-effort per file, so one un-convertible file (say a dashboard that references a widget that no longer exists) shouldn't be able to re-gate the app on every launch. When you consent, that consent is recorded: the app applies what it can, loads the files that migrated, and downgrades anything still pending to a **dismissible notice** instead of the blocking dialog. A genuinely new legacy file added later still gets a fresh consent prompt.
 
 ## Tasks retire themselves
 
@@ -33,7 +37,7 @@ You never have to clean up old migration steps:
 
 Nothing is changed or removed without a recoverable copy:
 
-- A rewritten file keeps a timestamped `.bak` beside it.
+- A rewritten file keeps a timestamped `.backup` copy beside it (e.g. `my-dashboard.json.20260627_141103_512847.backup`).
 - A removed file is copied into a dedicated `.migration-backups/` folder within the same area first.
 
 Each [Upgrade Note](/upgrade-notes/) tells you exactly where its backups are and how to roll back.
