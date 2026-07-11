@@ -600,7 +600,7 @@ Displays a single value prominently, with an optional icon and color.
 | `multiCurrency` | boolean | If `true`, displays one amount per currency, stacked vertically. The query must return one row per currency with `currency` and `amount` columns (or the columns specified by `currencyField` and `amountField`). |
 | `amountField` | string | Column name for amounts when `multiCurrency` is true (default: `"amount"`). |
 | `currencyField` | string | Column name for currencies when `multiCurrency` is true (default: `"currency"`). |
-| `colorBySign` | boolean | Colour the value and icon by sign — **green** when > 0, **blue** when exactly 0 ("on the mark"), **red** when negative. Use for figures where negative is bad, e.g. a Remaining / over-budget KPI. |
+| `colorBySign` | boolean | Colour **both the value text and the icon** by sign — **green** when > 0, **blue** when exactly 0 ("on the mark"), **red** when negative — **overriding `iconColor`** while it's on. Use for figures where negative is bad, e.g. a Remaining / over-budget KPI. (A single number has no "approaching" state, so there's no amber tier here — unlike the [budget-progress](#budget-progress) bars.) |
 | `showTrend` | boolean | Show a trend indicator below the value (e.g., "+5.2% vs prior"). Requires `trendField`. |
 | `trendField` | string | Column name containing the trend percentage. Positive values show as green (up), negative as red (down). |
 | `clickLink` | object | Makes the KPI value clickable, navigating to a filtered view. See [Click-Through Links](#click-through-links). |
