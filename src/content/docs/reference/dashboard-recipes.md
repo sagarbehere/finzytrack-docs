@@ -493,9 +493,12 @@ A `transform` step calls one named function from a **fixed catalog** over the ou
 | `limit` | `[rows]` | `{ count }` | the first `count` rows |
 | `pluck` | `[rows]` | `{ field }` | an array of one field's values |
 | `where` | `[rows]` | `{ field, equals? \| notEquals? \| in? }` | the rows matching the predicate (chain `firstRow`/`limit` to reduce to one) |
+| `appendTotal` | `[rows]` | `{ field?, labelField?, label?, count? }` | the rows (first `count`, if given) plus a grand-total row summing `field` over **all** input rows (`isTotal: true`), so a top-N table still totals the full set |
 | `pivot` | `[rows]` | `{ rowField, columnField, valueField, formatColumn?, sortRowsBy? }` | a cross-tabulation (see below) |
 | `joinBudgetActual` | `[budgets, actuals]` | `{ totalAccount?, periodStart?, periodEnd? }` | budget-vs-actual variance rows |
 | `joinByPeriod` | `[budgetsByPeriod, actualsByPeriod]` | — | `[{ period, budget, actual }]` |
+| `budgetSummary` | `[budgets, actuals]` | — | one aggregate row `{ budget, actual, remaining, pctUsed, pctUsedPct }` for a ring/KPIs (maximal-named-subtree, so nested budgets aren't double-counted) |
+| `unbudgetedSpending` | `[budgets, actuals]` | — | actual rows for accounts **not** covered by any budget, sorted by spend desc (inclusive-parent aware) |
 | `runningSum` | `[rows]` | `{ fields, orderBy }` | rows plus a cumulative column per field |
 | `envelopeRollover` | `[budgetsByPeriod, actualsByPeriod]` | — | per-period `{ budget, actual, available, carryover, overspent }` |
 
