@@ -600,6 +600,7 @@ Displays a single value prominently, with an optional icon and color.
 | `multiCurrency` | boolean | If `true`, displays one amount per currency, stacked vertically. The query must return one row per currency with `currency` and `amount` columns (or the columns specified by `currencyField` and `amountField`). |
 | `amountField` | string | Column name for amounts when `multiCurrency` is true (default: `"amount"`). |
 | `currencyField` | string | Column name for currencies when `multiCurrency` is true (default: `"currency"`). |
+| `colorBySign` | boolean | Colour the value and icon by sign — **green** when > 0, **blue** when exactly 0 ("on the mark"), **red** when negative. Use for figures where negative is bad, e.g. a Remaining / over-budget KPI. |
 | `showTrend` | boolean | Show a trend indicator below the value (e.g., "+5.2% vs prior"). Requires `trendField`. |
 | `trendField` | string | Column name containing the trend percentage. Positive values show as green (up), negative as red (down). |
 | `clickLink` | object | Makes the KPI value clickable, navigating to a filtered view. See [Click-Through Links](#click-through-links). |
@@ -1261,9 +1262,13 @@ A purpose-built budget-vs-actual list — **not an ECharts chart**, but a dedica
 | `pctUsedField` | string | Row field for the fraction of budget used, e.g. `1.23` = 123% (default: `"pctUsed"`). |
 | `currencyField` | string | Row field for the currency code (default: `"currency"`). |
 | `directionField` | string | Row field holding `"under-good"` or `"over-good"` (expenses vs income). Default `"direction"`; absent → under-good. |
-| `accountFormat` | string | Optional [format](#formats) for the category label (e.g. `"accountName2"`). |
+| `accountFormat` | string | Optional [format](#formats) for the account label (e.g. `"accountName2"`). |
+| `warnAt` | number | Fraction of budget where a bar turns amber ("approaching"). Default `0.85` (85%). |
+| `colors` | object | Override the status bar colours — `{ under, approaching, exact, over }`, each any CSS/hex colour (applied in both light and dark mode). Omitted statuses keep the default palette. |
 | `link` | object | Optional per-row click-through (see [Click-Through Links](#click-through-links)); templates can use `{{row.<field>}}` and `{{parameters.<name>}}`. |
 | `emptyText` | string | Message shown when there are no rows. |
+
+Bar colours are a status scale — **green** (under `warnAt`), **amber** (approaching), **blue** (exactly on budget, e.g. a fixed expense paid in full at 100%), **red** (over budget, strictly `> 100%`). To recolour, e.g. `"colors": { "under": "#0ea5e9", "over": "#dc2626" }`.
 
 The defaults match the `joinBudgetActual` flat output (`account`, `budget`, `actual`, `remaining`, `pctUsed`, `direction`, `currency`), so a widget usually needs only `accountFormat`, `emptyText`, and an optional `link`. Bar colours are a traffic light on how much of the budget is used — green (comfortable, under 85%), amber (approaching, 85–100%), red (over) — flipped for income (`over-good`), where reaching the target is good.
 
