@@ -1268,7 +1268,16 @@ A purpose-built budget-vs-actual list — **not an ECharts chart**, but a dedica
 | `link` | object | Optional per-row click-through (see [Click-Through Links](#click-through-links)); templates can use `{{row.<field>}}` and `{{parameters.<name>}}`. |
 | `emptyText` | string | Message shown when there are no rows. |
 
-Bar colours are a status scale — **green** (under `warnAt`), **amber** (approaching), **blue** (exactly on budget, e.g. a fixed expense paid in full at 100%), **red** (over budget, strictly `> 100%`). To recolour, e.g. `"colors": { "under": "#0ea5e9", "over": "#dc2626" }`.
+Bar colours are a status scale — **green** (under `warnAt`), **amber** (approaching), **blue** (exactly on budget, e.g. a fixed expense paid in full at 100%), **red** (over budget, strictly `> 100%`). Each maps to a `colors` key, and you can set any subset (omitted keys keep their default):
+
+```jsonc
+"colors": {
+  "under":       "#10b981",  // under budget (default green)
+  "approaching": "#f59e0b",  // approaching the limit — ≥ warnAt (default amber)
+  "exact":       "#3b82f6",  // exactly on budget — 100% (default blue)
+  "over":        "#ef4444"   // over budget — > 100% (default red)
+}
+```
 
 The defaults match the `joinBudgetActual` flat output (`account`, `budget`, `actual`, `remaining`, `pctUsed`, `direction`, `currency`), so a widget usually needs only `accountFormat`, `emptyText`, and an optional `link`. Bar colours are a traffic light on how much of the budget is used — green (comfortable, under 85%), amber (approaching, 85–100%), red (over) — flipped for income (`over-good`), where reaching the target is good.
 
