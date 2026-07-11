@@ -494,6 +494,7 @@ A `transform` step calls one named function from a **fixed catalog** over the ou
 | `pluck` | `[rows]` | `{ field }` | an array of one field's values |
 | `where` | `[rows]` | `{ field, equals? \| notEquals? \| in? }` | the rows matching the predicate (chain `firstRow`/`limit` to reduce to one) |
 | `appendTotal` | `[rows]` | `{ field?, labelField?, label?, count? }` | the rows (first `count`, if given) plus a grand-total row summing `field` over **all** input rows (`isTotal: true`), so a top-N table still totals the full set |
+| `groupBy` | `[rows]` | `{ key, sum }` | one row per distinct `key` (a field name or array of names), each field in `sum` totalled exactly; first-seen order. E.g. roll per-account-per-period budgets up to a per-period total |
 | `pivot` | `[rows]` | `{ rowField, columnField, valueField, formatColumn?, sortRowsBy? }` | a cross-tabulation (see below) |
 | `joinBudgetActual` | `[budgets, actuals]` | `{ totalAccount?, periodStart?, periodEnd? }` | budget-vs-actual variance rows |
 | `joinByPeriod` | `[budgetsByPeriod, actualsByPeriod]` | — | `[{ period, budget, actual }]` |
@@ -1199,6 +1200,9 @@ Displays a cross-tabulation with row and column totals. Requires a `pivot` trans
 | `format` | string | Cell value format (see [Formats](#formats)). |
 | `showRowTotals` | boolean | Show a "Total" column on the right (default: `true`). |
 | `showColumnTotals` | boolean | Show a totals row at the bottom (default: `true`). |
+| `colorByValue` | boolean | Tint each cell by its value read as a budget-usage fraction (e.g. `pctUsed`) — a **budget-adherence heat-map**. Uses the same green/amber/blue/red scale as [budget-progress](#budget-progress). Point `valueField` at a `pctUsed`-style column and turn totals off. |
+| `warnAt` | number | With `colorByValue`: fraction where a cell turns amber. Default `0.85`. |
+| `colors` | object | With `colorByValue`: override the status colours (`{ under, approaching, exact, over }` hex), same as budget-progress. |
 | `valueLink` | object | Click-through link for cell values (see [Click-Through Links](#click-through-links)). |
 
 A complete pivot widget requires both a pivot transform and a pivot visualization:
