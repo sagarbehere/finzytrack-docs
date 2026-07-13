@@ -97,13 +97,12 @@ Budget *tracking* is done with dashboards. Finzytrack ships a demo dashboard for
 
 | If you budget like this… | Use this demo dashboard | What it shows |
 |---|---|---|
-| A fixed amount per account each month | **Budget — This Month** | Budget vs actual per account, with remaining and % used |
-| An at-a-glance monthly summary | **Budget — Overview** | Headline KPIs — total spent, unbudgeted spending, biggest overspend — plus a per-category breakdown, a %-used chart, and a reconciliation |
+| A fixed amount per account each month, at a glance | **Budget — Overview** | Headline KPIs — total budgeted, spent, remaining — a per-account progress list, and the spending that falls outside any budget |
 | One total for an area, a few named sub-budgets, rest lumped together | **Budget — Zero-based (catch-all)** | Named carve-outs plus a single "Unbudgeted" bucket that sums back to the total |
 | "Am I pacing to budget?" over a span | **Budget — Burn-down** | Cumulative actual vs cumulative budget, month by month |
-| Unspent money rolls over to next month | **Budget — Envelopes** | Per-month available, spent, and carryover |
+| Unspent money rolls over to next month | **Budget — Envelopes** | Every envelope's balance at a glance; click one to drill into its month-by-month available, spent, and carryover |
 
-50/30/20 and pay-yourself-first are the **This Month** dashboard with budgets set on your Needs/Wants/Savings groups (or your savings account) — no different machinery, just different numbers and labels.
+50/30/20 and pay-yourself-first are the **Overview** dashboard with budgets set on your Needs/Wants/Savings groups (or your savings account) — no different machinery, just different numbers and labels.
 
 ---
 
@@ -117,15 +116,16 @@ A budget dashboard only has something to show once you've set budgets. Add them 
 
 ### 2. Copy the demo that matches your style
 
-Open **Settings → Dashboards**, select the demo from the list (e.g. *Budget — This Month*), and copy its JSON. Either edit it in place, or — to keep the original as a reference — paste it into a new dashboard and give it a new `id` and `title`. The editor validates as you go and shows a live preview.
+Open **Settings → Dashboards**, select the demo from the list (e.g. *Budget — Overview*), and copy its JSON. Either edit it in place, or — to keep the original as a reference — paste it into a new dashboard and give it a new `id` and `title`. The editor validates as you go and shows a live preview.
 
 ### 3. Re-point it at your accounts
 
 What you change depends on the style:
 
-- **This Month / Overview / 50-30-20 / pay-yourself-first** — nothing structural. These already cover *every* budgeted expense account (and, for Overview, the whole-expenses "unbudgeted" remainder), so once your budgets are set they just work. Adjust the **From/To** and **Currency** parameters to taste.
+- **Overview / 50-30-20 / pay-yourself-first** — nothing structural. These already cover *every* budgeted expense account (and, for Overview, the whole-expenses "unbudgeted" remainder), so once your budgets are set they just work. Adjust the **From/To** and **Currency** parameters to taste.
+- **Envelopes** — nothing structural either. The overview lists *every* budgeted account, so once your budgets are set it just works — click any envelope to drill into its trend below.
 - **Zero-based (catch-all)** — change `totalAccount` (in the `joinBudgetActual` step's `config`) from `Expenses:Insurance` to the account you want as the total (a real account that has sub-accounts — Beancount can't budget the bare `Expenses` root). Set a budget on that total account and on the children you want named; everything else rolls into **Unbudgeted**.
-- **Burn-down** and **Envelopes** — replace the **Account** parameter's option list with your own accounts, and set a budget for each. These track one account at a time.
+- **Burn-down** — replace the **Account** parameter's option list with your own accounts, and set a budget for each. It tracks one account at a time.
 
 The SQL `account_type = 'Expenses'` / `account LIKE '…'` filters and the column list can be edited too — see the [Dashboard & Widget Recipes](/reference/dashboard-recipes/) reference for the full format.
 
@@ -136,7 +136,7 @@ The widgets degrade gracefully (you'll see a short message, never a broken panel
 1. **Budgets are set** for the accounts the widget covers (Budgets view).
 2. The selected **month / date range has spending** — the example data may not cover the current month; pick a populated one.
 3. The **currency** matches your budgets and postings.
-4. For zero-based / burn-down / envelopes, the **account (or `totalAccount`) exists** in your ledger — the demos use example accounts you need to swap.
+4. For zero-based and burn-down, the **account (or `totalAccount`) exists** in your ledger — those demos use example accounts you need to swap. (Envelopes populates its picker from your ledger automatically.)
 
 Zero-based also calls out two cases in a **Note** column: *no total budget set on that account*, and *over-allocated* (your named budgets add up to more than the total).
 

@@ -328,9 +328,10 @@ Parameters add interactive controls (dropdowns, number inputs) to dashboards and
 | `type` | string | **Required.** One of: `"select"`, `"number"`, `"date"`. |
 | `default` | any | Default value. Can be a literal or a `$gen` generator. |
 | `options` | array | For `select` type: array of `{ "value": ..., "label": "..." }` objects. Can be a `$gen` generator. |
-| `optionsFrom` | string | For `select` type: dynamic option source. Supported values: `"currencies"` (populates from ledger currencies), `"years"` (populates from years present in ledger data). |
+| `optionsFrom` | string | For `select` type: dynamic option source, populated from the user's ledger. `"currencies"` (ledger currencies), `"years"` (years present in the data), `"accounts"` (all accounts), `"expenseAccounts"` / `"incomeAccounts"` (only that type). For the account sources, each option's value is the full account path and its label is the path below the type root (e.g. `Expenses:Insurance:Health` → `Insurance:Health`). |
 | `min` | number | For `number` type: minimum value. |
 | `max` | number | For `number` type: maximum value. |
+| `hidden` | boolean | When `true`, the parameter is functional (its `default` applies, it can be set by a [select action](#select-action-master-detail) or the URL, and steps read it) but renders **no control** in the parameter bar. Use for a parameter driven only by click-to-select. |
 
 ### Parameter Types
 
@@ -501,7 +502,7 @@ A `transform` step calls one named function from a **fixed catalog** over the ou
 | `budgetSummary` | `[budgets, actuals]` | — | one aggregate row `{ budget, actual, remaining, pctUsed, pctUsedPct }` for a ring/KPIs (maximal-named-subtree, so nested budgets aren't double-counted) |
 | `unbudgetedSpending` | `[budgets, actuals]` | — | actual rows for accounts **not** covered by any budget, sorted by spend desc (inclusive-parent aware) |
 | `runningSum` | `[rows]` | `{ fields, orderBy }` | rows plus a cumulative column per field |
-| `envelopeRollover` | `[budgetsByPeriod, actualsByPeriod]` | — | per-period `{ budget, actual, available, carryover, overspent }` |
+| `envelopeRollover` | `[budgetsByPeriod, actualsByPeriod]` | — | per-period `{ period, currency, budget, actual, available, carryover, overspent, dateFrom, dateTo }` (`dateFrom`/`dateTo` are the period's month bounds, for a per-point chart click-through) |
 
 ### `pivot`
 
@@ -1341,7 +1342,12 @@ This works automatically: if your widget (or its parent dashboard) has a paramet
 
 ## Click-Through Links
 
-Widgets can be made interactive by adding click-through links. Clicking a value navigates to the Transactions view with filters pre-applied.
+Widgets can be made interactive by adding a click action. A click action is one of two modes:
+
+- **Navigate** (`{name, query}`) — clicking a value goes to the Transactions view with filters pre-applied.
+- **Select** (`{select}`) — clicking sets dashboard parameters from the clicked context, driving other widgets on the same dashboard (master-detail drill-down). See [Select Action](#select-action-master-detail).
+
+Every click-action field — a chart `clickLink`/`seriesClickLinks`, a KPI `clickLink`, a pivot `valueLink`, a table column `link`, and a budget-progress `link` — accepts either mode.
 
 ### Link Structure
 
@@ -1360,6 +1366,8 @@ Widgets can be made interactive by adding click-through links. Clicking a value 
 |----------|------|-------------|
 | `name` | string | Route name. Currently only `"transactions"` is supported. |
 | `query` | object | Filter parameters for the Transactions view. |
+
+Provide **either** `{name, query}` (navigate) **or** `select` (below) — not both.
 
 ### Supported Query Filters
 
@@ -1438,6 +1446,39 @@ For charts with multiple series, you can specify different click-through links f
 - Keys are the series `name` values from the `options.series` array.
 - Set a series to `null` to disable clicking for that series.
 - If `seriesClickLinks` is present, it takes priority over `clickLink` for the matching series.
+
+### Select Action (master-detail)
+
+Instead of navigating away, a click can **set dashboard parameters** from the clicked row/value/series, re-running the widgets that depend on those parameters. This builds a master-detail dashboard: a list or chart on top acts as a picker for a detail view below.
+
+```json
+"link": { "select": { "account": "{{row.account}}" } }
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `select` | object | Map of dashboard-parameter name → template. On click, each parameter is set to its interpolated value. |
+
+- Templates use the **same click variables** as a navigate link for that widget type (e.g. `{{row.<field>}}` for a table column or budget-progress row, `{{data.<field>}}` for a chart series).
+- Only keys that are **actual dashboard parameters** are applied — a select can't invent unknown parameters.
+- Setting a parameter re-runs the dashboard shared steps and every widget that reads that parameter — exactly as if the user had changed it in the dropdown. The parameter is persisted and reflected in the URL like any other selection.
+- For a `budget-progress` list, the row whose selection matches the current parameter values is highlighted as the active (drilled-in) row.
+
+**Example — click an account to drive an account-scoped drill-down.** A `budget-progress` overview whose rows each set the `account` parameter; a chart below reads `:account` and shows just that account's trend:
+
+```json
+{
+  "id": "overview",
+  "output": "ranked",
+  "visualization": {
+    "type": "budget-progress",
+    "accountFormat": "accountName2",
+    "link": { "select": { "account": "{{row.account}}" } }
+  }
+}
+```
+
+The seeded **Budget — Envelopes** dashboard (`config/recipes/dashboards/budget-envelopes.json`) is a complete worked example: its envelope-balances list selects the `account` parameter, and the KPIs + trend chart below drill into the chosen envelope.
 
 ---
 

@@ -123,10 +123,10 @@ Editing the user-facing copy of the gallery (in `config/recipes/dashboards/widge
 
 Four budget dashboards, one per common budgeting style. They render against your `custom "budget"` directives, so they show data once you've set budgets (see the **[Budgets](/views/budgets/)** view). They're calibrated to the example ledger, so treat them as templates to copy and re-point at your own accounts.
 
-- **Budget — This Month** — budget vs actual per account for a month, with remaining and % used. The basis for the no-rollover, 50/30/20, and pay-yourself-first styles.
+- **Budget — Overview** — at-a-glance budgeted / spent / remaining KPIs, a per-account progress list, and the spending outside any budget. The basis for the no-rollover, 50/30/20, and pay-yourself-first styles.
 - **Budget — Zero-based (catch-all)** — a total budget on an account plus named carve-outs, with everything else collapsed into a single **Unbudgeted** bucket that reconciles to the total.
 - **Budget — Burn-down** — cumulative actual vs cumulative budget, month by month, for one account — to see whether you're pacing over or under.
-- **Budget — Envelopes** — envelope budgeting with rollover: each month's available, spent, and carryover for one account.
+- **Budget — Envelopes** — envelope budgeting with rollover: every envelope's balance at a glance, then click one to drill into its month-by-month available, spent, and carryover.
 
 The **[Budgets guide](/views/budgets/#build-your-own-budget-dashboard)** walks through copying one of these and adapting it to your accounts.
 
