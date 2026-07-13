@@ -123,7 +123,7 @@ Open **Settings → Dashboards**, select the demo from the list (e.g. *Budget �
 What you change depends on the style:
 
 - **Overview / 50-30-20 / pay-yourself-first** — nothing structural. These already cover *every* budgeted expense account (and, for Overview, the whole-expenses "unbudgeted" remainder), so once your budgets are set they just work. Adjust the **From/To** and **Currency** parameters to taste.
-- **Envelopes** — nothing structural either. The overview lists *every* budgeted account, so once your budgets are set it just works — click any envelope to drill into its trend below.
+- **Envelopes** — nothing structural either. The overview lists *every* budgeted account with its current balance, so once your budgets are set it just works — click any envelope to drill into its trend. Balances accumulate from each envelope's **first budget** (so what you see is the real balance, not a window that resets); use **As of** to evaluate at a past date, and **Start fresh** to deliberately reset an envelope to empty on a chosen date.
 - **Zero-based (catch-all)** — change `totalAccount` (in the `joinBudgetActual` step's `config`) from `Expenses:Insurance` to the account you want as the total (a real account that has sub-accounts — Beancount can't budget the bare `Expenses` root). Set a budget on that total account and on the children you want named; everything else rolls into **Unbudgeted**.
 - **Burn-down** — replace the **Account** parameter's option list with your own accounts, and set a budget for each. It tracks one account at a time.
 
@@ -136,7 +136,7 @@ The widgets degrade gracefully (you'll see a short message, never a broken panel
 1. **Budgets are set** for the accounts the widget covers (Budgets view).
 2. The selected **month / date range has spending** — the example data may not cover the current month; pick a populated one.
 3. The **currency** matches your budgets and postings.
-4. For zero-based and burn-down, the **account (or `totalAccount`) exists** in your ledger — those demos use example accounts you need to swap. (Envelopes populates its picker from your ledger automatically.)
+4. For zero-based and burn-down, the **account (or `totalAccount`) exists** in your ledger — those demos use example accounts you need to swap. (Envelopes needs no swap — click any budgeted envelope in its overview to drill in.)
 
 Zero-based also calls out two cases in a **Note** column: *no total budget set on that account*, and *over-allocated* (your named budgets add up to more than the total).
 

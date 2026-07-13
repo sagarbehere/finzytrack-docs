@@ -332,6 +332,8 @@ Parameters add interactive controls (dropdowns, number inputs) to dashboards and
 | `min` | number | For `number` type: minimum value. |
 | `max` | number | For `number` type: maximum value. |
 | `hidden` | boolean | When `true`, the parameter is functional (its `default` applies, it can be set by a [select action](#select-action-master-detail) or the URL, and steps read it) but renders **no control** in the parameter bar. Use for a parameter driven only by click-to-select. |
+| `showWhen` | object | Conditional visibility: `{ "param": "<name>", "equals": <value> }` — the control shows only while another parameter's current value equals `equals`. The parameter stays functional when hidden this way (its default/last value still feeds steps). Use to reveal a control based on a toggle (e.g. a date shown only when a checkbox is on). |
+| `minParam` / `maxParam` | string | For a `date` (or `number`) control: bind the input's minimum/maximum to another parameter's current value. Reactive — e.g. a "from" date with `"maxParam": "asOf"` can't be set past the "as of" date. |
 
 ### Parameter Types
 
@@ -365,6 +367,16 @@ Parameters add interactive controls (dropdowns, number inputs) to dashboards and
   "label": "Start Date",
   "type": "date",
   "default": { "$gen": "startOfYear" }
+}
+```
+
+**Boolean** — checkbox. The value is the string `"true"` or `"false"`; default `"false"`. Read it in a transform's `config` (`"{{params.flag}}"`) or pair it with a `showWhen` on another control:
+```json
+{
+  "name": "startFresh",
+  "label": "Start fresh",
+  "type": "boolean",
+  "default": "false"
 }
 ```
 
@@ -502,7 +514,8 @@ A `transform` step calls one named function from a **fixed catalog** over the ou
 | `budgetSummary` | `[budgets, actuals]` | — | one aggregate row `{ budget, actual, remaining, pctUsed, pctUsedPct }` for a ring/KPIs (maximal-named-subtree, so nested budgets aren't double-counted) |
 | `unbudgetedSpending` | `[budgets, actuals]` | — | actual rows for accounts **not** covered by any budget, sorted by spend desc (inclusive-parent aware) |
 | `runningSum` | `[rows]` | `{ fields, orderBy }` | rows plus a cumulative column per field |
-| `envelopeRollover` | `[budgetsByPeriod, actualsByPeriod]` | — | per-period `{ period, currency, budget, actual, available, carryover, overspent, dateFrom, dateTo }` (`dateFrom`/`dateTo` are the period's month bounds, for a per-point chart click-through) |
+| `envelopeRollover` | `[budgetsByPeriod, actualsByPeriod]` | `{ reset?, resetFrom? }` | per-period `{ period, currency, budget, actual, available, carryover, overspent, dateFrom, dateTo }`. Accumulates from the envelope's **inception** (the first month with a real budget) — leading budget-less months are skipped, and spend before inception isn't counted. Pass `reset` (truthy) + `resetFrom` (a date) to **start fresh** from that month instead (clamped to ≥ inception). `dateFrom`/`dateTo` are the period's month bounds (for a per-point chart click-through) |
+| `envelopeBalances` | `[budgetsByPeriod, actualsByPeriod]` | `{ reset?, resetFrom? }` | one row per budgeted `{ account, currency, budget, actual, remaining, pctUsed, direction }` — each envelope's **inception-aware running balance** (`remaining` = what's in the envelope now, equal to `envelopeRollover`'s final carryover). For a multi-envelope overview list; inclusive-parent, each envelope counted from its own inception (or from `resetFrom` when `reset` is set) |
 
 ### `pivot`
 
@@ -528,7 +541,7 @@ When `columnField` holds `YYYY-MM` values, the pivot generates per-column metada
 
 A `compute` step calls a vetted server-side function that returns values SQL can't compute directly. The catalog is fixed and currently centers on budgeting:
 
-- **`budget_for_range`** — resolves budgets from `custom "budget"` directives over a date range (or per calendar month with `groupBy: "period"`). Returns `[{ account, currency, budget }]`. Pair it with a `query` actuals step and a budget transform.
+- **`budget_for_range`** — resolves budgets from `custom "budget"` directives over a date range (or per calendar month with `groupBy: "period"`). Returns `[{ account, currency, budget }]`. Pair it with a `query` actuals step and a budget transform. `from` is optional: **omit it to start each account at its own inception** (its first budget directive) — the natural "from the beginning" for envelope balances, with no empty pre-inception months.
 
 ```json
 { "id": "budgets", "kind": "compute", "fn": "budget_for_range",
