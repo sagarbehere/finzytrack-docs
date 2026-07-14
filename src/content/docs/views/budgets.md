@@ -112,7 +112,7 @@ Budget *tracking* is done with dashboards. Finzytrack ships a demo dashboard for
 | A fixed amount per account each month, at a glance | **Budget — Overview** | Headline KPIs — total budgeted, spent, remaining — a per-account progress list, and the spending that falls outside any budget |
 | Unspent money rolls over to next month | **Budget — Envelopes** | Every envelope's balance at a glance; click one to drill into its month-by-month available, spent, and carryover |
 | One total for an area, a few named sub-budgets, rest lumped together | **Budget — Zero-based (catch-all)** | Named carve-outs plus an "Unbudgeted" bucket that sums back to the total, with a sunburst carving it all the way down |
-| "How have I done over the year?" | **Budget — Trailing 12 Months** | Total budget vs actual month by month, plus a per-account adherence heat-map (green under, red over) |
+| "How have I done, month by month?" | **Budget — History** | Budget vs actual month by month over any window (defaults to the trailing year), plus a per-account adherence heat-map (green under, red over) |
 
 **Two more popular styles don't need their own dashboard** — they're quick recipes over the *same* machinery, covered under [Build your own](#other-styles-build-your-own) below:
 
@@ -137,7 +137,7 @@ Open **Settings → Dashboards**, select the demo from the list (e.g. *Budget �
 
 What you change depends on the style:
 
-- **Overview / Trailing 12 Months** — nothing structural. These already cover *every* budgeted expense account (and, for Overview, the whole-expenses "unbudgeted" remainder), so once your budgets are set they just work. Adjust the **From/To** and **Currency** parameters to taste.
+- **Overview / History** — nothing structural. These already cover *every* budgeted expense account (and, for Overview, the whole-expenses "unbudgeted" remainder), so once your budgets are set they just work. Adjust the **From/To** and **Currency** parameters to taste.
 - **Envelopes** — nothing structural either. The overview lists *every* budgeted account with its current balance, so once your budgets are set it just works — click any envelope to drill into its trend. Balances accumulate from each envelope's **first budget** (so what you see is the real balance, not a window that resets); use **As of** to evaluate at a past date, and **Start fresh** to deliberately reset an envelope to empty on a chosen date.
 - **Zero-based (catch-all)** — pick your umbrella account in the **Total account** selector. Set a total budget on it — a real grouping account like `Expenses:Insurance`, or the whole-expenses root by quoting it (`custom "budget" "Expenses" …`, see [Total budgets](#total-budgets-on-a-whole-area-top-down)) — plus budgets on the children you want named; everything else rolls into **Unbudgeted**.
 
@@ -157,7 +157,7 @@ The widgets degrade gracefully (you'll see a short message, never a broken panel
 1. **Budgets are set** for the accounts the widget covers (Budgets view).
 2. The selected **month / date range has spending** — the example data may not cover the current month; pick a populated one.
 3. The **currency** matches your budgets and postings.
-4. For zero-based, the **Total account** you picked has a budget (a real grouping account, or the quoted root). If your named budgets add up to more than the total, that's *over-allocation* — the top-level "Unbudgeted" slice goes negative (and drops out of the sunburst). (Overview, Envelopes, and Trailing 12 Months need no swap — they cover every budgeted account automatically.)
+4. For zero-based, the **Total account** you picked has a budget (a real grouping account, or the quoted root). If your named budgets add up to more than the total, that's *over-allocation* — the top-level "Unbudgeted" slice goes negative (and drops out of the sunburst). (Overview, Envelopes, and History need no swap — they cover every budgeted account automatically.)
 
 ### Or let the AI assistant build it
 

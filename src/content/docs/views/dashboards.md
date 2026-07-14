@@ -126,7 +126,7 @@ Four budget dashboards, one per genuinely distinct budgeting style. They render 
 - **Budget — Overview** — at-a-glance budgeted / spent / remaining KPIs, a per-account progress list, and the spending outside any budget. The basis for the no-rollover, 50/30/20, and pay-yourself-first styles.
 - **Budget — Envelopes** — envelope budgeting with rollover: every envelope's balance at a glance, then click one to drill into its month-by-month available, spent, and carryover.
 - **Budget — Zero-based (catch-all)** — a total budget on an umbrella account (a real grouping account, or the whole-expenses root via a quoted directive) plus named carve-outs, with everything else collapsed into an **Unbudgeted** bucket that reconciles to the total, and a sunburst carving the total all the way down.
-- **Budget — Trailing 12 Months** — a retrospective: total budget vs actual month by month, plus a per-account adherence heat-map (green under, red over).
+- **Budget — History** — budget vs actual month by month over any window (defaults to the trailing year), plus a per-account adherence heat-map (green under, red over).
 
 Two more popular styles — **50/30/20** and **pace / burn-down** — are quick recipes over the same building blocks rather than separate dashboards; the **[Budgets guide](/views/budgets/#other-styles-build-your-own)** shows how to build them, and how to copy any demo and adapt it to your accounts.
 
