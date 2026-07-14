@@ -84,7 +84,7 @@ For the **bare root** (`Expenses`, `Income`, …), Beancount won't accept it as 
 2026-01-01 custom "budget" "Expenses" "monthly" 9000 USD
 ```
 
-Either way it's a normal budget (inclusive-parent covers the whole subtree). The **[Budget — Zero-based](#choosing-a-budgeting-style)** dashboard turns such a total into carve-outs + an "Unbudgeted" remainder, with a sunburst that carves it all the way down. Total budgets are only shown in that top-down view — the other (bottom-up) dashboards ignore them so they don't double-count.
+Either way it's a normal budget (inclusive-parent covers the whole subtree). The **[Budget: Zero-based](#choosing-a-budgeting-style)** dashboard turns such a total into carve-outs + an "Unbudgeted" remainder, with a sunburst that carves it all the way down. Total budgets are only shown in that top-down view — the other (bottom-up) dashboards ignore them so they don't double-count.
 
 ### Multiple currencies
 
@@ -109,10 +109,10 @@ Budget *tracking* is done with dashboards. Finzytrack ships a demo dashboard for
 
 | If you budget like this… | Use this demo dashboard | What it shows |
 |---|---|---|
-| A fixed amount per account each month, at a glance | **Budget — Overview** | Headline KPIs — total budgeted, spent, remaining — a per-account progress list, and the spending that falls outside any budget |
-| Unspent money rolls over to next month | **Budget — Envelopes** | Every envelope's balance at a glance; click one to drill into its month-by-month available, spent, and carryover |
-| One total for an area, a few named sub-budgets, rest lumped together | **Budget — Zero-based (catch-all)** | Named carve-outs plus an "Unbudgeted" bucket that sums back to the total, with a sunburst carving it all the way down |
-| "How have I done, month by month?" | **Budget — History** | Budget vs actual month by month over any window (defaults to the trailing year), plus a per-account adherence heat-map (green under, red over) |
+| A fixed amount per account each month, at a glance | **Budget: Overview** | Headline KPIs — total budgeted, spent, remaining — a per-account progress list, and the spending that falls outside any budget |
+| Unspent money rolls over to next month | **Budget: Envelopes** | Every envelope's balance at a glance; click one to drill into its month-by-month available, spent, and carryover |
+| One total for an area, a few named sub-budgets, rest lumped together | **Budget: Zero-based** | Named carve-outs plus an "Unbudgeted" bucket that sums back to the total, with a sunburst carving it all the way down |
+| "How have I done, month by month?" | **Budget: History** | Budget vs actual month by month over any window (defaults to the trailing year), plus a per-account adherence heat-map (green under, red over) |
 
 **Two more popular styles don't need their own dashboard** — they're quick recipes over the *same* machinery, covered under [Build your own](#other-styles-build-your-own) below:
 
@@ -131,7 +131,7 @@ A budget dashboard only has something to show once you've set budgets. Add them 
 
 ### 2. Copy the demo that matches your style
 
-Open **Settings → Dashboards**, select the demo from the list (e.g. *Budget — Overview*), and copy its JSON. Either edit it in place, or — to keep the original as a reference — paste it into a new dashboard and give it a new `id` and `title`. The editor validates as you go and shows a live preview.
+Open **Settings → Dashboards**, select the demo from the list (e.g. *Budget: Overview*), and copy its JSON. Either edit it in place, or — to keep the original as a reference — paste it into a new dashboard and give it a new `id` and `title`. The editor validates as you go and shows a live preview.
 
 ### 3. Re-point it at your accounts
 

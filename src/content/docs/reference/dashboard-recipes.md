@@ -535,7 +535,7 @@ When `columnField` holds `YYYY-MM` values, the pivot generates per-column metada
 
 ### Budget transforms
 
-`joinBudgetActual`, `joinByPeriod`, `runningSum`, and `envelopeRollover` pair a `query` step (actuals) with a `compute` step (`budget_for_range`) to build budget dashboards. `joinBudgetActual` in **remainder mode** (set `config.totalAccount`) adds synthetic "Unbudgeted" and "Total" rows for catch-all/zero-based budgeting. To feed one of those roll-up rows to a single-value widget, slice it out with `where` — e.g. `where { field: "kind", equals: "total" }` yields the grand-total row for a KPI (see the Budget — Overview dashboard under [Dashboard shared steps](#dashboard-shared-steps)). See the [Budgets guide](/views/budgets/) for the styles and the seeded demo dashboards that use each.
+`joinBudgetActual`, `joinByPeriod`, `runningSum`, and `envelopeRollover` pair a `query` step (actuals) with a `compute` step (`budget_for_range`) to build budget dashboards. `joinBudgetActual` in **remainder mode** (set `config.totalAccount`) adds synthetic "Unbudgeted" and "Total" rows for catch-all/zero-based budgeting. To feed one of those roll-up rows to a single-value widget, slice it out with `where` — e.g. `where { field: "kind", equals: "total" }` yields the grand-total row for a KPI (see the Budget: Overview dashboard under [Dashboard shared steps](#dashboard-shared-steps)). See the [Budgets guide](/views/budgets/) for the styles and the seeded demo dashboards that use each.
 
 ---
 
@@ -558,13 +558,13 @@ A `compute` step calls a vetted server-side function that returns values SQL can
 
 A dashboard may declare a top-level `steps` array (the same step kinds, but no `output`). These run **once per dashboard render** and their outputs are available to every widget via `{{dashboard.steps.<id>}}`. Use them to compute an expensive value once and feed several widgets — instead of every widget repeating the same query, resolve, and join.
 
-The seeded **Budget — Overview** dashboard is the worked example: it resolves budgets, queries actuals, and joins them into a variance table **once** at the dashboard level, then six widgets (three KPIs, a breakdown table, a chart, and a reconciliation) each render a slice of that single result.
+The seeded **Budget: Overview** dashboard is the worked example: it resolves budgets, queries actuals, and joins them into a variance table **once** at the dashboard level, then six widgets (three KPIs, a breakdown table, a chart, and a reconciliation) each render a slice of that single result.
 
 ```json
 {
   "schemaVersion": 2,
   "id": "budget-overview",
-  "title": "Budget — Overview",
+  "title": "Budget: Overview",
   "parameters": [ /* monthStart, monthEnd, currency */ ],
 
   "steps": [
@@ -1497,7 +1497,7 @@ Instead of navigating away, a click can **set dashboard parameters** from the cl
 }
 ```
 
-The seeded **Budget — Envelopes** dashboard (`config/recipes/dashboards/budget-envelopes.json`) is a complete worked example: its envelope-balances list selects the `account` parameter, and the KPIs + trend chart below drill into the chosen envelope.
+The seeded **Budget: Envelopes** dashboard (`config/recipes/dashboards/budget-envelopes.json`) is a complete worked example: its envelope-balances list selects the `account` parameter, and the KPIs + trend chart below drill into the chosen envelope.
 
 ---
 
