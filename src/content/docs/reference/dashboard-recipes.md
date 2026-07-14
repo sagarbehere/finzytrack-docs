@@ -874,6 +874,10 @@ Key concepts:
 - Multiple `series` entries create grouped bars. Use `"barGap": "10%"` to control spacing.
 - The app injects query results as a `dataset.source` — you don't need to provide data in the options.
 
+:::tip[Position the legend, or it overlaps the axis]
+When a chart has **more than one series**, show a legend — but **pin it** and make room for it. An unpositioned `legend` defaults to the bottom-center, where it sits on top of the x-axis labels. Set `legend: { "top": 0 }` (top-anchored) and give the grid headroom with `grid: { "top": 40 }`, as the multi-series example above does. Single-series charts should set `legend: { "show": false }` (a one-item legend just adds clutter).
+:::
+
 #### Line Chart
 
 Same structure as bar chart, but with `"chartType": "line"` and series `"type": "line"`:
