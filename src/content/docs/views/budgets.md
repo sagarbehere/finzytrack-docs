@@ -70,9 +70,21 @@ The end marker is specific to Finzytrack. The directive stays valid in any Beanc
 
 A budget on a parent account is compared against spending on that account **and all of its descendants**. A budget on `Expenses:Food` covers `Expenses:Food`, `Expenses:Food:Restaurants`, and so on. If you also budget a child account, that child is tracked as its own line *and* still counts toward the parent — they overlap by design.
 
-:::note
-Beancount accounts need at least one subaccount, so you cannot budget the bare `Expenses` root. To budget a whole area, budget a real grouping account (for example `Expenses:Insurance`).
-:::
+#### Total budgets on a whole area (top-down)
+
+To set **one total budget for an entire area** — the top-down / zero-based way — budget the grouping account. For a real grouping account (one with sub-accounts, e.g. `Expenses:Insurance`), write it normally:
+
+```
+2026-01-01 custom "budget" Expenses:Insurance "monthly" 500 USD
+```
+
+For the **bare root** (`Expenses`, `Income`, …), Beancount won't accept it as an account token — but **quoting it** works, and both Beancount and Fava read it:
+
+```
+2026-01-01 custom "budget" "Expenses" "monthly" 9000 USD
+```
+
+Either way it's a normal budget (inclusive-parent covers the whole subtree). The **[Budget — Zero-based](#choosing-a-budgeting-style)** dashboard turns such a total into carve-outs + an "Unbudgeted" remainder, with a sunburst that carves it all the way down. Total budgets are only shown in that top-down view — the other (bottom-up) dashboards ignore them so they don't double-count.
 
 ### Multiple currencies
 
@@ -98,11 +110,14 @@ Budget *tracking* is done with dashboards. Finzytrack ships a demo dashboard for
 | If you budget like this… | Use this demo dashboard | What it shows |
 |---|---|---|
 | A fixed amount per account each month, at a glance | **Budget — Overview** | Headline KPIs — total budgeted, spent, remaining — a per-account progress list, and the spending that falls outside any budget |
-| One total for an area, a few named sub-budgets, rest lumped together | **Budget — Zero-based (catch-all)** | Named carve-outs plus a single "Unbudgeted" bucket that sums back to the total |
-| "Am I pacing to budget?" over a span | **Budget — Burn-down** | Cumulative actual vs cumulative budget, month by month |
 | Unspent money rolls over to next month | **Budget — Envelopes** | Every envelope's balance at a glance; click one to drill into its month-by-month available, spent, and carryover |
+| One total for an area, a few named sub-budgets, rest lumped together | **Budget — Zero-based (catch-all)** | Named carve-outs plus an "Unbudgeted" bucket that sums back to the total, with a sunburst carving it all the way down |
+| "How have I done over the year?" | **Budget — Trailing 12 Months** | Total budget vs actual month by month, plus a per-account adherence heat-map (green under, red over) |
 
-50/30/20 and pay-yourself-first are the **Overview** dashboard with budgets set on your Needs/Wants/Savings groups (or your savings account) — no different machinery, just different numbers and labels.
+**Two more popular styles don't need their own dashboard** — they're quick recipes over the *same* machinery, covered under [Build your own](#other-styles-build-your-own) below:
+
+- **50/30/20** (and pay-yourself-first) — the Overview dashboard with budgets set on your Needs/Wants/Savings group accounts, plus a proportion donut. Same no-rollover math, just three groups and different labels.
+- **Pace / burn-down** ("am I on track this month?") — a cumulative line of budget vs actual for one account, built as a single widget.
 
 ---
 
@@ -122,12 +137,18 @@ Open **Settings → Dashboards**, select the demo from the list (e.g. *Budget �
 
 What you change depends on the style:
 
-- **Overview / 50-30-20 / pay-yourself-first** — nothing structural. These already cover *every* budgeted expense account (and, for Overview, the whole-expenses "unbudgeted" remainder), so once your budgets are set they just work. Adjust the **From/To** and **Currency** parameters to taste.
+- **Overview / Trailing 12 Months** — nothing structural. These already cover *every* budgeted expense account (and, for Overview, the whole-expenses "unbudgeted" remainder), so once your budgets are set they just work. Adjust the **From/To** and **Currency** parameters to taste.
 - **Envelopes** — nothing structural either. The overview lists *every* budgeted account with its current balance, so once your budgets are set it just works — click any envelope to drill into its trend. Balances accumulate from each envelope's **first budget** (so what you see is the real balance, not a window that resets); use **As of** to evaluate at a past date, and **Start fresh** to deliberately reset an envelope to empty on a chosen date.
-- **Zero-based (catch-all)** — change `totalAccount` (in the `joinBudgetActual` step's `config`) from `Expenses:Insurance` to the account you want as the total (a real account that has sub-accounts — Beancount can't budget the bare `Expenses` root). Set a budget on that total account and on the children you want named; everything else rolls into **Unbudgeted**.
-- **Burn-down** — replace the **Account** parameter's option list with your own accounts, and set a budget for each. It tracks one account at a time.
+- **Zero-based (catch-all)** — pick your umbrella account in the **Total account** selector. Set a total budget on it — a real grouping account like `Expenses:Insurance`, or the whole-expenses root by quoting it (`custom "budget" "Expenses" …`, see [Total budgets](#total-budgets-on-a-whole-area-top-down)) — plus budgets on the children you want named; everything else rolls into **Unbudgeted**.
 
 The SQL `account_type = 'Expenses'` / `account LIKE '…'` filters and the column list can be edited too — see the [Dashboard & Widget Recipes](/reference/dashboard-recipes/) reference for the full format.
+
+### Other styles (build-your-own)
+
+Two popular styles are recipes over the same building blocks rather than seeded dashboards:
+
+- **50/30/20** — group your expenses under Needs / Wants / Savings accounts and set a monthly budget on each of the three groups. The **Overview** dashboard then tracks them like any other budget (inclusive-parent covers each group's subtree). Add a **proportion donut** to see the actual split against the 50/30/20 ideal: a `pie` chart (`radius: ["40%","68%"]`) over a query of actual spend per group. It's the same no-rollover math — only which numbers you enter changes.
+- **Pace / burn-down** — "am I pacing to stay under this month?" is one widget: a `query` for per-period actuals + a `budget_for_range` (`groupBy: "period"`) step, joined with `joinByPeriod`, then `runningSum` (`fields: ["budget","actual"]`, `orderBy: "period"`) to get cumulative series, plotted as a `line` chart. The actual line crossing above the budget line means you're pacing over. Drop it into the Overview (or any dashboard) as an extra widget rather than a whole dashboard.
 
 ### Troubleshooting — "my dashboard is empty"
 
@@ -136,9 +157,7 @@ The widgets degrade gracefully (you'll see a short message, never a broken panel
 1. **Budgets are set** for the accounts the widget covers (Budgets view).
 2. The selected **month / date range has spending** — the example data may not cover the current month; pick a populated one.
 3. The **currency** matches your budgets and postings.
-4. For zero-based and burn-down, the **account (or `totalAccount`) exists** in your ledger — those demos use example accounts you need to swap. (Envelopes needs no swap — click any budgeted envelope in its overview to drill in.)
-
-Zero-based also calls out two cases in a **Note** column: *no total budget set on that account*, and *over-allocated* (your named budgets add up to more than the total).
+4. For zero-based, the **Total account** you picked has a budget (a real grouping account, or the quoted root). If your named budgets add up to more than the total, that's *over-allocation* — the top-level "Unbudgeted" slice goes negative (and drops out of the sunburst). (Overview, Envelopes, and Trailing 12 Months need no swap — they cover every budgeted account automatically.)
 
 ### Or let the AI assistant build it
 
