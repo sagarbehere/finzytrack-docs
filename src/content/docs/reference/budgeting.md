@@ -121,7 +121,7 @@ Client-side transforms that turn budgets + actuals into what a widget renders:
 |---|---|
 | `joinBudgetActual` | Per-account variance `{ budget, actual, remaining, pctUsed, direction }`. **Remainder mode** (`config.totalAccount`) adds synthetic **Unbudgeted** + **Total** rows for catch-all/zero-based, with an over-allocation flag. |
 | `joinBudgetActualByPeriod` | Per-(account, period) variance — feeds the adherence heat-map. |
-| `joinByPeriod` | Merges per-period budgets and actuals into one row per period. |
+| `joinByPeriod` | Merges per-period budgets and actuals into one row per period, with the month's date bounds so a chart series can click through to that period. |
 | `runningSum` | Cumulative columns over a period series — burn-down / pace. |
 | `envelopeRollover` | Per-period `{ available, carryover, overspent }` — stateless envelope rollover. |
 | `envelopeBalances` | Every budgeted account's inception-aware carried-forward balance. |
