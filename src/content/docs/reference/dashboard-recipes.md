@@ -602,6 +602,37 @@ Shared steps are parameterized by **dashboard** parameters only. If a widget loc
 
 ---
 
+## Colors
+
+Anywhere a color is accepted — a series `itemStyle.color`, a KPI `iconColor`, budget-progress
+`colors`, a chart's top-level `options.color` array — you can use a **`{{theme.*}}` token** instead
+of a raw hex value. Tokens draw from the active **dashboard theme**, so colors stay consistent across
+every dashboard and can be recolored from one file. Prefer tokens; a raw hex/CSS color still works as
+a per-value override.
+
+| Token | Use for |
+|---|---|
+| `{{theme.brand}}` | The accent/focus color — a single-series chart, a primary/magnitude KPI icon |
+| `{{theme.baseline}}` | The muted "target/budget" a value is measured against |
+| `{{theme.valence.good \| warn \| bad \| complete}}` | Favorability: under / approaching / over / exactly-on-budget. The only place green/amber/red should appear |
+| `{{theme.series.<name>}}` | A named recurring series: `budget`, `actual`, `income`, `expense`, `savings` |
+| `{{theme.categorical}}` / `{{theme.categorical.N}}` | Category identity (pie/treemap) — auto-assigned, or a specific 0-based slot |
+
+Conventions the runtime applies for you:
+
+- **Pie and treemap charts** get the theme's categorical palette automatically — don't set colors on
+  them unless you want to override. Treemaps and sunbursts also color by **account family** (hue) and
+  **depth** (lightness), so a category's tiles read as a group.
+- **Budget-progress bars and the pivot heat-map** are colored by favorability from the theme — no
+  color config needed.
+- **KPI icons**: use `{{theme.brand}}` for a magnitude (Spent, Total, Assets); set `colorBySign: true`
+  for a signed value (Remaining, Net change) so it goes green/red by its sign.
+
+The token set above is fixed — don't invent new tokens. For the full theme file and how to edit it,
+see the [Dashboard Colors & Themes](/reference/dashboard-themes/) reference.
+
+---
+
 ## Visualizations
 
 The `visualization` object in each widget determines how query results are displayed.
@@ -614,13 +645,13 @@ Displays a single value prominently, with an optional icon and color.
 |----------|------|-------------|
 | `type` | string | **Required.** Must be `"kpi"`. |
 | `icon` | string | Single character or emoji displayed in a colored circle (e.g., `"$"`, `"↑"`, `"↓"`, `"#"`). |
-| `iconColor` | string | Icon background color: `"blue"`, `"green"`, `"red"`, `"purple"`, or `"amber"`. |
+| `iconColor` | string | Icon background color. Prefer a theme token — `"{{theme.brand}}"` for a magnitude, `"{{theme.series.income}}"` to match a series (see [Colors](#colors)). A hex/CSS color or a legacy name (`"blue"`/`"green"`/`"red"`/`"purple"`/`"amber"`) also works. For a signed figure use `colorBySign` instead. |
 | `format` | string | Value format (see [Formats](#formats)). |
 | `valueField` | string | Column name to display as the KPI value (default: `"value"`). |
 | `multiCurrency` | boolean | If `true`, displays one amount per currency, stacked vertically. The query must return one row per currency with `currency` and `amount` columns (or the columns specified by `currencyField` and `amountField`). |
 | `amountField` | string | Column name for amounts when `multiCurrency` is true (default: `"amount"`). |
 | `currencyField` | string | Column name for currencies when `multiCurrency` is true (default: `"currency"`). |
-| `colorBySign` | boolean | Colour **both the value text and the icon** by sign — **green** when > 0, **blue** when exactly 0 ("on the mark"), **red** when negative — **overriding `iconColor`** while it's on. Use for figures where negative is bad, e.g. a Remaining / over-budget KPI. (A single number has no "approaching" state, so there's no amber tier here — unlike the [budget-progress](#budget-progress) bars.) |
+| `colorBySign` | boolean | Colour **both the value text and the icon** by sign, from the theme's favorability colors — **good** when > 0, **on-the-mark** when exactly 0, **bad** when negative — **overriding `iconColor`** while it's on. Use for figures where negative is bad, e.g. a Remaining / over-budget KPI. (A single number has no "approaching" state, so there's no amber tier here — unlike the [budget-progress](#budget-progress) bars.) |
 | `showTrend` | boolean | Show a trend indicator below the value (e.g., "+5.2% vs prior"). Requires `trendField`. |
 | `trendField` | string | Column name containing the trend percentage. Positive values show as green (up), negative as red (down). |
 | `clickLink` | object | Makes the KPI value clickable, navigating to a filtered view. See [Click-Through Links](#click-through-links). |
@@ -1640,7 +1671,7 @@ Recipes are validated when saved. Here's a summary of the validation rules:
 - `output`: Required. Must name a step in `steps`.
 - `visualization`: Required object with `type` in `["kpi", "chart", "table", "pivot"]`.
 - For `chart`: `chartType` must be in `["bar", "line", "pie", "area", "scatter", "treemap", "funnel", "gauge", "calendar", "sankey", "radar", "sunburst"]`.
-- For `kpi`: `iconColor` must be in `["blue", "green", "red", "purple", "amber"]`.
+- For `kpi`: `iconColor` is any string — a `{{theme.*}}` token, a hex/CSS color, or a legacy name (`blue`/`green`/`red`/`purple`/`amber`). See [Colors](#colors).
 - `format` and label format strings must be valid format names.
 
 ### Step Validation

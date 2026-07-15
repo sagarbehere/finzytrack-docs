@@ -25,7 +25,15 @@ After updating, if new or updated demo content is available you'll see a dismiss
 - **Dashboards you've edited** are **kept exactly as they are**. Finzytrack can tell an untouched dashboard from an edited one, so your changes are never clobbered. (The trade-off: once you edit a demo dashboard it stops receiving updates — Finzytrack has no way to know your version is safe to replace. See [Restoring an original demo](#restoring-an-original-demo) if you want the shipped copy back.)
 - **Dashboards you deleted** are **not brought back**.
 
+**The dashboard color theme** (in `config/dashboard-themes/`) is delivered the same careful way as dashboards: the theme file is **added** if you don't have it, **refreshed** while it's untouched, and **kept as-is once you've edited it** — so a palette you've customized is never overwritten. See [Dashboard Colors & Themes](/reference/dashboard-themes/) for what's in it and how to edit it.
+
 **The demo ledger** (in `data/ledgers/`, including the multi-file demo) is sample data Finzytrack provides — not your own records — so it's **refreshed to the latest version whenever a newer one ships**, even if you poked at it while exploring. A backup is saved first. This is what keeps the demo dates current. Finzytrack only replaces it when it genuinely has a newer version, so your exploration isn't wiped every time you open the app. **Your own ledger is never demo content and is never touched.**
+
+## Getting the new colors on a dashboard you've edited
+
+This release introduces a **color theme** for dashboards — consistent chart, budget, and category colors across every dashboard. New and untouched demo dashboards pick it up automatically when you apply the update. But a demo dashboard you've **already edited** is (rightly) never overwritten, so it won't switch to the improved, fully-themed version on its own.
+
+If you'd like the new theming on a demo you've customized, copy the updated version over by hand — the same steps as [Restoring an original demo](#restoring-an-original-demo): open the shipped copy from the repository's [`backend/resources/seed_config/recipes/dashboards/`](https://github.com/sagarbehere/finzytrack/tree/main/backend/resources/seed_config/recipes/dashboards), then paste it into **Settings → Dashboards** and **Save** (your edited version is backed up on save). Your own new dashboards keep whatever colors you gave them; to adopt the theme in one, swap explicit color values for theme tokens like `{{theme.brand}}` (see [Dashboard Colors & Themes](/reference/dashboard-themes/)).
 
 ## Backups — nothing is lost
 

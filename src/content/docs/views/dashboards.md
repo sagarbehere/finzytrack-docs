@@ -59,6 +59,10 @@ Tabular data with sortable columns. Values can be formatted as currency, percent
 
 Two-dimensional summaries — for example, expense categories as rows and months as columns. Pivot tables can show row totals, column totals, and a grand total. Cells can be clickable links to filtered transaction views.
 
+### Colors
+
+Dashboard colors — chart series, category slices, budget bars, KPI accents — come from a shared **dashboard theme**, so they stay consistent across every dashboard and can be recolored from one place. See [Dashboard Colors & Themes](/reference/dashboard-themes/).
+
 ---
 
 ## Parameters
@@ -144,8 +148,8 @@ If you have [AI configured](/quick-start/#configuring-ai), you can describe the 
 
 ### Using the Settings Editor
 
-Go to **Settings > Dashboards** to create and edit dashboard and widget recipes using a JSON editor with live preview. Select "Dashboards" or "Widgets" at the top, click **"+ New"**, write or paste your recipe JSON, and use the **Refresh Preview** button to see a live rendering of your layout. See [Dashboard Recipes](/reference/dashboard-recipes/) for the full recipe reference.
+Go to **Settings > Dashboards** to create and edit dashboards using a JSON editor with live preview. Click **"+ New"**, write or paste your dashboard JSON, and use the **Refresh Preview** button to see a live rendering of your layout. See [Dashboard Recipes](/reference/dashboard-recipes/) for the full recipe reference.
 
 ### Editing Recipe Files Directly
 
-Dashboard recipes are JSON files stored in `config/recipes/dashboards/` and widget recipes in `config/recipes/widgets/`. You can create or edit these files with any text editor. After making changes, click the **Reload** button in the dashboard tab bar to pick up the new files. See [Dashboard Recipes](/reference/dashboard-recipes/) for the recipe format and options.
+Dashboards are JSON files stored in `config/recipes/dashboards/`, one file per dashboard; each widget is defined **inline** within its dashboard (there is no separate widget file). You can create or edit these files with any text editor. After making changes, click the **Reload** button in the dashboard tab bar to pick up the new files. See [Dashboard Recipes](/reference/dashboard-recipes/) for the recipe format and options.

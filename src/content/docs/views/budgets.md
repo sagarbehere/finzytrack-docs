@@ -42,7 +42,8 @@ You can equally hand-write these directives in your ledger file — the Budgets 
 
 ## How budgets are interpreted
 
-These semantics determine what your budget numbers *mean*.
+These semantics determine what your budget numbers *mean*. For the precise directive format and the
+building blocks budget dashboards are made of, see the [Budgeting reference](/reference/budgeting/).
 
 ### Effective-dating
 
