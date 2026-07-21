@@ -5,7 +5,7 @@ sidebar:
   order: 6
 ---
 
-The Budgets view lets you set a budget for any account — separately for each currency — effective from a date, and track actual spending against it. The unit of a budget is an **(account, currency)** pair, so the same account can carry an independent budget in each currency you use (see [Multiple currencies](#multiple-currencies)). Budgets are stored directly in your ledger as standard Beancount `custom "budget"` directives, so they stay compatible with Fava and travel with your data.
+The Budgets view lets you set a budget for any account, separately for each currency, so your actual spending can be tracked against it using dashboards. The unit of a budget is an **(account, currency)** pair, so the same account can carry an independent budget in each currency you use (see [Multiple currencies](#multiple-currencies)); each is **effective from a date and holds until you change it** (see [Effective-dating](#effective-dating)). Budgets are saved into your ledger, so they travel with your data. For the exact storage format and the full semantics, see the [Budgeting reference](/reference/budgeting/).
 
 ---
 
@@ -13,100 +13,54 @@ The Budgets view lets you set a budget for any account — separately for each c
 
 Open **Budgets** from the sidebar. The view lists one row per **(account, currency)** pair you budget, with two amount columns:
 
-- **Current budget** — what's in effect for that account and currency, as of the date in the **Current budget as of** filter (today by default). This column is read-only.
-- **New budget** — enter an amount here (with an interval and effective date) to change the budget *going forward*. Saving writes a new directive effective from that date; the earlier budget still governs the earlier period. A row with a pending entry is marked **Edited**.
+- **Budget** — what's in effect for that account and currency, as of the date in the **Budget as of** filter (today by default). This column is read-only.
+- **New budget** — enter an amount here (with an interval and effective date) to change the budget *going forward*. Saving adds a new budget effective from that date; the earlier budget still governs the earlier period. A row with a pending entry is marked **Edited**.
 
 Stage as many changes as you like across rows, then click **Save Changes** below the table to commit them together; **Reset** discards the staged entries. A per-row status icon shows Edited, Saved, or — if a write fails — an error you can hover for the reason.
 
 - **Quick-add row** (top): budget an account and currency you haven't budgeted yet — enter account, currency, interval, amount, and effective date, then **Add**.
-- **Filters:** narrow by account name, set the **Current budget as of** date, and — when you budget in more than one currency — filter by **Currency**.
+- **Filters:** narrow by account name, set the **Budget as of** date, and — when you budget in more than one currency — filter by **Currency**.
 
-### Editing or removing past budgets — Manage history
+The budget editor is also reachable from the **Accounts** view: open an account's detail drawer and click **Manage** in the **Budget** section.
 
-Setting a **New budget** always adds a directive going forward; it never rewrites the past. To correct or remove an earlier directive, expand a row with its **▸** chevron to open **Manage history** — the full timeline of directives for that account and currency. There you can:
+### Managing budget history
 
-- **Edit or delete** an individual past or current directive in place. These changes apply immediately (they are corrections to the record, not staged forward changes).
-- **End budget** — stop budgeting this account and currency from a date you choose, keeping the past directives (see [Ending a budget](#ending-a-budget)).
+Setting a **New budget** always adds a budget going forward; it never rewrites the past. To correct or remove an earlier budget, expand a row with its **▸** chevron to open **Manage history** — the full timeline for that account and currency. There you can:
 
-The same per-account budget editor is available from the **Accounts** view: open an account's detail drawer and use its **Budget** section.
-
-A budget you set is written to your ledger as a directive like:
-
-```
-2026-01-01 custom "budget" Expenses:Food "monthly" 500 USD
-```
-
-You can equally hand-write these directives in your ledger file — the Budgets view simply reads and writes them for you.
+- **Edit or delete** an individual past or current budget in place. These changes apply immediately (they are corrections to the record, not staged forward changes).
+- **End budget** — stop budgeting this account and currency from a date you choose, keeping the earlier budgets (see [Ending a budget](#ending-a-budget)).
 
 ---
 
-## How budgets are interpreted
+## Good to know
 
-These semantics determine what your budget numbers *mean*. For the precise directive format and the
-building blocks budget dashboards are made of, see the [Budgeting reference](/reference/budgeting/).
+These concepts affect what your budgets mean and what the dashboards show. They're summarized here in plain terms; for the full detail — including the exact directive format Finzytrack writes into your ledger — see the [Budgeting reference](/reference/budgeting/).
 
 ### Effective-dating
 
-A budget applies from its effective date until a later budget for the **same account and currency** supersedes it. To change an amount mid-year, add a second directive with a later date — the earlier one still governs the earlier months.
+A budget applies from its effective date until a later budget for the **same account and currency** replaces it. To change an amount mid-year, add a new budget with a later date — the earlier one still governs the earlier months. That's exactly what the **New budget** column does: it adds a budget going forward without touching the past.
 
 ### Ending a budget
 
-To stop budgeting an account and currency from a certain date — without deleting the record of what you budgeted before — use **End budget** in a row's [Manage history](#editing-or-removing-past-budgets--manage-history). From that date the account is no longer budgeted: it drops out of budget-vs-actual tracking, while the earlier directives remain for the periods they governed.
+**End budget** — in a row's [Manage history](#managing-budget-history) — stops budgeting an account and currency from a date you choose, without deleting the record of what you budgeted before. From that date the account drops out of budget-vs-actual tracking, while the earlier budgets remain for the periods they governed.
 
-Ending is different from budgeting **0**. A budget of 0 is a real target of zero — spending against it counts as over budget. An end means there is *no budget at all* from that date.
+Ending is different from budgeting **0**. A budget of 0 is a real target of zero — spending against it counts as over budget. An end means there is *no budget at all* from that date. To resume budgeting, set a new budget with a later effective date; to undo an end, delete it in **Manage history**.
 
-An end is stored as a budget directive with a `none` interval, for example:
+### Inheritance
 
-```
-2026-07-01 custom "budget" Expenses:Food "none" 0 USD
-```
+A budget on a parent account is compared against spending on that account **and all of its sub-accounts**. A budget on `Expenses:Food` covers `Expenses:Food`, `Expenses:Food:Restaurants`, and so on. If you also budget a child account, that child is tracked as its own line *and* still counts toward the parent — they overlap by design.
 
-The `0` amount is inert — it exists only to name the currency, so you can end one currency's budget for an account while keeping another. To resume budgeting, set a new budget with a later effective date (it supersedes the end); to undo the end entirely, delete the end marker in **Manage history**.
-
-:::note
-The end marker is specific to Finzytrack. The directive stays valid in any Beancount tool, but a tool that doesn't recognize the `none` interval (such as Fava) simply ignores it and shows the previous budget as continuing.
-:::
-
-### Inheritance (inclusive-parent)
-
-A budget on a parent account is compared against spending on that account **and all of its descendants**. A budget on `Expenses:Food` covers `Expenses:Food`, `Expenses:Food:Restaurants`, and so on. If you also budget a child account, that child is tracked as its own line *and* still counts toward the parent — they overlap by design.
-
-#### Total budgets on a whole area (top-down)
-
-To set **one total budget for an entire area** — the top-down / zero-based way — budget the grouping account. For a real grouping account (one with sub-accounts, e.g. `Expenses:Insurance`), write it normally:
-
-```
-2026-01-01 custom "budget" Expenses:Insurance "monthly" 500 USD
-```
-
-For the **bare root** (`Expenses`, `Income`, …), Beancount won't accept it as an account token — but **quoting it** works, and both Beancount and Fava read it:
-
-```
-2026-01-01 custom "budget" "Expenses" "monthly" 9000 USD
-```
-
-Either way it's a normal budget (inclusive-parent covers the whole subtree). The **[Budget: Zero-based](#choosing-a-budgeting-style)** dashboard turns such a total into carve-outs + an "Unbudgeted" remainder, with a sunburst that carves it all the way down. Total budgets are only shown in that top-down view — the other (bottom-up) dashboards ignore them so they don't double-count.
+To set **one total budget for a whole area** — the top-down / zero-based way — just budget the grouping account: pick it from the account dropdown when setting a budget. You can even budget your entire expenses by selecting the **Expenses** account ([how the root is stored](/reference/budgeting/#total-budgets-and-the-account-root)). The **[Budget: Zero-based](#choosing-a-budgeting-style)** dashboard turns such a total into named carve-outs plus an "Unbudgeted" remainder, with a sunburst carving it all the way down. Total budgets are shown only in that top-down view — the other (bottom-up) dashboards ignore them so they don't double-count.
 
 ### Multiple currencies
 
-A budget applies only to its own currency; spending in other currencies is ignored for that budget. The **same account can carry a separate budget in each currency**, tracked side by side — for example a USD budget and an INR budget on `Expenses:Food`:
-
-```
-2026-01-01 custom "budget" Expenses:Food "monthly"   500 USD
-2026-01-01 custom "budget" Expenses:Food "monthly" 30000 INR
-```
-
-Each is compared only against `Expenses:Food` spending in its own currency. Budget dashboards pick one currency at a time (a **Currency** parameter), since amounts in different currencies can't be summed into a single variance.
-
-### Period normalization
-
-A budget can use any interval (`daily`, `weekly`, `monthly`, `quarterly`, `yearly`). For an aligned period with a single active budget, the period total is exactly the amount you set. For other ranges, Finzytrack uses the same full-precision daily-equivalent normalization Fava does (`monthly ÷ days-in-that-month`, etc.), so arbitrary date ranges are computable.
+A budget applies only to its own currency; spending in other currencies is ignored for that budget. The **same account can carry a separate budget in each currency**, tracked side by side — for example a USD budget and an INR budget on `Expenses:Food`, each compared only against spending in its own currency. Budget dashboards work in one currency at a time (a **Currency** parameter), since amounts in different currencies can't be summed into a single variance.
 
 ---
 
 ## Choosing a budgeting style
 
-Budget *tracking* is done with dashboards. Finzytrack ships a demo dashboard for each common style — open the **Dashboards** view, pick the one that matches how you like to budget, and copy/tweak it. The "allocation philosophy" (how you arrive at the numbers — zero-based, 50/30/20, pay-yourself-first) is just how you choose what to enter; the tracking is the same machinery.
+Budget *tracking* is done with dashboards. Finzytrack ships a demo dashboard for each common style — open the **Dashboards** view, pick the one that matches how you like to budget, and copy/tweak it if needed. The "allocation philosophy" (how you arrive at the numbers — zero-based, 50/30/20, pay-yourself-first) is just how you choose what to enter; the tracking is the same machinery.
 
 | If you budget like this… | Use this demo dashboard | What it shows |
 |---|---|---|
@@ -124,7 +78,7 @@ Budget *tracking* is done with dashboards. Finzytrack ships a demo dashboard for
 
 ## Build your own budget dashboard
 
-The demo dashboards are calibrated to the bundled example ledger, so they're **templates** — the quickest way to a budget dashboard for *your* data is to copy a demo and re-point it at your own accounts.
+The demo dashboards **just work once you've set your budgets** — they already cover every budgeted account, so most people never edit one. Change a dashboard only to show something *different* from the demo; when you do, copy a demo and adjust it.
 
 ### 1. Set your budgets first
 
@@ -134,15 +88,15 @@ A budget dashboard only has something to show once you've set budgets. Add them 
 
 Open **Settings → Dashboards**, select the demo from the list (e.g. *Budget: Overview*), and copy its JSON. Either edit it in place, or — to keep the original as a reference — paste it into a new dashboard and give it a new `id` and `title`. The editor validates as you go and shows a live preview.
 
-### 3. Re-point it at your accounts
+### 3. Adjust it — usually nothing to change
 
-What you change depends on the style:
+With your budgets set, the demos work as-is; adjust the parameters to taste:
 
-- **Overview / History** — nothing structural. These already cover *every* budgeted expense account (and, for Overview, the whole-expenses "unbudgeted" remainder), so once your budgets are set they just work. Adjust the **From/To** and **Currency** parameters to taste.
-- **Envelopes** — nothing structural either. The overview lists *every* budgeted account with its current balance, so once your budgets are set it just works — click any envelope to drill into its trend. Balances accumulate from each envelope's **first budget** (so what you see is the real balance, not a window that resets); use **As of** to evaluate at a past date, and **Start fresh** to deliberately reset an envelope to empty on a chosen date.
-- **Zero-based (catch-all)** — pick your umbrella account in the **Total account** selector. Set a total budget on it — a real grouping account like `Expenses:Insurance`, or the whole-expenses root by quoting it (`custom "budget" "Expenses" …`, see [Total budgets](#total-budgets-on-a-whole-area-top-down)) — plus budgets on the children you want named; everything else rolls into **Unbudgeted**.
+- **Overview / History** — no structural change. They cover *every* budgeted expense account (and, for Overview, the whole-expenses "Unbudgeted" remainder) automatically. Set the **From/To** and **Currency** parameters to taste.
+- **Envelopes** — no structural change either; it lists every budgeted account with its current balance, so click any envelope to drill into its trend. Balances accumulate from each envelope's **first budget** (so what you see is the real balance, not a window that resets); use **As of** to evaluate at a past date, and **Start fresh** to deliberately reset an envelope to empty on a chosen date.
+- **Zero-based (catch-all)** — pick your umbrella account in the **Total account** selector: a grouping account like `Expenses:Insurance`, or your whole expenses by selecting the **Expenses** root. Set a total budget on it plus budgets on the children you want named; everything else rolls into **Unbudgeted**.
 
-The SQL `account_type = 'Expenses'` / `account LIKE '…'` filters and the column list can be edited too — see the [Dashboard & Widget Recipes](/reference/dashboard-recipes/) reference for the full format.
+To change accounts, columns, or the underlying SQL, see the [Dashboard & Widget Recipes](/reference/dashboard-recipes/) reference for the full format.
 
 ### Other styles (build-your-own)
 
@@ -153,12 +107,12 @@ Two popular styles are recipes over the same building blocks rather than seeded 
 
 ### Troubleshooting — "my dashboard is empty"
 
-The widgets degrade gracefully (you'll see a short message, never a broken panel). If a budget widget is empty or showing blanks, check, in order:
+The widgets should degrade gracefully (you'll see a short message, not a broken panel). If a budget widget is empty or showing blanks, check, in order:
 
 1. **Budgets are set** for the accounts the widget covers (Budgets view).
 2. The selected **month / date range has spending** — the example data may not cover the current month; pick a populated one.
 3. The **currency** matches your budgets and postings.
-4. For zero-based, the **Total account** you picked has a budget (a real grouping account, or the quoted root). If your named budgets add up to more than the total, that's *over-allocation* — the top-level "Unbudgeted" slice goes negative (and drops out of the sunburst). (Overview, Envelopes, and History need no swap — they cover every budgeted account automatically.)
+4. For zero-based, the **Total account** you picked has a budget (a grouping account, or the Expenses root). If your named budgets add up to more than the total, that's *over-allocation* — the top-level "Unbudgeted" slice goes negative (and drops out of the sunburst). (Overview, Envelopes, and History need no swap — they cover every budgeted account automatically.)
 
 ### Or let the AI assistant build it
 

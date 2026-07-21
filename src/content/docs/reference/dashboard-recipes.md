@@ -1645,7 +1645,7 @@ This is the canonical multi-source widget: a `query` step for actuals, a `comput
 }
 ```
 
-The bundled `budget-this-month`, `budget-zero-based`, `budget-burndown`, and `budget-envelopes` dashboards build on this pattern with the other budget transforms. For the user-facing workflow — copying a demo and re-pointing it at your own accounts — see [Build your own budget dashboard](/views/budgets/#build-your-own-budget-dashboard).
+The bundled `budget-overview`, `budget-envelopes`, `budget-zero-based`, and `budget-history` dashboards build on this pattern with the other budget transforms. For the user-facing workflow — copying a demo and adapting it to your own accounts — see [Build your own budget dashboard](/views/budgets/#build-your-own-budget-dashboard).
 
 ---
 

@@ -134,8 +134,9 @@ Budget-progress bars and the adherence heat-map color themselves from the theme'
 
 ## Budgeting styles → dashboards
 
-Every style is the *same* machinery — which numbers you enter and which pieces you compose. Finzytrack
-seeds one dashboard for each style that earns a dedicated one:
+Every style is the *same* machinery — which numbers you enter and which pieces you compose. For choosing
+and tweaking a style in the app, see the [Budgets guide](/views/budgets/#choosing-a-budgeting-style); this
+is the format-side map. Finzytrack seeds one dashboard for each style that earns a dedicated one:
 
 | Style | Dashboard |
 |---|---|
