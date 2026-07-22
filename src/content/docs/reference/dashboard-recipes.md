@@ -13,22 +13,22 @@ If you have [AI configured](/quick-start/#configuring-ai), you can [build dashbo
 The bundled **Widget Gallery** dashboard contains a working example of every widget type the app supports (kpi, bar, line, area, pie, scatter, treemap, table, pivot, funnel, gauge, calendar heatmap, sankey, radar, sunburst, budget progress). When building a new recipe, the fastest path is to find the closest gallery widget, copy its JSON, and adapt the SQL and titles. The gallery's source lives at `backend/resources/seed_config/recipes/dashboards/widget-gallery.json` (or open it from the Dashboard panel and use the recipe editor to inspect each widget). Each gallery widget has a `helpText` field describing the type's specific gotchas — those notes are the most reliable distillation of what works for that chart type.
 :::
 
-Dashboards in Finzytrack are defined using **JSON recipe files**. The dashboard is the only recipe type: each dashboard defines a grid layout and the widgets it contains **inline** — there are no separate, standalone widget files. Recipe files are plain JSON — no code changes or rebuilds required.
+Dashboards in Finzytrack are defined using **JSON recipe files**. Each dashboard defines a grid layout and the widgets it contains **inline** — there are no separate, standalone widget files. 
 
 ## Concepts
 
 A **widget** is the fundamental building block — a KPI card, chart, table, pivot table, or budget-progress list. Each widget is a small **pipeline of steps** feeding a visualization. A step is one of:
 
-- **`query`** — a read-only SQL query against your ledger data (the common case).
-- **`compute`** — a server-side function that returns computed values (for example `budget_for_range`, which supplies budget numbers). The available functions are a fixed catalog.
-- **`transform`** — a client-side function that reshapes or combines the outputs of earlier steps (sort, limit, pivot, budget-vs-actual, and so on).
+- **`query`** — a read-only SQL query against your ledger data (the common case). You can freely write any query that makes sense for your widget.
+- **`compute`** — a server-side function that returns computed values (for example `budget_for_range`, which supplies budget numbers). There is a fixed catalog of available compute functions.
+- **`transform`** — a client-side function that reshapes or combines the outputs of earlier steps (sort, limit, pivot, budget-vs-actual, and so on). There is a fixed catalog of available transforms.
 
-The widget names an `output` step whose result is drawn. Most widgets are simply one `query` step feeding the visualization; multi-source widgets (such as budget vs actual) combine a `query` step and a `compute` step in a `transform`. Widgets can have interactive **parameters** (dropdowns, date and number inputs) that flow into steps.
+The widget names an `output` step whose result is visualized. Most widgets are simply one `query` step feeding the visualization; multi-source widgets (such as budget vs actual) combine a `query` step and a `compute` step in a `transform`. Widgets can have interactive **parameters** (dropdowns, date and number inputs) that flow into steps.
 
 A **dashboard** arranges its widgets in a grid layout and can define shared parameters that cascade to every widget. It can also define **shared steps** that are computed once and fed to multiple widgets.
 
 :::tip
-The most reliable, always-current description of the recipe format is built into the app: when you ask the AI assistant to build a dashboard it loads the schema on demand, and **Settings → Dashboards** validates your JSON with live preview. The deeper examples below predate the step-based format and are being refreshed; the in-app schema is authoritative.
+The most reliable, always-current description of the recipe format is built into the app: when you ask the AI assistant to build a dashboard it loads the schema on demand, and **Settings → Dashboards** validates your JSON with live preview.
 :::
 
 ### File Structure
@@ -289,7 +289,7 @@ Compute functions do calculations SQL can't express — budget normalization, pr
 | `inputs` | Ordered `{{steps.<id>}}` / `{{dashboard.steps.<id>}}` references to the step outputs this transform consumes. |
 | `config` | Optional transform-specific configuration; `{{...}}` templates inside it are resolved. |
 
-Transforms run in the browser over already-computed step outputs. Unlike query steps, a transform can take **multiple inputs** — that's how a widget combines a SQL result with a compute result (for example budget vs actual).
+Transforms run in the browser over already-computed step outputs. Unlike query steps, a transform can take **multiple inputs** — that's how a widget combines a SQL result with a compute result (for example budget vs actual). Like compute functions, the transform names are a **fixed catalog** — you select from it and can't invent new ones (see the [full catalog](#transforms) below).
 
 ### References & interpolation
 

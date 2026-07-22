@@ -5,15 +5,12 @@ sidebar:
   order: 3
 ---
 
-This is the reference for how budgeting works in Finzytrack: the directive that stores a budget, the
-semantics Finzytrack applies when resolving it, and the building blocks budget dashboards are made of.
-For setting and tracking budgets in the app, see the [Budgets view guide](/views/budgets/); for the
+This is the reference for how budgeting works in Finzytrack. It describes the directive that stores a budget, the semantics Finzytrack applies when resolving it, and the building blocks which make up budget dashboards. For setting and tracking budgets in the app, see the [Budgets view guide](/views/budgets/); for the
 dashboard recipe format, see [Dashboard & Widget Recipes](/reference/dashboard-recipes/).
 
 ## The `custom "budget"` directive
 
-A budget is stored directly in your ledger as a standard Beancount `custom "budget"` directive — the
-same format Fava uses, so budgets travel with your data:
+A budget is stored directly in your ledger as a standard Beancount `custom "budget"` directive — so budgets travel with your data (this is the same format used by Fava):
 
 ```
 2026-01-01 custom "budget" Expenses:Food "monthly" 500 USD
@@ -94,9 +91,7 @@ fractional; only the display rounds.
 
 ## Building blocks for budget dashboards
 
-Budget dashboards are ordinary [dashboard recipes](/reference/dashboard-recipes/): a `query` step for
-actual spending + a `compute` step for the budget numbers + a `transform` that merges them. The pieces
-are a fixed catalog — you compose them, you don't write new ones.
+Budget dashboards are ordinary [dashboard recipes](/reference/dashboard-recipes/): a `query` step for actual spending + a `compute` step for the budget numbers + a `transform` that merges them. You can freely write your own queries, while the compute and transform functions are selected from a fixed catalog. Please [raise a feature request (issue) on GitHub](https://github.com/sagarbehere/finzytrack/issues) if you need a particular compute or transform function.
 
 ### The `budget_for_range` compute function
 
