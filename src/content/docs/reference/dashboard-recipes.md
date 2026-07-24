@@ -1322,20 +1322,22 @@ A purpose-built budget-vs-actual list — **not an ECharts chart**, but a dedica
 | `directionField` | string | Row field holding `"under-good"` or `"over-good"` (expenses vs income). Default `"direction"`; absent → under-good. |
 | `accountFormat` | string | Optional [format](#formats) for the account label (e.g. `"accountName2"`). |
 | `warnAt` | number | Fraction of budget where a bar turns amber ("approaching"). Default `0.85` (85%). |
-| `colors` | object | Override the status bar colours — `{ under, approaching, exact, over }`, each any CSS/hex colour (applied in both light and dark mode). Omitted statuses keep the default palette. |
+| `colors` | object | Override the status bar colours — `{ under, approaching, exact, over }`. Each defaults to the matching **theme valence** colour (`good`/`warn`/`complete`/`bad`), so you normally omit this entirely. To override a status, set its key to a `{{theme.*}}` token or a raw hex/CSS colour; omitted keys keep the theme default. |
 | `link` | object | Optional per-row click-through (see [Click-Through Links](#click-through-links)); templates can use `{{row.<field>}}` and `{{parameters.<name>}}`. |
 | `emptyText` | string | Message shown when there are no rows. |
 
-Bar colours are a status scale — **green** (under `warnAt`), **amber** (approaching), **blue** (exactly on budget, e.g. a fixed expense paid in full at 100%), **red** (over budget, strictly `> 100%`). Each maps to a `colors` key, and you can set any subset (omitted keys keep their default):
+Bar colours are a status scale — **green** (under `warnAt`), **amber** (approaching), **blue** (exactly on budget, e.g. a fixed expense paid in full at 100%), **red** (over budget, strictly `> 100%`). These come from the active theme's **valence** scale automatically, so you normally set **no** `colors` at all (none of the seeded budget dashboards do). Each `colors` key maps to the theme valence token that is its default — override a status by pointing its key at a different token (preferred) or a raw hex/CSS colour:
 
 ```jsonc
 "colors": {
-  "under":       "#10b981",  // under budget (default green)
-  "approaching": "#f59e0b",  // approaching the limit — ≥ warnAt (default amber)
-  "exact":       "#3b82f6",  // exactly on budget — 100% (default blue)
-  "over":        "#ef4444"   // over budget — > 100% (default red)
+  "under":       "{{theme.valence.good}}",      // under budget — default
+  "approaching": "{{theme.valence.warn}}",      // ≥ warnAt — default
+  "exact":       "{{theme.valence.complete}}",  // exactly 100% — default
+  "over":        "{{theme.valence.bad}}"        // > 100% — default
 }
 ```
+
+A raw hex (e.g. `"over": "#ef4444"`) works too, as a per-value escape hatch. See [Colors](#colors) and the [Dashboard Colors & Themes](/reference/dashboard-themes/) reference.
 
 The defaults match the `joinBudgetActual` flat output (`account`, `budget`, `actual`, `remaining`, `pctUsed`, `direction`, `currency`), so a widget usually needs only `accountFormat`, `emptyText`, and an optional `link`. Bar colours are a traffic light on how much of the budget is used — green (comfortable, under 85%), amber (approaching, 85–100%), red (over) — flipped for income (`over-good`), where reaching the target is good.
 

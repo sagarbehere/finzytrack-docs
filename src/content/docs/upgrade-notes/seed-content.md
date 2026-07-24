@@ -39,9 +39,9 @@ If you'd like the new theming on a demo you've customized, copy the updated vers
 
 Before replacing any file, Finzytrack saves a timestamped copy beside it, e.g. `config/recipes/dashboards/budget-overview.json.20260709_141103_512847.backup`. To roll back, quit Finzytrack, delete the updated file, and rename its `.backup` copy back.
 
-## Brought the notice back after dismissing it
+## Bring a notice back after dismissing it
 
-Dismissed the notice by mistake, or want to re-check later? **Settings → General → Show dismissed notices** re-opens any startup notice you've dismissed — including this one — so you can review it again and click **Add now**. If nothing new is waiting, it simply tells you you're up to date. (It only re-shows notices; it never applies anything on its own, and it can't touch your edits.)
+Dismissed a notice by mistake, or want to re-check later? **Settings → General → Show dismissed notices** re-opens any startup notice you've dismissed so you can review it again and click **Add now**. If nothing new is waiting, it simply tells you you're up to date. (It only re-shows notices; it never applies anything on its own, and it can't touch your edits.)
 
 ## Restoring an original demo
 

@@ -27,7 +27,7 @@ Every time Finzytrack writes to a file — your ledger, a rule file, a recipe, t
 
 ### Where Backups Are Stored
 
-All backups are stored in a single directory: `data/backups/` within your Finzytrack data directory. The directory is created automatically on first use.
+The automatic per-write backups described here are all stored in a single directory: `data/backups/` within your Finzytrack data directory. The directory is created automatically on first use. (The one exception is [backups made during upgrades](#backups-during-upgrades), which sit beside the file being converted rather than in `data/backups/`.)
 
 ### Backup Naming
 
@@ -64,6 +64,12 @@ Finzytrack uses an atomic write mechanism to ensure files are never left in a pa
 4. If an error occurs during writing, the temporary file is discarded and the original remains untouched.
 
 This means that even if the app crashes or loses power mid-write, your data files will not be corrupted.
+
+### Backups during upgrades
+
+Occasionally a new version of Finzytrack needs to convert some of your saved files to a new format — most often your saved dashboards. This happens **only after you consent** to a prompt on launch, and Finzytrack **backs up every file it changes first**, so an upgrade is always reversible.
+
+These upgrade backups sit **beside the original file** (not in `data/backups/`) as a timestamped copy, for example `my-dashboard.json.20260627_141103_512847.backup`; a file that is removed rather than rewritten is copied into a `.migration-backups/` folder in the same area first. Each [Upgrade Note](/upgrade-notes/) says exactly where its backups are and how to roll the change back.
 
 ---
 

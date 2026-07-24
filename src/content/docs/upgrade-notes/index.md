@@ -18,8 +18,8 @@ This section has one entry per change that needs your attention, each labeled wi
 ## Notes
 
 - **v0.2.0** — [Dashboards move to the step-based format](/upgrade-notes/dashboards-step-format/): the dashboard recipe format changed; saved dashboards are upgraded on first launch after you confirm.
-- **v0.2.0** — [New demo content](/upgrade-notes/seed-content/): new and updated demo dashboards and demo data are offered to existing installs, without touching anything you've edited.
+- **v0.2.0** — [New demo content](/upgrade-notes/seed-content/): new and updated demo dashboards and demo data are offered to existing installs.
 
 ---
 
-For how the upgrade mechanism works under the hood, see [Asset migrations](/development/asset-migrations/) in the Development section.
+For what happens to your files during an upgrade — always consent-gated and backed up — see [Backups during upgrades](/reference/backups-and-logs/#backups-during-upgrades).
