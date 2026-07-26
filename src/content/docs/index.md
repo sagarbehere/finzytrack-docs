@@ -12,8 +12,8 @@ Available for **macOS, Windows, and Linux**.
 
 ## What Finzytrack does
 
-Personal finance software is useful along four dimensions. Finzytrack is designed to
-be strong across all four.
+Personal finance software is useful along several dimensions. Finzytrack is designed to
+be strong across all of them.
 
 ### Import
 
@@ -56,6 +56,18 @@ accessible; AI is just a faster path to the same place.
 Turn any query or analysis into a dashboard widget — a chart, a table, a KPI — that
 updates automatically whenever your data changes. Build a dashboard that reflects
 how you think about your finances.
+
+### Budget
+
+Set targets, then see how you're tracking.
+
+Set a budget for any account, effective from any date. Budgets are stored as standard
+[Beancount](https://beancount.github.io/) directives right in your ledger — not a
+separate database — so they travel with the rest of your data. Finzytrack tracks your
+actual spending against them and shows where you're on track and where you've
+overspent, with ready-made dashboards for monthly budgets, envelopes with rollover,
+zero-based catch-all, and month-over-month history. See [Budgets](/views/budgets/) for
+the full guide.
 
 ---
 
