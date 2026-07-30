@@ -19,6 +19,7 @@ This section has one entry per change that needs your attention, each labeled wi
 
 - **v0.2.0** — [Dashboards move to the step-based format](/upgrade-notes/dashboards-step-format/): the dashboard recipe format changed; saved dashboards are upgraded on first launch after you confirm.
 - **v0.2.0** — [New demo content](/upgrade-notes/seed-content/): new and updated demo dashboards and demo data are offered to existing installs.
+- **v0.2.1** — [Currencies and investment holdings](/upgrade-notes/currencies-and-holdings/): totals and pickers now show currencies only; if you hold investments, set your operating currencies in Settings.
 
 ---
 
