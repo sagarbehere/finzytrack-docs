@@ -114,7 +114,7 @@ Beancount uses double-entry accounting. Every transaction has postings that sum 
 
 Common derived values:
 
-- **Net worth** = `SUM(CAST(amount AS REAL)) WHERE account_type IN ('Assets', 'Liabilities')`
+- **Net worth** = `SUM(CAST(amount AS REAL)) WHERE account_type IN ('Assets', 'Liabilities')`, grouped by currency. For a money figure, exclude investment holdings — see [Currencies vs holdings](#currencies-vs-holdings) below.
 - **Savings** = Income - Expenses = `SUM(CASE WHEN account_type = 'Income' THEN -CAST(amount AS REAL) ELSE 0 END) - SUM(CASE WHEN account_type = 'Expenses' THEN CAST(amount AS REAL) ELSE 0 END)`
 
 :::caution
@@ -141,6 +141,22 @@ FROM postings
 WHERE account_type = 'Expenses' AND currency = :currency
 GROUP BY account
 ```
+
+### Currencies vs holdings
+
+The `currency` column holds **any** commodity code — real currencies (`USD`, `INR`) and investment holdings (stocks/funds like `VOO`, `VTI`). The `commodities` table's `is_currency` column says which is which (see [Commodities and Currencies](/reference/commodities-and-currencies/)).
+
+For money totals — net worth, total assets, total liabilities — join `commodities` and keep only currencies, so share counts are never mixed into a money figure:
+
+```sql
+SELECT currency, SUM(CAST(amount AS REAL)) AS amount
+FROM postings p JOIN commodities c ON p.currency = c.code
+WHERE c.is_currency = 1 AND account_type = 'Assets'
+GROUP BY currency
+HAVING amount != 0
+```
+
+To analyze the holdings themselves (e.g. share quantities), filter `WHERE c.is_currency = 0` instead.
 
 ### SQL Syntax Rules
 
@@ -177,10 +193,12 @@ ORDER BY currency
 ```
 
 #### Net worth by currency
+Joins `commodities` and filters `is_currency` so investment holdings are not stacked into the money total (see [Currencies vs holdings](#currencies-vs-holdings)).
 ```sql
 SELECT currency,
   SUM(CASE WHEN account_type IN ('Assets', 'Liabilities') THEN CAST(amount AS REAL) ELSE 0 END) AS amount
-FROM postings
+FROM postings p JOIN commodities c ON p.currency = c.code
+WHERE c.is_currency = 1
 GROUP BY currency
 HAVING amount != 0
 ORDER BY currency

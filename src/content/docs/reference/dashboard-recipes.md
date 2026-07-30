@@ -707,7 +707,7 @@ If your query uses different column names than `currency` and `amount`, specify 
   "id": "assets-by-currency",
   "title": "Total Assets",
   "steps": [
-    { "id": "rows", "kind": "query", "query": "SELECT currency AS cur, SUM(CAST(amount AS REAL)) AS total FROM postings WHERE account_type = 'Assets' GROUP BY currency HAVING total != 0" }
+    { "id": "rows", "kind": "query", "query": "SELECT currency AS cur, SUM(CAST(amount AS REAL)) AS total FROM postings p JOIN commodities c ON p.currency = c.code WHERE c.is_currency = 1 AND account_type = 'Assets' GROUP BY currency HAVING total != 0" }
   ],
   "output": "rows",
   "visualization": {
@@ -1703,7 +1703,7 @@ Dashboard IDs must be unique across recipe files; step IDs must be unique within
 - Use `"rowHeight": "140px"` for KPI-focused dashboards, `"200px"` for chart-heavy ones.
 
 ### Multi-Currency Tips
-- For KPIs showing totals across all currencies, use `multiCurrency: true` and `GROUP BY currency`.
+- For KPIs showing totals across all currencies, use `multiCurrency: true` and `GROUP BY currency`. For **money** totals (net worth, assets, liabilities), also `JOIN commodities c ON p.currency = c.code WHERE c.is_currency = 1` so investment holdings (stocks/funds) aren't stacked as share counts — see [Commodities and Currencies](/reference/commodities-and-currencies/).
 - For charts and pivots that need a single currency, add a `currency` parameter with `"optionsFrom": "currencies"` and filter with `WHERE currency = :currency`.
 - For year selectors, use `"optionsFrom": "years"` to dynamically populate from years present in the ledger data.
 - Common pattern: dashboard-level `year` parameter + widget-level `currency` parameter on charts/pivots, while KPIs show all currencies.
