@@ -94,24 +94,24 @@ The AppImage is a single self-contained file — no installation step is needed.
 
 ### Required runtime packages
 
-The AppImage doesn't bundle GTK, WebKit, or any other system libraries — it relies on the user's distro to supply them. The two packages you need are:
+The AppImage doesn't bundle GTK, WebKit, or any other system libraries — it relies on the user's distro to supply them. The packages you need are:
 
-- **`libwebkit2gtk-4.1`** — the WebKit rendering engine used to display the UI
+- **the WebKit GObject-introspection typelib** — how Finzytrack loads WebKit at runtime; on Debian/Ubuntu this is **`gir1.2-webkit2-4.1`**. Installing it also pulls in the WebKit rendering library (`libwebkit2gtk-4.1-0`) as a dependency. This typelib is usually already present on **GNOME** desktops, but **not on KDE/Qt desktops (e.g. Kubuntu) or minimal installs** — which is the most common reason a freshly-downloaded AppImage won't start.
 - **`libfuse2`** — required by AppImage itself to mount as a runtime filesystem
 
 Use whichever line matches your distro:
 
 | Distro | Install command |
 |---|---|
-| Debian 13 / Ubuntu 24.04+ | `sudo apt install libwebkit2gtk-4.1-0 libfuse2t64` |
-| Debian 12 / Ubuntu 22.04 | `sudo apt install libwebkit2gtk-4.1-0 libfuse2` |
+| Debian 13 / Ubuntu 24.04+ | `sudo apt install gir1.2-webkit2-4.1 libfuse2t64` |
+| Debian 12 / Ubuntu 22.04 | `sudo apt install gir1.2-webkit2-4.1 libfuse2` |
 | Fedora 36+ | `sudo dnf install webkit2gtk4.1 fuse-libs` |
 | Arch / Manjaro | `sudo pacman -S webkit2gtk-4.1 fuse2` |
-| openSUSE Tumbleweed | `sudo zypper install libwebkit2gtk-4_1-0 libfuse2` |
+| openSUSE Tumbleweed | `sudo zypper install typelib-1_0-WebKit2-4_1 libfuse2` |
 
 The package manager will pull in everything else (GLib, GTK, Pango, Cairo, X11, font/icon libraries…) as transitive dependencies, so you don't need to list them yourself.
 
-If the AppImage fails to start with `cannot open shared object file: libwebkit2gtk-4.1.so.0`, install the package above. The launcher also prints a friendly install hint when it detects WebKit is missing.
+If the AppImage fails to start with `cannot open shared object file: libwebkit2gtk-4.1.so.0`, or with `You must have either QT or GTK with Python extensions installed`, install the package for your distro above. The second message means the WebKit **introspection typelib** is missing even though the WebKit library itself may already be installed — common on KDE/Qt desktops such as Kubuntu, and fixed by the `gir1.2-webkit2-4.1` (or your distro's typelib) package. The launcher also prints a friendly install hint when it detects WebKit is missing.
 
 On Debian 13, the FUSE package is named `libfuse2t64` rather than `libfuse2` — part of Debian 13's time_t 64-bit transition. Older distros still use the `libfuse2` name.
 
