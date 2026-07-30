@@ -36,6 +36,8 @@ accounts:
 | `default_currency` | string | `"USD"` | Default currency code (e.g., `USD`, `EUR`, `INR`). Used when a currency is not specified during import. |
 | `default_unknown_account` | string | `"Expenses:Unknown"` | Fallback account assigned to imported transactions when the category cannot be determined. |
 
+`default_currency` is a fallback for import; it is **not** the list of currencies your reports total in. That list — your *operating currencies* — lives in the ledger, not `config.yaml`, and is edited under **Settings → General → Operating Currencies**. See [Commodities and Currencies](/reference/commodities-and-currencies/).
+
 ---
 
 ## Server
