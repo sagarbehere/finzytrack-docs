@@ -27,6 +27,7 @@ Detailed reference material for the configurable parts of Finzytrack. Use these 
 | Page | Purpose |
 | ---- | ------- |
 | [Account Hierarchy](/reference/account-hierarchy/) | Designing a chart of accounts that fits your finances |
+| [Commodities and Currencies](/reference/commodities-and-currencies/) | How Finzytrack tells currencies from investment holdings, and how operating currencies control totals and pickers |
 | [Backups and Logs](/reference/backups-and-logs/) | Where Finzytrack writes backups and logs, and how to manage them |
 | [Ledger Rewrites](/reference/ledger-rewrites/) | What is retained and what is dropped when Finzytrack writes to your ledger |
 | [Multi-file Ledgers](/reference/multi-file-ledgers/) | How Finzytrack reads and writes ledgers split across files via `include` directives |

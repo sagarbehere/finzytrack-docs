@@ -329,14 +329,17 @@ ORDER BY a.name
 
 #### commodities
 
-One row per Commodity directive.
+One row per commodity — the union of those declared with a `commodity`
+directive and those that only appear in a posting. `declaration_date`, `name`,
+and `asset_class` are `NULL` for commodities that were never formally declared.
 
 | Column | Type | Description |
 |--------|------|-------------|
 | `code` | TEXT (PK) | Commodity code (e.g., `USD`, `AAPL`). |
-| `declaration_date` | TEXT | Date of the commodity directive. |
+| `declaration_date` | TEXT | Date of the commodity directive, if declared. |
 | `name` | TEXT | Full name from metadata (e.g., `"Apple Inc."`). |
-| `type` | TEXT | Commodity type from metadata (e.g., `"stock"`, `"currency"`). |
+| `asset_class` | TEXT | `asset-class` metadata (e.g., `"cash"`, `"stock"`, `"etf"`). |
+| `is_currency` | INTEGER | `1` if the commodity plays a currency (unit-of-account) role, else `0`. Derived from the `operating_currency` option (a code in that list is a currency), falling back to `asset-class` and defaulting to `1` when neither is declared. |
 | `metadata_json` | TEXT | JSON object of commodity metadata. |
 
 #### commodity_usage
