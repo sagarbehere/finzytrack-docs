@@ -94,12 +94,7 @@ The AppImage is a single self-contained file — no installation step is needed.
 
 ### Required runtime packages
 
-The AppImage doesn't bundle GTK, WebKit, or any other system libraries — it relies on the user's distro to supply them. The packages you need are:
-
-- **the WebKit GObject-introspection typelib** — how Finzytrack loads WebKit at runtime; on Debian/Ubuntu this is **`gir1.2-webkit2-4.1`**. Installing it also pulls in the WebKit rendering library (`libwebkit2gtk-4.1-0`) as a dependency. This typelib is usually already present on **GNOME** desktops, but **not on KDE/Qt desktops (e.g. Kubuntu) or minimal installs** — which is the most common reason a freshly-downloaded AppImage won't start.
-- **`libfuse2`** — required by AppImage itself to mount as a runtime filesystem
-
-Use whichever line matches your distro:
+The AppImage relies on your distro for two things — the WebKit GTK engine (via its GObject-introspection typelib, which is how Finzytrack loads WebKit) and FUSE (which AppImages use to run). Install both with the line for your distro:
 
 | Distro | Install command |
 |---|---|
@@ -109,11 +104,9 @@ Use whichever line matches your distro:
 | Arch / Manjaro | `sudo pacman -S webkit2gtk-4.1 fuse2` |
 | openSUSE Tumbleweed | `sudo zypper install typelib-1_0-WebKit2-4_1 libfuse2` |
 
-The package manager will pull in everything else (GLib, GTK, Pango, Cairo, X11, font/icon libraries…) as transitive dependencies, so you don't need to list them yourself.
+These pull in everything else (GLib, GTK, Pango, Cairo, …) as dependencies. The WebKit typelib is usually already present on GNOME desktops but often missing on KDE/Qt (e.g. Kubuntu) or minimal installs — the most common reason a freshly-downloaded AppImage won't start.
 
-If the AppImage fails to start with `cannot open shared object file: libwebkit2gtk-4.1.so.0`, or with `You must have either QT or GTK with Python extensions installed`, install the package for your distro above. The second message means the WebKit **introspection typelib** is missing even though the WebKit library itself may already be installed — common on KDE/Qt desktops such as Kubuntu, and fixed by the `gir1.2-webkit2-4.1` (or your distro's typelib) package. The launcher also prints a friendly install hint when it detects WebKit is missing.
-
-On Debian 13, the FUSE package is named `libfuse2t64` rather than `libfuse2` — part of Debian 13's time_t 64-bit transition. Older distros still use the `libfuse2` name.
+**If it won't start:** the errors `cannot open shared object file: libwebkit2gtk-4.1.so.0` and `You must have either QT or GTK with Python extensions installed` both mean the packages above aren't installed — run the command for your distro. (The second error is specifically the missing typelib, even when the WebKit library itself is present.)
 
 To integrate Finzytrack with your desktop environment (application menu, file manager, etc.), you can use [AppImageLauncher](https://github.com/TheAssassin/AppImageLauncher).
 
