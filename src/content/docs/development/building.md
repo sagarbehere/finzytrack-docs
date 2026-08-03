@@ -12,9 +12,11 @@ Finzytrack ships as a standalone desktop app that bundles the FastAPI backend, t
 Before building, you need:
 
 - **Python 3.11+** (3.13 recommended)
-- **Node.js 18+** (22 recommended)
+- **Node.js 20+** (22 recommended)
 - **npm** (comes with Node.js)
 - **Git**
+
+Node 20 is a hard minimum: Tailwind CSS v4 compiles through a native module (`@tailwindcss/oxide`) that is published only for Node 20 and above. On Node 18, `npm install` appears to succeed but silently skips that module, and `npm run build` then fails with `Error: Cannot find native binding`. See [Node version errors](#node-version-errors) below.
 
 ### Platform-specific prerequisites
 
@@ -46,12 +48,21 @@ On Debian 13, `libfuse2` has been renamed `libfuse2t64` as part of the time_t 64
 
 The Python-side GTK bindings (`pygobject`, `pycairo`) are installed automatically from `desktop/requirements.txt`. PyGObject is currently pinned `<3.51` because newer 3.5x crashes pywebview's GTK page-load callback; remove the pin once pywebview's GTK backend is updated upstream.
 
-Debian 13 ships Node.js 20 via apt, which meets the minimum. To match the version CI builds with (Node 22), install from NodeSource:
+**Node.js on Debian/Ubuntu.** Check what you have before building:
+
+```bash
+node --version
+```
+
+Debian 13 ships Node.js 20 via apt, which meets the minimum. **Ubuntu ships older versions that do not** — Ubuntu 24.04 provides Node 18, and Ubuntu 22.04 provides Node 12. On those releases the apt `nodejs` package cannot build the frontend, so install Node 22 from NodeSource (also the version CI builds with):
 
 ```bash
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 sudo apt-get install -y nodejs
+node --version    # v22.x
 ```
+
+This applies only to building from source. The prebuilt AppImage contains an already-compiled frontend and needs no Node.js at all.
 
 **Windows** — verified on Windows 11. PyWebView uses EdgeChromium (EdgeWebView2), which is included with modern Windows, so no GUI runtime needs to be installed. You do need Python, Node.js, and Git, which a fresh Windows install does not ship.
 
@@ -123,6 +134,27 @@ cd frontend
 npm install
 cd ..
 ```
+
+#### Node version errors
+
+If `npm run build` (or `python build.py`) fails with:
+
+```
+Cannot find native binding. npm has a bug related to optional dependencies
+  at Object.<anonymous> (.../node_modules/@tailwindcss/oxide/index.js)
+```
+
+your Node.js is older than 20. Tailwind CSS v4 compiles through a native module that is published only for Node 20 and above. Because that module is an optional dependency, npm skips it without failing when the Node version does not match — so `npm install` looks like it worked, and the problem only appears at build time.
+
+Ignore the message's advice to delete `package-lock.json`; that will not help, and it discards the project's pinned dependency versions. Install Node 20 or newer (see [platform-specific prerequisites](#platform-specific-prerequisites)), then reinstall:
+
+```bash
+cd frontend
+rm -rf node_modules
+npm install
+```
+
+Removing `node_modules` is necessary because npm will not add the skipped module to an existing install.
 
 ## Running in Development Mode
 

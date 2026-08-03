@@ -200,13 +200,26 @@ Finzytrack is designed as a local desktop app, but it can be self-hosted on a VP
 
 ### Setup
 
-On your server, clone the repository and install dependencies:
+You need **Python 3.11+** and **Node.js 20 or newer** on the server. Check the Node version first — several distributions ship an older one that cannot build the frontend, including Ubuntu 24.04 (Node 18) and Ubuntu 22.04 (Node 12):
+
+```bash
+node --version
+```
+
+If it is below 20, install Node 22 from NodeSource:
+
+```bash
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+
+Then clone the repository and install dependencies:
 
 ```bash
 git clone https://github.com/sagarbehere/finzytrack.git
 cd finzytrack
 
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 pip install -r backend/requirements.txt
 
@@ -216,11 +229,13 @@ npm run build
 cd ..
 ```
 
+If `npm run build` fails with `Cannot find native binding`, your Node version is still below 20 — see [Node version errors](/development/building/#node-version-errors) on the Build Instructions page.
+
 Start the backend, serving the built frontend:
 
 ```bash
 cd backend
-python -m app.main --static-dir ../frontend/dist --host 0.0.0.0
+python -m app.main --static-dir ../frontend/dist --server-host 0.0.0.0
 ```
 
 This starts Finzytrack on port 8001, accessible from the network.
@@ -257,7 +272,7 @@ After=network.target
 Type=simple
 User=finzytrack
 WorkingDirectory=/path/to/finzytrack/backend
-ExecStart=/path/to/finzytrack/venv/bin/python -m app.main --static-dir /path/to/finzytrack/frontend/dist --host 127.0.0.1
+ExecStart=/path/to/finzytrack/venv/bin/python -m app.main --static-dir /path/to/finzytrack/frontend/dist --server-host 127.0.0.1
 Restart=on-failure
 
 [Install]
