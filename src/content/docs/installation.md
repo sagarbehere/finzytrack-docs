@@ -200,7 +200,7 @@ Finzytrack is designed as a local desktop app, but it can be self-hosted on a VP
 
 ### Setup
 
-You need **Python 3.11+** and **Node.js 20 or newer** on the server. Check the Node version first — several distributions ship an older one that cannot build the frontend, including Ubuntu 24.04 (Node 18) and Ubuntu 22.04 (Node 12):
+You need **Python 3.12+** and **Node.js 20 or newer** on the server. Ubuntu 24.04 and Debian 13 already ship a suitable Python, so in practice only Node needs attention. Check it first — several distributions ship a version too old to build the frontend, including Ubuntu 24.04 (Node 18) and Ubuntu 22.04 (Node 12):
 
 ```bash
 node --version
