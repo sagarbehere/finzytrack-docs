@@ -164,7 +164,7 @@ The demo ledger is a generated artifact, not a committed file, so a fresh clone 
 python backend/scripts/generate_fake.py
 ```
 
-This writes `backend/resources/seed_data/ledgers/fake.beancount` and its companion `prices.beancount` in well under a second (about 5,400 transactions). It needs no dependencies beyond the standard library, so it works with or without the virtual environment active.
+This writes `backend/resources/seed_data/ledgers/fake.beancount` in well under a second (about 5,400 transactions). It needs no dependencies beyond the standard library, so it works with or without the virtual environment active.
 
 Run it **before** first launch if you plan to choose **demo data** in the setup wizard. Without it, demo mode still completes but seeds an empty ledger, and every dashboard renders blank. Choosing your own ledger file instead is unaffected.
 
