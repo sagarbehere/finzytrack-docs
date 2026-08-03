@@ -156,6 +156,20 @@ npm install
 
 Removing `node_modules` is necessary because npm will not add the skipped module to an existing install.
 
+### 4. Generate the demo ledger
+
+The demo ledger is a generated artifact, not a committed file, so a fresh clone does not have one. Generate it from the repository root:
+
+```bash
+python backend/scripts/generate_fake.py
+```
+
+This writes `backend/resources/seed_data/ledgers/fake.beancount` and its companion `prices.beancount` in well under a second (about 5,400 transactions). It needs no dependencies beyond the standard library, so it works with or without the virtual environment active.
+
+Run it **before** first launch if you plan to choose **demo data** in the setup wizard. Without it, demo mode still completes but seeds an empty ledger, and every dashboard renders blank. Choosing your own ledger file instead is unaffected.
+
+The generated transactions are anchored to the current month, which is why the file is not committed: a checked-in ledger would age out and the demo dashboards — which query recent months — would go empty over time. Re-run the command any time you want to re-anchor it to today. The desktop build regenerates it automatically (`desktop/finzytrack.spec`), and the test suite generates it on demand, so this step is only for running from source.
+
 ## Running in Development Mode
 
 During development, the backend and frontend run as separate processes. The Vite dev server proxies API requests to the backend, so both need to be running at the same time.

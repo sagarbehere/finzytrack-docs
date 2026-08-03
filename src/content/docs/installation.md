@@ -231,6 +231,14 @@ cd ..
 
 If `npm run build` fails with `Cannot find native binding`, your Node version is still below 20 — see [Node version errors](/development/building/#node-version-errors) on the Build Instructions page.
 
+If you intend to pick **demo data** in the setup wizard, generate the demo ledger first — it is a generated artifact and a fresh clone does not include one:
+
+```bash
+python backend/scripts/generate_fake.py
+```
+
+Without it, demo mode completes but seeds an empty ledger and the dashboards render blank. This is not needed if you point Finzytrack at your own ledger file.
+
 Start the backend, serving the built frontend:
 
 ```bash
