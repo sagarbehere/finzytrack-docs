@@ -332,6 +332,7 @@ Parameters add interactive controls (dropdowns, number inputs) to dashboards and
 | `min` | number | For `number` type: minimum value. |
 | `max` | number | For `number` type: maximum value. |
 | `hidden` | boolean | When `true`, the parameter is functional (its `default` applies, it can be set by a [select action](#select-action-master-detail) or the URL, and steps read it) but renders **no control** in the parameter bar. Use for a parameter driven only by click-to-select. |
+| `allowAll` | boolean | For a `select` param (typically `optionsFrom: "currencies"`): prepend an "All" option bound to the value `*`. Used for a dashboard-level currency filter — "All" (the default) shows every currency, a specific pick narrows the dashboard. Gate the filter in SQL with `WHERE (:currency = '*' OR currency = :currency)`. The `*` value does not override or hide a same-named widget-level `currency` param, so per-chart currency pickers stay usable while the filter is on "All". |
 | `showWhen` | object | Conditional visibility: `{ "param": "<name>", "equals": <value> }` — the control shows only while another parameter's current value equals `equals`. The parameter stays functional when hidden this way (its default/last value still feeds steps). Use to reveal a control based on a toggle (e.g. a date shown only when a checkbox is on). |
 | `minParam` / `maxParam` | string | For a `date` (or `number`) control: bind the input's minimum/maximum to another parameter's current value. Reactive — e.g. a "from" date with `"maxParam": "asOf"` can't be set past the "as of" date. |
 
@@ -506,7 +507,7 @@ A `transform` step calls one named function from a **fixed catalog** over the ou
 | `limit` | `[rows]` | `{ count }` | the first `count` rows |
 | `pluck` | `[rows]` | `{ field }` | an array of one field's values |
 | `where` | `[rows]` | `{ field, equals? \| notEquals? \| in? }` | the rows matching the predicate (chain `firstRow`/`limit` to reduce to one) |
-| `appendTotal` | `[rows]` | `{ field?, labelField?, label?, count? }` | the rows (first `count`, if given) plus a grand-total row summing `field` over **all** input rows (`isTotal: true`), so a top-N table still totals the full set |
+| `appendTotal` | `[rows]` | `{ field?, labelField?, label?, count?, groupField? }` | the rows (first `count`, if given) plus a grand-total row summing `field` over **all** input rows (`isTotal: true`), so a top-N table still totals the full set. With `groupField` (e.g. `"currency"`), emits one total row **per distinct group value** instead of a single grand total — for a multi-currency table, where summing across currencies is meaningless |
 | `groupBy` | `[rows]` | `{ key, sum }` | one row per distinct `key` (a field name or array of names), each field in `sum` totalled exactly; first-seen order. E.g. roll per-account-per-period budgets up to a per-period total |
 | `pivot` | `[rows]` | `{ rowField, columnField, valueField, formatColumn?, sortRowsBy? }` | a cross-tabulation (see below) |
 | `joinBudgetActual` | `[budgets, actuals]` | `{ totalAccount?, periodStart?, periodEnd? }` | budget-vs-actual variance rows |
@@ -1220,6 +1221,7 @@ Displays query results as a simple data table.
 | `label` | string | **Required.** Column header text. |
 | `align` | string | Text alignment: `"left"` (default), `"center"`, `"right"`. |
 | `format` | string | Value format (see [Formats](#formats)). |
+| `currencyField` | string | For a money column in a multi-currency table: the row field holding that row's currency code, so each cell is formatted in its own currency (symbol + grouping) instead of the widget's single `currency` param. Use with a `"currency"`/`"signedCurrency"` `format`. |
 | `link` | object | Click-through link for cell values (see [Click-Through Links](#click-through-links)). |
 
 ### Pivot Table
@@ -1514,7 +1516,7 @@ Instead of navigating away, a click can **set dashboard parameters** from the cl
 - Templates use the **same click variables** as a navigate link for that widget type (e.g. `{{row.<field>}}` for a table column or budget-progress row, `{{data.<field>}}` for a chart series).
 - Only keys that are **actual dashboard parameters** are applied — a select can't invent unknown parameters.
 - Setting a parameter re-runs the dashboard shared steps and every widget that reads that parameter — exactly as if the user had changed it in the dropdown. The parameter is persisted and reflected in the URL like any other selection.
-- For a `budget-progress` list, the row whose selection matches the current parameter values is highlighted as the active (drilled-in) row.
+- For a `budget-progress` list or a `table`, the row whose selection matches the current parameter values is highlighted as the active (drilled-in) row.
 
 **Example — click an account to drive an account-scoped drill-down.** A `budget-progress` overview whose rows each set the `account` parameter; a chart below reads `:account` and shows just that account's trend:
 
