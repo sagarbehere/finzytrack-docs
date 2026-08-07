@@ -52,7 +52,7 @@ the wrong place is simply not found.
 |---|---|---|
 | On the `commodity` | `asset-class`, `name`, `fetch_symbol`, `issue_date`, `denomination` | The security itself |
 | On an asset account `open` | `asset-class`, `interest_rate`, `maturity_date`, `compounding`, `interest_account`, `institution`, `registration` | One held position |
-| On an income account `open` | `income-type` | The kind of income |
+| On an income account `open` | `income-type`, `dividend_of` | The kind of income, and which security a dividend account pays for |
 
 Each is covered below. Every key is optional.
 
@@ -205,14 +205,44 @@ order:
    a shared account cannot tell two paid-out deposits apart.
 
 Interest that cannot be tied to a single account is **never guessed onto the wrong
-account.** It is shown as **unattributed interest** — a clearly marked figure on
-the Cash & Deposits dashboard. It still counts in your income totals; it simply
-has no per-account yield. Seeing a large unattributed figure is your cue to add an
-`interest_account` link.
+account.** It is shown as **unattributed interest** on the Cash & Deposits dashboard
+— a headline figure plus an "Unattributed Interest by Account" list, grouped by the
+income account that recorded it. Click an account in that list to see its
+transactions. The interest still counts in your income totals; it simply has no
+per-account yield. A large figure there is your cue to add an `interest_account`
+link to the earning instrument.
 
 **Effective yield** is the interest you actually earned divided by the account's
 average balance over the period, expressed as an annual rate. It is shown beside
 the stated `interest_rate` so you can see promised against delivered.
+
+### Attributing dividends to the holding that paid them
+
+The returns view groups performance by asset class, so each dividend needs to be tied
+to the holding that paid it. How that happens depends on how the dividend is paid:
+
+- **Reinvested dividends** buy more units of the holding, so the transaction already
+  names the security — it is attributed automatically, no metadata needed.
+- **Cash dividends** are paid into a cash account and leave the holding untouched, so
+  the transaction contains no reference to the security. To attribute these, add a
+  **`dividend_of`** key to the dividend income account, naming the commodity it pays
+  for:
+
+  ```beancount
+  2015-12-31 open Income:Dividends:VOO USD
+    income-type: "dividend"
+    dividend_of: "VOO"
+  ```
+
+  Give each such holding its **own** dividend income account so the link is
+  unambiguous.
+
+A cash dividend with no `dividend_of` link is shown as **unattributed dividends** on
+the Holdings & Performance dashboard — a headline figure plus an "Unattributed
+Dividends by Account" list, grouped by the income account that recorded it. Click an
+account in that list to see its transactions. The dividend still counts in your income
+and in your overall portfolio return; it is only left out of the per-asset-class
+return. A large figure there is your cue to add a `dividend_of` link.
 
 ## Realized gains need no metadata
 
@@ -249,6 +279,7 @@ is what to add.
 | Cash accounts grouped by type, with rate and maturity | Account-level `asset-class`, plus `interest_rate` and `maturity_date` |
 | Interest earned and effective yield per account | `income-type: "interest"` on the interest income account; `interest_account` for paid-out interest |
 | The interest-versus-dividend income split | `income-type` on your income accounts |
+| Cash dividends grouped by asset class in returns | `dividend_of: "<SYMBOL>"` on each cash-dividend income account |
 | Realized capital gains, short vs long term | Nothing — just record sales with their cost and sale price |
 | An I-Bond's accrued value | `asset-class: "i-bond"`, `issue_date`, and `denomination` on the commodity |
 
@@ -285,6 +316,7 @@ option "operating_currency" "USD"
 ; --- Income accounts, classified by kind ---
 2015-12-31 open Income:Dividends:VOO USD
   income-type: "dividend"
+  dividend_of: "VOO"
 2023-01-14 open Income:Interest:CD1 USD
   income-type: "interest"
 2019-04-22 open Income:Interest:Savings USD
@@ -302,7 +334,9 @@ You do not need to do any of this at once. A sensible order:
 3. Add **`interest_rate`** and **`maturity_date`** to CDs and savings for the rate
    and maturity detail.
 4. Add **`interest_account`** links only where interest is paid *out* to a
-   separate account and you want its yield.
+   separate account and you want its yield, and **`dividend_of`** links only where
+   dividends are paid out as cash and you want them grouped by asset class in
+   returns.
 
 At every step, everything you have not tagged still shows — just with less detail.
 

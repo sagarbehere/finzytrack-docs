@@ -81,17 +81,18 @@ Some parameters default to a **templated value** like *Current Year* or *Current
 
 ## Included Dashboards
 
-Finzytrack ships with several dashboards out of the box: three **overview** dashboards that give you a useful picture from day one, a **Widget Gallery** reference of every supported widget type, and a set of **budget** dashboards (one per common budgeting style).
+Finzytrack ships with several dashboards out of the box: three **overview** dashboards that give you a useful picture from day one, three **investment** dashboards for holdings and cash instruments, a **Widget Gallery** reference of every supported widget type, and a set of **budget** dashboards (one per common budgeting style).
 
 ### Financial Overview
 
 A snapshot of your current financial position:
 
-- **Net Worth** — sum of all assets minus all liabilities, shown per currency.
-- **Total Assets** — sum of all asset accounts.
+- **Net Worth** — sum of all assets minus all liabilities, shown per currency. Includes the market value of any priced holdings, folded into the currency each is priced in.
+- **Total Assets** — sum of all asset accounts, holdings included at market value.
 - **Total Liabilities** — sum of all liability accounts.
 - **Assets Breakdown** — pie chart showing how your assets are distributed across accounts. Has a currency parameter for filtering.
 - **Liabilities Breakdown** — pie chart showing outstanding liabilities by account. Has a currency parameter for filtering.
+- **Allocation by Asset Class** — pie chart of your assets grouped by asset class (cash, ETF, CD, and so on), the honest mix across cash and holdings.
 
 ### Month Summary
 
@@ -111,6 +112,45 @@ An annual financial summary. Use the **Year** parameter to select the year.
 - **Savings** — income minus expenses.
 - **Monthly Income & Expenses** — a bar chart comparing income, expenses, and savings month by month throughout the year. Click any bar to see the transactions behind it.
 - **Expenses Pivot Table** — a table with expense categories as rows and months as columns, showing how spending in each category changes over the year. Includes row and column totals.
+
+### Investment dashboards
+
+Three dashboards project your holdings and cash instruments. They are per-currency (Finzytrack never sums across currencies), and every table cell and chart element clicks through to the underlying transactions. A small amount of optional metadata enriches them — see the [Investments reference](/reference/investments/).
+
+#### Holdings & Performance
+
+Your priced holdings — equities, funds, crypto — and how they have performed.
+
+- **Invested / Current Value / Unrealized Gain** — what you paid for the holdings you still hold, what they are worth now, and the difference, per currency.
+- **Value Over Time** — market value against cost basis, month by month. Months with no recorded price fall back to cost.
+- **Market Value by Holding** — each holding's current value as a bar.
+- **Returns by Asset Class** — money-weighted return (XIRR) and simple gain per asset class.
+- **Unattributed Dividends** — a warning figure, with a **by-account list** beside it, for cash dividends that aren't linked to a holding and so are left out of the returns above. Empty when everything is attributed. See [Attributing dividends](/reference/investments/#attributing-dividends-to-the-holding-that-paid-them).
+- **Holdings** — a sortable table: units, average cost, cost basis, last price, market value, gain/loss, and weight. Click a holding to load its lots and price history below.
+- **Purchase Lots** and **Price History** — the lots and recorded prices for the holding selected in the table.
+
+#### Cash & Deposits
+
+Every currency-balance account — checking, savings, CDs, cash-modelled bonds.
+
+- **Total Cash & Deposits** — the sum of these accounts, per currency.
+- **Unattributed Interest** — a warning figure, with a **by-account list** below, for interest that couldn't be tied to the account that earned it. Empty when everything is attributed. See [Attributing interest](/reference/investments/#attributing-interest-to-the-account-that-earned-it).
+- **Accounts** — each account with its type, rate, maturity, balance, interest earned, and effective yield (interest ÷ average balance, annualized), shown next to the stated rate so you can compare promised against delivered.
+- **Cash by Type** — a pie of your cash by account type.
+- **Upcoming Maturities** — term instruments with a recorded maturity date, soonest first.
+
+#### Returns & Income
+
+What your money earned — income and realized gains.
+
+- **Interest & Dividends** — total interest plus dividend income received, per currency.
+- **Realized Gain** — total realized capital gain or loss on sold holdings.
+- **Interest & Dividends Over Time** — dividends and interest received per year.
+- **Interest & Dividends by Source** — which accounts the income came from.
+- **Realized Gain by Year** — realized gains per year, split into short- and long-term by holding period.
+- **Sales** — every sale: date, holding, proceeds, cost basis, and realized gain, consolidated across accounts.
+
+The realized-gains figures are derived from your ledger and are **not a tax document** — they apply no wash-sale rules or broker lot-selection, so they can differ from your 1099-B. For tax, use your broker's official statements.
 
 ### Widget Gallery
 
