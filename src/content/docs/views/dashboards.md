@@ -124,14 +124,15 @@ Your priced holdings — equities, funds, crypto — and how they have performed
 - **Invested / Current Value / Unrealized Gain** — what you paid for the holdings you still hold, what they are worth now, and the difference, per currency.
 - **Value Over Time** — market value against cost basis, month by month. Months with no recorded price fall back to cost.
 - **Market Value by Holding** — each holding's current value as a bar.
-- **Returns by Asset Class** — money-weighted return (XIRR) and simple gain per asset class.
-- **Unattributed Dividends** — a warning figure, with a **by-account list** beside it, for cash dividends that aren't linked to a holding and so are left out of the returns above. Empty when everything is attributed. See [Attributing dividends](/reference/investments/#attributing-dividends-to-the-holding-that-paid-them).
+- **Portfolio Return** — money-weighted return (XIRR) and simple gain for all your holdings together, per currency. Cash and deposit accounts are not included.
+- **Returns by Asset Class** — the same two returns per asset class.
+- **Unattributed Dividends** — a warning figure, with a **by-account list** beside it, for cash dividends that aren't linked to a holding and so are left out of the returns by asset class (they still count in the portfolio return). Empty when everything is attributed. See [Attributing dividends](/reference/investments/#attributing-dividends-to-the-holding-that-paid-them).
 - **Holdings** — a sortable table: units, average cost, cost basis, last price, market value, gain/loss, and weight. Click a holding to load its lots and price history below.
 - **Purchase Lots** and **Price History** — the lots and recorded prices for the holding selected in the table.
 
 #### Cash & Deposits
 
-Every currency-balance account — checking, savings, CDs, cash-modelled bonds.
+Every currency-balance account — checking, savings, CDs, bonds recorded as a cash balance.
 
 - **Total Cash & Deposits** — the sum of these accounts, per currency.
 - **Unattributed Interest** — a warning figure, with a **by-account list** below, for interest that couldn't be tied to the account that earned it. Empty when everything is attributed. See [Attributing interest](/reference/investments/#attributing-interest-to-the-account-that-earned-it).

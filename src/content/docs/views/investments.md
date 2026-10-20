@@ -27,13 +27,14 @@ ledger yet.
 | **Buy** | Units of a holding bought at cost, paid from a cash account. |
 | **Reinvest** | A reinvested dividend or income that buys more units. No cash moves. |
 | **Dividend** | A dividend paid to cash. |
-| **Sell** | A sale of units. Choose the lots (FIFO, LIFO, HIFO, or specific lots) and see the realized gain before you add it. |
+| **Sell** | A sale of units. Choose the lots (FIFO, LIFO, HIFO, or specific lots) and see the realized gain before you add it. The sale must be in the currency the lots were bought in. |
 | **CD Matures** | A CD or term deposit paying its principal, and any final interest, to another account. |
 | **Interest** | Interest credited to the account itself (compounding) or paid to another account. |
 | **Add Holding** | A position you already hold, at its average cost, without its buy history. |
 
 Each form takes a date and a currency, plus the accounts and amounts for that action.
-A fee and a narration are optional.
+**Buy** and **Sell** take an optional fee; every form except **Sell** takes an
+optional narration.
 
 - **Income account suggestions** come from your metadata, never from account names.
   For a dividend, Finzytrack suggests the income account whose `dividend_of` is that
@@ -43,8 +44,10 @@ A fee and a narration are optional.
   then click **Register** to write them to your ledger. If a transaction doesn't
   balance, you are asked before it is written. **Clear** removes everything staged.
 
-AI file import and natural-language entry in the [Import](/views/import/) view build
-investment transactions the same way.
+The **AI** and **Manual** tabs of the [Import](/views/import/) view build investment
+transactions the same way, from a statement or from a sentence. They record buys,
+sales, dividends, reinvested dividends, interest and CD maturities, but not positions
+you already hold; use **Add Holding** for those.
 
 ---
 
@@ -59,8 +62,8 @@ dashboards; nothing here is required. The tab has three sections:
 | **Cash and deposit accounts** | `Assets` accounts that hold only currencies and were never held at cost | Account type, and for CDs and bonds, Interest rate and Maturity date |
 | **Income accounts** | All `Income` accounts, including closed ones | Income type, and for dividends, Dividend from |
 
-Each section starts with a short "Adds: …" line per field, saying what that field
-gives you. An empty field reads **Not set**.
+Each section starts with one short line per field, saying what that field gives you
+or when it is needed. An empty field reads **Not set**.
 
 - **Show only items not set** hides items with nothing left to add. It starts on
   when there is something to add. "N more not shown — Show all"
@@ -72,7 +75,8 @@ gives you. An empty field reads **Not set**.
   writes them all in one go, and **Discard** drops them. If you leave the page with
   unsaved changes, you are asked first.
 - **Accounts are edited one at a time.** **Edit** opens the account form, whose
-  **Investment details** section has the same fields.
+  **Investment details** section has the same fields. It also has **Interest income
+  account** for `savings`, `cd` and `bond` accounts, which is not shown in the table.
 - **Cash or holding.** With no `operating_currency` in your ledger, setting a
   commodity's asset class to `cash` or `currency` (or away from it) changes whether
   it counts as cash or as a holding; the tab says so before you save. With operating

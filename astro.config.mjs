@@ -31,6 +31,7 @@ export default defineConfig({
 				{ label: 'Home', slug: 'index' },
 				{ label: 'Installation', slug: 'installation' },
 				{ label: 'Quick Start', slug: 'quick-start' },
+				{ label: 'Guides', autogenerate: { directory: 'guides' } },
 				{ label: 'Views', autogenerate: { directory: 'views' } },
 				{ label: 'Reference', autogenerate: { directory: 'reference' } },
 				{ label: 'Upgrade Notes', autogenerate: { directory: 'upgrade-notes' } },
