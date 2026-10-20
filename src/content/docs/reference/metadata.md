@@ -52,20 +52,26 @@ These describe a cash or deposit account: one that holds a balance in a currency
 
 ```beancount
 2023-01-14 open Assets:Deposits:ValleyCU-CD1 USD
-  asset-class: "cd"
+  account-type: "cd"
   interest_rate: "4.50%"
   maturity_date: 2025-01-14
 ```
 
 | Key | Values | Used for |
 |---|---|---|
-| `asset-class` | `checking`, `savings`, `cd`, `bond`, `cash` | The account's type in Cash & Deposits and in allocation (untagged: `cash`). An account with any type other than `checking`, `cash` or `currency` earns interest: interest added to it, or paid when it matures, is counted as its interest. |
-| `interest_rate` | Text, e.g. `"4.50%"` | Shown as the stated rate in Cash & Deposits, beside the yield actually earned. |
+| `account-type` | `checking`, `savings`, `cd`, `bond`, `cash` | The account's type in Cash & Deposits and in allocation (untagged: `cash`). An account with any type other than `checking`, `cash` or `currency` earns interest: interest added to it, or paid when it matures, is counted as its interest. |
+| `interest_rate` | Text, e.g. `"4.50%"` | Shown as the stated rate in Cash & Deposits, beside the yield actually earned. (A checking account shows its rate, but its interest is not matched to it, so it has no yield.) |
 | `maturity_date` | A date, e.g. `2025-01-14` | The maturity date in Cash & Deposits, and the Upcoming Maturities list. |
 | `interest_account` | An income account name | Links interest paid out to another account back to this one. See [Attributing interest](/reference/investments/#attributing-interest-to-the-account-that-earned-it). |
 
-The Setup & Metadata tab offers `interest_rate` and `maturity_date` for `cd` and
-`bond` accounts, and `interest_account` for `savings`, `cd` and `bond` accounts.
+The Setup & Metadata tab offers `interest_rate` for `checking`, `savings`, `cd` and
+`bond` accounts, `maturity_date` for `cd` and `bond` accounts, and `interest_account`
+for `savings`, `cd` and `bond` accounts.
+
+`account-type` is a different key from the commodity's `asset-class`: an account
+holds a balance, a commodity is a security. Some values look alike (`cash`, `cd`,
+`bond`) but mean different things — `asset-class: "cash"` on a commodity can make it a
+currency, while `account-type: "cash"` only labels an account.
 
 ## On an `Income` account's `open`
 

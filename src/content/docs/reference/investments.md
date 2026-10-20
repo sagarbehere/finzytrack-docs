@@ -168,18 +168,18 @@ type goes on the account's **`open`** directive:
 
 ```beancount
 2019-04-22 open Assets:Savings:HighYield USD
-  asset-class: "savings"
+  account-type: "savings"
   interest_rate: "4.50%"
 
 2023-01-14 open Assets:Deposits:ValleyCU-CD1 USD
-  asset-class: "cd"
+  account-type: "cd"
   interest_rate: "4.50%"
   maturity_date: 2025-01-14
 ```
 
 Account-level keys:
 
-- **`asset-class`** — the account type: `checking`, `savings`, `cd`, `bond`, or
+- **`account-type`** — the account type: `checking`, `savings`, `cd`, `bond`, or
   `cash`. This routes the account to the right group. An untagged account shows as
   plain cash, and interest it earns is not matched to it (see below).
 - **`interest_rate`** — the stated rate, shown next to the *realized* yield so you
@@ -229,7 +229,7 @@ order:
 2. **Interest at maturity.** If a term deposit closes and pays out its principal
    plus interest, the deposit being drawn down is the earner.
 
-   Both cases need only the deposit's account type: an `asset-class` other than
+   Both cases need only the deposit's account type: an `account-type` other than
    `checking` or `cash`, such as `savings`, `cd` or `bond`. Interest on a checking
    account, or on an untagged account, is not matched to it.
 3. **Interest paid out to another account.** If a CD pays its interest into another
@@ -242,7 +242,7 @@ order:
 
    ```beancount
    2022-01-03 open Assets:Deposits:AxisBank-FD USD
-     asset-class: "cd"
+     account-type: "cd"
      interest_rate: "5.25%"
      interest_account: "Income:Interest:AxisBank-FD"
 

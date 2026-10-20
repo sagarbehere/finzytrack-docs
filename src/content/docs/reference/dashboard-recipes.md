@@ -112,7 +112,7 @@ A dashboard recipe is a JSON file with the following top-level structure:
 | `text` | string | The offer. Say what adding the metadata gives, not that something is missing. |
 
 The hint appears only when, in that scope, an open item that is in use has no
-value for its main key (`asset-class` for commodities and accounts, `income-type`
+value for its main key (`asset-class` for commodities, `account-type` for accounts, `income-type`
 for income accounts). Other fields (such as `maturity_date` or `dividend_of`),
 closed accounts and unused items never make it appear. For commodities, only
 holdings count: a commodity tagged `cash` or `currency`, or one that is otherwise a

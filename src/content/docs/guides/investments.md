@@ -155,7 +155,9 @@ but not in the returns by asset class.
 
 Back in **Setup & Metadata**, under **Cash and deposit accounts**, click **Edit** on
 each account and set its **Account type**: `checking`, `savings`, `cd`, `bond` or
-`cash`. For a CD or bond, also set its **Interest rate** and **Maturity date**.
+`cash`. For a checking, savings, CD or bond account you can also set its **Interest
+rate**, and for a CD or bond its **Maturity date**. (In the ledger file the account
+type is written as `account-type`.)
 
 The account type also lets Finzytrack find the interest each account earned, from
 your `interest` income accounts:
@@ -171,7 +173,7 @@ your `interest` income accounts:
 
   ```beancount
   2025-01-15 open Assets:Bank:CD-2025 USD
-    asset-class: "cd"
+    account-type: "cd"
     interest_rate: "4.50%"
     maturity_date: 2026-01-15
     interest_account: "Income:Interest:CD-2025"
@@ -278,11 +280,11 @@ option "operating_currency" "USD"
   Assets:Brokerage  -4174.50 USD
 
 2019-04-22 open Assets:Savings USD
-  asset-class: "savings"
+  account-type: "savings"
   interest_rate: "3.75%"
 
 2023-01-14 open Assets:Deposits:CD1 USD
-  asset-class: "cd"
+  account-type: "cd"
   interest_rate: "4.50%"
   maturity_date: 2025-01-14
   interest_account: "Income:Interest:CD1"

@@ -59,7 +59,7 @@ dashboards; nothing here is required. The tab has three sections:
 | Section | Lists | Fields |
 |---|---|---|
 | **Holdings and currencies** | Every commodity except your operating currencies | Asset class, Name, Price symbol, and for I-Bonds, Issue month and Face value |
-| **Cash and deposit accounts** | `Assets` accounts that hold only currencies and were never held at cost | Account type, and for CDs and bonds, Interest rate and Maturity date |
+| **Cash and deposit accounts** | `Assets` accounts that hold only currencies and were never held at cost | Account type; Interest rate for checking, savings, CDs and bonds; Maturity date for CDs and bonds |
 | **Income accounts** | All `Income` accounts, including closed ones | Income type, and for dividends, Dividend from |
 
 Each section starts with one short line per field, saying what that field gives you
@@ -68,8 +68,9 @@ or when it is needed. An empty field reads **Not set**.
 - **Show only items not set** hides items with nothing left to add. It starts on
   when there is something to add. "N more not shown — Show all"
   lists the rest.
-- **Fields appear when they apply.** An account is offered Interest rate and Maturity
-  date only once its type is `cd` or `bond`. A value that no longer applies stays
+- **Fields appear when they apply.** An account is offered Interest rate once its type
+  is `checking`, `savings`, `cd` or `bond`, and Maturity date once it is `cd` or
+  `bond`. A value that no longer applies stays
   visible, greyed, so you can clear it.
 - **Holdings are edited in the table.** Changed cells are highlighted; **Save changes**
   writes them all in one go, and **Discard** drops them. If you leave the page with
