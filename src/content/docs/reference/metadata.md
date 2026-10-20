@@ -40,7 +40,7 @@ currencies; see [Commodities and Currencies](/reference/commodities-and-currenci
 
 | Key | Values | Used for |
 |---|---|---|
-| `asset-class` | `stock`, `etf`, `mutual-fund`, `money-market`, `bond`, `cd`, `i-bond`, `crypto`, `cash`, `currency` | Grouping in allocation and returns by asset class (untagged: `unclassified`). How often prices are fetched ([table](/reference/investments/#fetching-prices)). With no `operating_currency`, `cash` and `currency` make the commodity a currency, and an untagged commodity is also a currency. |
+| `asset-class` | `stock`, `etf`, `mutual-fund`, `money-market`, `bond`, `cd`, `i-bond`, `crypto`, `cash`, `currency` | Grouping in allocation and returns by asset class (untagged: `unclassified`). `cd` and `bond` here mean CDs and bonds held as priced units (for example in a brokerage); a CD held as a balance is an account with `account-type: "cd"`. How often prices are fetched ([table](/reference/investments/#fetching-prices)). With no `operating_currency`, `cash` and `currency` make the commodity a currency, and an untagged commodity is also a currency. |
 | `name` | Text | A readable name shown next to the code. |
 | `fetch_symbol` | A ticker, e.g. `"BRK-B"` | The symbol requested when fetching prices, when it differs from the code. |
 | `issue_date` | `MM/YYYY`, `YYYY-MM` or `YYYY-MM-DD` | I-Bonds (`asset-class: "i-bond"`): the issue month. Needed to compute the bond's value, per face dollar (record I-Bonds as face dollars at a cost of 1.00 each). |

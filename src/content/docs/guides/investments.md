@@ -36,6 +36,10 @@ Finzytrack treats everything you own as one of two kinds:
 - A **cash or deposit account** holds a *balance* in a currency: checking, savings,
   CDs. Its value is the balance.
 
+Some things can be either, depending on how you hold them. A CD or bond bought
+through a brokerage, held as units with a price, is a holding. A CD at your bank,
+held as a balance, is a deposit account.
+
 Finzytrack never decides anything from account names. You can name your accounts
 however you like. What an account or a holding *is* comes from a few metadata
 values you set, mostly on one screen.
@@ -104,7 +108,8 @@ each holding:
 
 - **Asset class** — `stock`, `etf`, `mutual-fund`, `money-market`, `bond`, `cd`,
   `i-bond` or `crypto`. This gives you allocation and returns by asset class, and
-  decides how often prices are fetched.
+  decides how often prices are fetched. Use `cd` or `bond` only for CDs and bonds you
+  hold as units in a brokerage account; a bank CD is set up in step 7.
 - **Name** — optional, a readable name next to the code.
 - **Price symbol** — only if the price service knows the holding by a different
   symbol than its code.
