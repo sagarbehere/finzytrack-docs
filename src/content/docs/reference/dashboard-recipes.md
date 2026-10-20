@@ -91,6 +91,48 @@ A dashboard recipe is a JSON file with the following top-level structure:
 | `description` | string | One-line description shown in the dashboard picker. |
 | `parameters` | array | Dashboard-level parameters shared by all widgets (see [Parameters](#parameters)). |
 | `steps` | array | Dashboard **shared steps** — computed once and fed to multiple widgets (see [Shared steps](#dashboard-shared-steps)). |
+| `metadataHint` | object | An offer shown above the dashboard when some of your items could use more metadata (see [Metadata hint](#metadata-hint)). |
+| `actions` | array | Buttons in the dashboard header, from a fixed list (see [Dashboard actions](#dashboard-actions)). |
+
+### Metadata hint
+
+`metadataHint` shows a short offer above the dashboard, with a link to
+**Investments → Setup & Metadata**:
+
+```json
+"metadataHint": {
+  "scope": "commodity",
+  "text": "Want allocation and returns by asset class? Add an asset class to your holdings."
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `scope` | string | Which items the offer is about: `commodity` (holdings), `account` (cash and deposit accounts), or `income-account` (income accounts). |
+| `text` | string | The offer. Say what adding the metadata gives, not that something is missing. |
+
+The hint appears only when, in that scope, an open item that is in use has no
+value for its main key (`asset-class` for commodities and accounts, `income-type`
+for income accounts). Other fields (such as `maturity_date` or `dividend_of`),
+closed accounts and unused items never make it appear. The user can dismiss it;
+it then stays hidden for that dashboard in that browser.
+
+### Dashboard actions
+
+`actions` adds built-in buttons to the dashboard header:
+
+```json
+"actions": ["update-prices"]
+```
+
+| Action | Button |
+|---|---|
+| `update-prices` | **Update prices**: fetches new prices for your holdings (the same as **Investments → Prices**), then refreshes the dashboard. |
+
+A dashboard shows only the actions it lists. Nothing is added based on what its
+steps compute, so a dashboard that shows market values needs `update-prices` to get
+the button. An unknown action name makes the recipe invalid. Each action may appear
+once.
 
 ### Widgets are inline only
 

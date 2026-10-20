@@ -13,5 +13,7 @@ Finzytrack's sidebar provides access to the main views of the application. Each 
 | [Import](/views/import/) | Import transactions from bank statements |
 | [Transactions](/views/transactions/) | Browse and search your transaction history |
 | [Accounts](/views/accounts/) | View your account hierarchy and balances |
+| [Budgets](/views/budgets/) | Set budgets per account and currency, and track spending against them |
+| [Investments](/views/investments/) | Record investment activity, add investment metadata, and manage prices |
 | [Query](/views/query/) | Run custom queries against your financial data |
 | [AI Assistant](/views/ai-assistant/) | Conversational assistant for financial analysis, import rule creation, dashboard building, and more |

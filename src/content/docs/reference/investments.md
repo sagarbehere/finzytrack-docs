@@ -86,11 +86,16 @@ On the **`commodity`** directive you can add:
 
 ### Prices give holdings a market value
 
-A holding shows a market value only when Finzytrack has a **price** for it. Prices
-live in a sidecar file that Finzytrack owns and maintains for you — you do not edit
-your transactions to record them. Finzytrack can **fetch** recent prices for your
-holdings (using `fetch_symbol` when the code and ticker differ), and you can also
-enter a price by hand.
+A holding shows a market value only when Finzytrack has a **price** for it. A
+holding with no price is valued at its cost.
+
+Prices live in a **price file** next to your ledger: for `one.beancount` it is
+`one.prices.beancount`. Your ledger does not `include` it, so other Beancount tools
+don't see these prices. `price` directives written in your ledger file also count.
+
+You see and change prices in **Investments → Prices**: one row per holding and
+quote currency, with how it is fetched, its latest price, and how old that price is.
+Open a row to see its history.
 
 Two special cases need no fetching:
 
@@ -109,6 +114,56 @@ Two special cases need no fetching:
     issue_date: "2022-05"
     denomination: "10000"
   ```
+
+### Fetching prices
+
+**Update prices** (on the Prices tab, or on the Holdings & Performance dashboard)
+fetches prices from Yahoo Finance. It fetches each holding by its `fetch_symbol`, or
+by its code when `fetch_symbol` is not set. How often a holding gets a price depends
+on its `asset-class`:
+
+| `asset-class` | Prices |
+|---|---|
+| `stock`, `etf`, `mutual-fund`, `crypto`, or not set | One per trading day |
+| `bond`, `cd` | One per month |
+| `i-bond` | Computed, one per month (see above) |
+| `money-market`, `cash`, `currency` | Not fetched |
+
+- **What is fetched:** holdings only, never currencies. With no `operating_currency`
+  in your ledger, a commodity without an `asset-class` counts as cash, so it is not
+  fetched. Give it an asset class to fetch it.
+- **Which days:** the first fetch covers the time since your first purchase. After
+  that, each fetch starts at the newest stored price, replaces it with the new value,
+  and adds the days since. For a holding you have sold, fetching stops at the last
+  transaction. Days before the newest price are never fetched again, so deleting an
+  older price leaves a gap.
+- **Which currency:** a holding is fetched in the currency you bought it in. A price
+  you enter in another currency is kept, but never fetched or replaced.
+- **Rounding:** fetched prices are rounded to 4 decimal places (more for very small
+  prices).
+- A fetch never changes a price in your ledger file.
+
+A held holding's latest price is **out of date** when it is more than 7 days old
+(daily prices) or more than 45 days old (monthly and I-Bond prices), or when there is
+no price at all. Sold holdings and holdings that are not fetched are never out of
+date.
+
+### Entering and changing prices
+
+On the Prices tab you can add a price, and change or delete any price in the price
+file, including fetched ones.
+
+- A price is one number per holding, quote currency and date. Changing a price's
+  date moves it; if the new date already has a price, you are asked before it is
+  replaced.
+- Prices in your ledger file are listed as **In ledger file** and can't be changed
+  on the tab. Change them in the ledger file. A price on the same date as one in the
+  ledger file is not accepted.
+- A price can't be dated after today.
+- The next fetch replaces the newest price of a fetched holding, even a price you
+  entered by hand.
+- Every save rewrites the price file. Your edits to it are kept; comments are not.
+  If the file has lines Finzytrack can't read, it is not rewritten until you fix them.
 
 ## Cash & deposit accounts
 
