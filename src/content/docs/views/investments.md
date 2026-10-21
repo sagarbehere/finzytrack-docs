@@ -52,8 +52,8 @@ type, and optionally its interest rate and (for a CD or bond) its maturity date.
 **Date** and **Currency** at the top of the form are its open date and currency.
 
 - **Create an interest income account for this deposit** (off by default) also
-  creates an `Income` account for this deposit's interest, with a suggested name you
-  can change, and links the two, so interest is matched to the deposit even when it
+  creates an `Income` account for this deposit's interest, with the name you type, and
+  links the two, so interest is matched to the deposit even when it
   is paid into another account. When it is off, you can pick an existing interest
   income account instead, or none.
 - **Record the first deposit** also records the transfer into the new account, from an
