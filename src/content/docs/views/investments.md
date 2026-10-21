@@ -95,7 +95,10 @@ or when it is needed. An empty field reads **Not set**.
   `bond`. A value that no longer applies stays
   visible, greyed, so you can clear it.
 - **Holdings are edited in the table.** Changed cells are highlighted; **Save changes**
-  writes them all in one go, and **Discard** drops them. If you leave the page with
+  writes them all in one go, and **Discard** drops them.
+- **Find** (next to Price symbol, for holdings bought in INR) looks up an Indian
+  mutual fund's AMFI scheme code by name and shows each scheme's latest NAV.
+  **Use** fills in Price symbol; save as usual. If you leave the page with
   unsaved changes, you are asked first.
 - **Accounts are edited one at a time.** **Edit** opens the account form, whose
   **Investment details** section has the same fields. It also has **Interest income

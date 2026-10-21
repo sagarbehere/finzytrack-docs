@@ -112,8 +112,10 @@ each holding:
   hold as units in a brokerage account; a bank CD is set up in step 7.
 - **Name** — optional, a readable name next to the code.
 - **Price symbol** — only if the price service knows the holding by a different
-  symbol than its code. For an Indian mutual fund, enter `amfi:` and its AMFI
-  scheme code, such as `amfi:122639` ([how to find it](/reference/investments/#fetching-prices)).
+  symbol than its code. For an Indian mutual fund, click **Find**, search by the
+  fund's name, and click **Use** on the scheme that matches your plan (Direct or
+  Regular) and option (Growth or IDCW). This fills in `amfi:` and its AMFI scheme
+  code, such as `amfi:122639` ([more](/reference/investments/#fetching-prices)).
 
 For an **I-Bond**, also set its **Issue month**; Finzytrack then computes its value
 each month. **Face value** is optional.

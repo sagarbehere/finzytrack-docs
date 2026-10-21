@@ -117,9 +117,15 @@ stocks, for example, are `RELIANCE.NS` (NSE) or `RELIANCE.BO` (BSE).
 Indian mutual funds are fetched from AMFI instead, through
 [mfapi.in](https://www.mfapi.in/). Set `fetch_symbol` to `amfi:` and the fund's
 scheme code, for example `fetch_symbol: "amfi:122639"`. Each plan and option has
-its own code: search by name at `https://api.mfapi.in/mf/search?q=<fund name>`
-and pick the one whose name matches your plan (Direct or Regular) and option
-(Growth or IDCW). Prices are in INR.
+its own code. To find it, click **Find** next to the holding's **Price symbol** in
+**Investments → Setup & Metadata** (offered for holdings bought in INR). It
+searches by name and shows each scheme's latest NAV. Pick the one whose name
+matches your plan (Direct or Regular) and option (Growth or IDCW); its NAV should
+match the NAV your broker shows. Prices are in INR.
+
+If the search service can't be reached, Finzytrack says so. You can then find the
+code by hand and type `amfi:` and the code yourself (see
+[Finding AMFI scheme codes by hand](#finding-amfi-scheme-codes-by-hand)).
 
 How often a holding gets a price depends on its `asset-class`:
 
@@ -141,9 +147,11 @@ How often a holding gets a price depends on its `asset-class`:
   older price leaves a gap.
 - **Which currency:** prices are stored in the currency the price service quotes. A
   holding is valued only with prices in the currency you bought it in, and its fetch
-  dates follow its prices in that currency. If the service quotes a different
-  currency (for example pence for London shares), the holding stays at cost; add its
-  prices by hand in your currency. A price you enter in another currency is kept but
+  dates follow its prices in that currency. Prices quoted in pence or cents (London,
+  Johannesburg and Tel Aviv shares) are converted to pounds, rand or shekels. If the
+  service quotes a different currency than the one you bought in (for example a
+  listing in euros for a fund you bought in dollars), the holding stays at cost; add
+  its prices by hand in your currency. A price you enter in another currency is kept but
   never fetched or replaced.
 - **Rounding:** fetched prices are rounded to 4 decimal places (more for very small
   prices).
@@ -153,6 +161,48 @@ A held holding's latest price is **out of date** when it is more than 7 days old
 (daily prices) or more than 45 days old (monthly and I-Bond prices), or when there is
 no price at all. Sold holdings and holdings that are not fetched are never out of
 date.
+
+### Finding AMFI scheme codes by hand
+
+Use this when **Find** doesn't work, or to check its answer. You need your fund's
+name, plan and option exactly as your broker or your CAS statement shows them, for
+example *Sundaram Mid Cap Fund – Regular Plan – Growth*, and its current NAV.
+
+1. Open `https://api.mfapi.in/mf/search?q=<fund name>` in a browser, for example
+   `https://api.mfapi.in/mf/search?q=Sundaram Mid Cap`. It lists every matching
+   scheme as a `schemeCode` and a `schemeName`.
+2. Pick the `schemeName` that matches your plan (**Direct** or **Regular**) and
+   option (**Growth**, **IDCW** or **Bonus**). Each one has a different code.
+3. Check it: open `https://api.mfapi.in/mf/<schemeCode>/latest`. Its `nav` should
+   equal your broker's current NAV for the same date. The Direct and Regular plans
+   of one fund have different NAVs, so a match confirms the code. (Growth and Bonus
+   options can have the same NAV; then go by the name.)
+4. Set the holding's **Price symbol** to `amfi:` and the code, for example
+   `amfi:101539`.
+
+You can also give this to an AI assistant that can browse the web. Copy the text
+below, replace the example list with your funds, and paste it in:
+
+```text
+Find the AMFI scheme code for each Indian mutual fund below.
+
+For each fund:
+1. Search https://api.mfapi.in/mf/search?q=<fund name>. Each result has a
+   schemeCode and a schemeName.
+2. Choose the result whose schemeName matches the plan (Direct or Regular) and the
+   option (Growth, IDCW or Bonus) given for the fund. Do not mix up Direct and
+   Regular, or Growth and IDCW: each has its own code and its own NAV.
+3. Check the choice: https://api.mfapi.in/mf/<schemeCode>/latest gives the latest
+   NAV and its date. It should equal the NAV given for the fund (allow for a
+   different date). If no result matches, say so; do not guess.
+
+Reply with a table: fund as given | schemeName | schemeCode | NAV and date |
+matches? Then list each fund as   <fund> -> amfi:<schemeCode>
+
+My funds (name, plan, option, current NAV from my broker):
+- Sundaram Mid Cap Fund, Regular, Growth, 1386.6013
+- DSP Focused Fund, Regular, Growth, 53.0870
+```
 
 ### Entering and changing prices
 
