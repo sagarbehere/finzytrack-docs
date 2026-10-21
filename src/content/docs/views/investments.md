@@ -31,6 +31,7 @@ ledger yet.
 | **CD Matures** | A CD or term deposit paying its principal, and any final interest, to another account. |
 | **Interest** | Interest credited to the account itself (compounding) or paid to another account. |
 | **Add Holding** | A position you already hold, at its average cost, without its buy history. |
+| **Open Deposit** | A new savings, CD or bond account — see [Open Deposit](#open-deposit). |
 
 Each form takes a date and a currency, plus the accounts and amounts for that action.
 **Buy** and **Sell** take an optional fee; every form except **Sell** takes an
@@ -43,6 +44,25 @@ optional narration.
 - **Review and register.** You can edit the staged transactions in the review table,
   then click **Register** to write them to your ledger. If a transaction doesn't
   balance, you are asked before it is written. **Clear** removes everything staged.
+
+### Open Deposit
+
+Opens a savings, CD or bond account in one step. Enter the new account's name and
+type, and optionally its interest rate and (for a CD or bond) its maturity date. The
+**Date** and **Currency** at the top of the form are its open date and currency.
+
+- **Create an interest income account for this deposit** (off by default) also
+  creates an `Income` account for this deposit's interest, with a suggested name you
+  can change, and links the two, so interest is matched to the deposit even when it
+  is paid into another account. When it is off, you can pick an existing interest
+  income account instead, or none.
+- **Record the first deposit** also records the transfer into the new account, from an
+  existing `Assets` or `Liabilities` account.
+
+The form shows exactly what will be written to your ledger as you type, and points
+out anything that can't be written (for example a name that already exists). Unlike
+the other Quick Actions, it does not go to the review table: **Create** writes it to
+your ledger directly.
 
 The **AI** and **Manual** tabs of the [Import](/views/import/) view build investment
 transactions the same way, from a statement or from a sentence. They record buys,

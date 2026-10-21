@@ -158,6 +158,11 @@ but not in the returns by asset class.
 
 ## Step 7: Describe your cash and deposit accounts
 
+To open a **new** savings account, CD or bond account, use **Investments → Quick
+Actions → Open Deposit**: it creates the account with its type, rate and maturity
+date, and optionally its own interest income account and the first transfer into it,
+in one step. For accounts you already have:
+
 Back in **Setup & Metadata**, under **Cash and deposit accounts**, click **Edit** on
 each account and set its **Account type**: `checking`, `savings`, `cd`, `bond` or
 `cash`. For a checking, savings, CD or bond account you can also set its **Interest
@@ -199,6 +204,7 @@ From now on, record each event with a **Quick Action**:
 | You sell units | **Sell** — choose which lots to sell (FIFO, LIFO, HIFO, or specific lots) and check the gain before adding it |
 | Interest is credited | **Interest** |
 | A CD matures | **CD Matures** |
+| You open a savings account, CD or bond account | **Open Deposit** (written directly, not staged) |
 
 Finzytrack suggests the income account from your metadata: the dividend account
 whose **Dividend from** is that holding, or your only dividend account; for interest,
