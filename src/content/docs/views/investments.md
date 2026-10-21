@@ -59,8 +59,10 @@ type, and optionally its interest rate and (for a CD or bond) its maturity date.
 - **Record the first deposit** also records the transfer into the new account, from an
   existing `Assets` or `Liabilities` account.
 
-The form shows exactly what will be written to your ledger as you type, and points
-out anything that can't be written (for example a name that already exists). Unlike
+The form shows what will be written to your ledger as you type, and points out
+anything that can't be written (for example a name that already exists). If your
+accounts change before you click **Create** so that it would write something
+different, nothing is written and the form shows the new preview instead. Unlike
 the other Quick Actions, it does not go to the review table: **Create** writes it to
 your ledger directly.
 
