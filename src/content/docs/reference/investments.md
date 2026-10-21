@@ -71,6 +71,8 @@ On the **`commodity`** directive you can add:
 - **`fetch_symbol`** — the ticker to request when fetching prices, **only if it
   differs from the commodity code.** For `VOO` the code already is the ticker, so
   this is optional; it earns its place for codes that do not match their ticker.
+  For an Indian mutual fund, use `amfi:` and the fund's AMFI scheme code (see
+  [Fetching prices](#fetching-prices)).
 
 ### Prices give holdings a market value
 
@@ -109,8 +111,17 @@ Two special cases need no fetching:
 
 **Update prices** (on the Prices tab, or on the Holdings & Performance and Financial Overview dashboards)
 fetches prices from Yahoo Finance. It fetches each holding by its `fetch_symbol`, or
-by its code when `fetch_symbol` is not set. How often a holding gets a price depends
-on its `asset-class`:
+by its code when `fetch_symbol` is not set. Yahoo covers many exchanges: Indian
+stocks, for example, are `RELIANCE.NS` (NSE) or `RELIANCE.BO` (BSE).
+
+Indian mutual funds are fetched from AMFI instead, through
+[mfapi.in](https://www.mfapi.in/). Set `fetch_symbol` to `amfi:` and the fund's
+scheme code, for example `fetch_symbol: "amfi:122639"`. Each plan and option has
+its own code: search by name at `https://api.mfapi.in/mf/search?q=<fund name>`
+and pick the one whose name matches your plan (Direct or Regular) and option
+(Growth or IDCW). Prices are in INR.
+
+How often a holding gets a price depends on its `asset-class`:
 
 | `asset-class` | Prices |
 |---|---|

@@ -42,7 +42,7 @@ currencies; see [Commodities and Currencies](/reference/commodities-and-currenci
 |---|---|---|
 | `asset-class` | `stock`, `etf`, `mutual-fund`, `money-market`, `bond`, `cd`, `i-bond`, `crypto`, `cash`, `currency` | Grouping in allocation and returns by asset class (untagged: `unclassified`). `cd` and `bond` here mean CDs and bonds held as priced units (for example in a brokerage); a CD held as a balance is an account with `account-type: "cd"`. How often prices are fetched ([table](/reference/investments/#fetching-prices)). With no `operating_currency`, `cash` and `currency` make the commodity a currency, and an untagged commodity is also a currency. |
 | `name` | Text | A readable name shown next to the code. |
-| `fetch_symbol` | A ticker, e.g. `"BRK-B"` | The symbol requested when fetching prices, when it differs from the code. |
+| `fetch_symbol` | A ticker, e.g. `"BRK-B"` or `"RELIANCE.NS"`; for an Indian mutual fund, `amfi:` and its scheme code, e.g. `"amfi:122639"` | The symbol requested when fetching prices, when it differs from the code. `amfi:` symbols are fetched from AMFI, all others from Yahoo Finance ([Fetching prices](/reference/investments/#fetching-prices)). |
 | `issue_date` | `MM/YYYY`, `YYYY-MM` or `YYYY-MM-DD` | I-Bonds (`asset-class: "i-bond"`): the issue month. Needed to compute the bond's value, per face dollar (record I-Bonds as face dollars at a cost of 1.00 each). |
 | `denomination` | A whole number, e.g. `"10000"` | I-Bonds: the face value. Optional; it only affects rounding (1000 if not set). |
 
