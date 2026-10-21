@@ -475,7 +475,7 @@ Generators can appear anywhere in the recipe JSON. Any object with a `"$gen"` ke
 |-----------|--------|-------|
 | `currentYear` | Current year as a number | `{ "$gen": "currentYear" }` |
 | `currentMonth` | Current month (1-12) | `{ "$gen": "currentMonth" }` |
-| `defaultCurrency` | User's default currency string | `{ "$gen": "defaultCurrency" }` |
+| `defaultCurrency` | Your default currency. If the active ledger has no transactions in it, the currency the ledger uses most. | `{ "$gen": "defaultCurrency" }` |
 | `today` | Today's date as YYYY-MM-DD | `{ "$gen": "today" }` |
 
 #### Date Generators
