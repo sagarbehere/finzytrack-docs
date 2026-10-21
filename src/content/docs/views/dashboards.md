@@ -53,7 +53,7 @@ Visual plots of your data. Supported chart types include **bar**, **line**, **pi
 
 ### Tables
 
-Tabular data with sortable columns. Values can be formatted as currency, percentage, or plain numbers. Table cells can be clickable links to filtered transaction views.
+Tabular data with sortable columns: click a column heading to sort ascending, again for descending, and a third time to return to the original order. Total rows stay at the bottom, and amounts in different currencies are sorted separately. Values can be formatted as currency, percentage, or plain numbers. Table cells can be clickable links to filtered transaction views.
 
 ### Pivot Tables
 
