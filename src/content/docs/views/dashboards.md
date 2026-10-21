@@ -94,6 +94,8 @@ A snapshot of your current financial position:
 - **Liabilities Breakdown** — pie chart showing outstanding liabilities by account. Has a currency parameter for filtering.
 - **Allocation by Asset Class** — pie chart of your assets grouped by asset class (cash, ETF, CD, and so on), the honest mix across cash and holdings.
 
+Holdings are valued at their latest price, or at what you paid when they have no price. When you hold anything whose prices are fetched, the header shows **Update prices** and the date of the prices in use.
+
 ### Month Summary
 
 A monthly income-and-expense report. Use the **Year** and **Month** parameters in the header to select the period.

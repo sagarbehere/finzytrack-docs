@@ -129,7 +129,7 @@ it then stays hidden for that dashboard in that browser.
 
 | Action | Button |
 |---|---|
-| `update-prices` | **Update prices**: fetches new prices for your holdings (the same as **Investments → Prices**), then refreshes the dashboard. |
+| `update-prices` | **Update prices**: fetches new prices for your holdings (the same as **Investments → Prices**), then refreshes the dashboard. Below the button: the date of the prices in use, and how many holdings need a newer price. The button appears only while you hold something whose prices are fetched. |
 
 A dashboard shows only the actions it lists. Nothing is added based on what its
 steps compute, so a dashboard that shows market values needs `update-prices` to get

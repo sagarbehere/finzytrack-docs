@@ -230,7 +230,8 @@ lots first (FIFO), or LIFO or HIFO if you say so. To sell specific lots, use the
   simple gain. Cash and deposit accounts are not included.
 - *Returns by Asset Class* shows the same two returns for each asset class.
 - Click a holding in the *Holdings* table to see its purchase lots and price history.
-- **Update prices** in the header fetches prices without leaving the dashboard.
+- **Update prices** in the header fetches prices without leaving the dashboard. Below
+  it: the date of the prices in use, and how many holdings need a newer price.
 
 **Cash & Deposits**
 - *Total Cash & Deposits* includes every `Assets` account balance in a currency,

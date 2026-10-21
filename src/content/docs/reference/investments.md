@@ -107,7 +107,7 @@ Two special cases need no fetching:
 
 ### Fetching prices
 
-**Update prices** (on the Prices tab, or on the Holdings & Performance dashboard)
+**Update prices** (on the Prices tab, or on the Holdings & Performance and Financial Overview dashboards)
 fetches prices from Yahoo Finance. It fetches each holding by its `fetch_symbol`, or
 by its code when `fetch_symbol` is not set. How often a holding gets a price depends
 on its `asset-class`:
