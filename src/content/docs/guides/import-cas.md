@@ -97,6 +97,10 @@ The preview updates every time you change a choice. Nothing is written yet.
   `HDFC-BALANCEDADV-RG`. You can change it. A fund you already have in your ledger (same
   ISIN or AMFI code) keeps its code. New funds get their name, ISIN, fund house, asset class
   and AMFI price symbol.
+- **Don't import** leaves a fund out, for example a fund that belongs to someone else.
+  Nothing is written for it: no transactions, balance check or price. If money was
+  switched between it and one of your funds, your half is recorded against your cash-side
+  account, and the preview says so. The choice applies to this import only.
 - **Details** shows a fund's rows by year. Each year shows the units at year end and
   whether they match the statement, so a gap is pinned to the year it starts.
 - **Messages** list anything to check: a switch whose other half wasn't found, a row that
