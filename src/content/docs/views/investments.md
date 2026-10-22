@@ -5,9 +5,10 @@ sidebar:
   order: 6
 ---
 
-The Investments view has three tabs:
+The Investments view has four tabs:
 
 - **[Quick Actions](#quick-actions)** — forms that turn an investment event (a buy, a sale, a dividend…) into ledger transactions.
+- **[Import statement](#import-statement)** — every Indian mutual fund you hold, with its full history, from one CAS statement.
 - **[Setup & Metadata](#setup--metadata)** — optional details for your holdings and accounts that add detail to the investment dashboards.
 - **[Prices](#prices)** — the prices used to value your holdings: fetch them, add them, change them.
 
@@ -31,6 +32,7 @@ ledger yet.
 | **CD Matures** | A CD or term deposit paying its principal, and any final interest, to another account. |
 | **Interest** | Interest credited to the account itself (compounding) or paid to another account. |
 | **Add Holding** | A position you already hold, at its average cost, without its buy history. |
+| **Merger** | A fund that merged into another (or changed its face value). Each lot keeps its purchase date and cost; no gain is booked. |
 | **Open Deposit** | A new savings, CD or bond account — see [Open Deposit](#open-deposit). |
 
 Each form takes a date and a currency, plus the accounts and amounts for that action.
@@ -70,6 +72,18 @@ The **AI** and **Manual** tabs of the [Import](/views/import/) view build invest
 transactions the same way, from a statement or from a sentence. They record buys,
 sales, dividends, reinvested dividends, interest and CD maturities, but not positions
 you already hold; use **Add Holding** for those.
+
+---
+
+## Import statement
+
+Reads a CAMS + KFintech Consolidated Account Statement (CAS) PDF on your computer, without
+AI, and imports every fund in it with its full history: purchases, redemptions (FIFO),
+switches, dividends, mergers, stamp duty and taxes. You choose every account; a preview
+shows each fund's units against the statement, by year, and lets you fix any row before
+**Register** writes it all in one step. Earlier imports are listed and can be undone.
+
+Step by step: [Importing Indian mutual funds (CAS)](/guides/import-cas/).
 
 ---
 

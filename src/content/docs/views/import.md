@@ -97,7 +97,12 @@ Parses statements using your configured AI model, extracting transactions withou
 1. **Upload** a file — supported formats include CSV, Excel, PDF, EML (email files), and images (JPG, PNG, GIF, WebP). Image support depends on the underlying AI model — not all models can process images.
 2. **Select the Beancount account** this statement belongs to.
 3. **Select the currency**.
-4. Click **Parse with AI** to send the file to your AI model for extraction.
+4. For a password-protected PDF (most Indian bank and card statements), enter its **PDF password**. The PDF is opened on your computer; the password is not saved or sent to the AI.
+5. Click **Parse with AI** to send the file to your AI model for extraction.
+
+A mutual fund CAS is not sent to the AI. Finzytrack recognises it and links to
+**Investments → Import statement**, which reads it exactly and without AI
+([guide](/guides/import-cas/)).
 
 The AI reads the document and returns a list of transactions. Review them carefully — the AI infers structure from the document layout, so occasional errors are possible, especially with unusual formats.
 

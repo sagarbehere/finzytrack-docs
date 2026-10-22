@@ -380,9 +380,31 @@ account, are not part of it. It counts every cash dividend from an `income-type:
 
 For an asset class, a transaction counts toward the class of the holding it touches.
 A cash dividend counts toward a class only through its income account's
-`dividend_of`; otherwise it counts only toward the portfolio return. XIRR is blank when it
+`dividend_of`; otherwise it counts only toward the portfolio return, so the two XIRRs
+can differ slightly even when all your holdings are in one asset class. XIRR is blank when it
 can't be computed: flows that all go one way, or no solution — for example when all
 the money went in on the **As of** date.
+
+### Comparing with a broker's figures
+
+These should match your broker. A difference here means something is missing or wrong:
+
+- **Units** of each holding — exactly.
+- **Cost** of each holding — apart from charges (see below) and the broker's rounding.
+- **Current value** — when both use the price of the same day. Finzytrack uses the newest
+  stored price, and shows its date; a broker's page may show another day.
+
+These are often defined differently, so a difference is expected:
+
+- **Gain.** Finzytrack's gain is market value minus cost basis. A reinvested dividend is
+  income that buys units at their cost, so it adds to both value and cost, not to the gain;
+  it appears as dividend income. Many brokers add dividends, paid out and reinvested, to
+  their gain.
+- **Return.** Finzytrack's XIRR covers all the money that went into your holdings,
+  including holdings you have sold. A broker's return (often a CAGR) usually covers each
+  holding you have now.
+- **Charges in cost.** Stamp duty and other charges booked as separate lines are expenses
+  in Finzytrack, not part of a holding's cost. Some statements include them in cost.
 
 ## Realized gains need no metadata
 
