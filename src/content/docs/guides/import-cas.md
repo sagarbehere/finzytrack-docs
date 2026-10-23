@@ -57,7 +57,10 @@ Finzytrack shows what the statement covers, for example *"This statement covers
 ## 4. Choose the accounts
 
 - **Where the funds are held.** One row per distributor (ARN code) in the statement, or
-  *Direct plans*. You can pick the same account for all of them.
+  *Direct plans*. You can pick the same account for all of them. Importing someone else's
+  statement (a spouse's, say)? Give their funds their own holding account: balance checks
+  cover a whole account, so two people's units in one account can't be told apart. The
+  preview warns when an import would break a balance check already in your ledger.
 - **Money paid in and out.** The statement shows the fund side only: it doesn't say
   which bank account paid for a purchase or received a redemption. You have three choices,
   and you can combine them:
