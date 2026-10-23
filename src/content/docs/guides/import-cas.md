@@ -90,6 +90,11 @@ be counted twice.
 
 The preview updates every time you change a choice. Nothing is written yet.
 
+Four cards at the top sum it up: the **transactions** that will be written (one can cover
+several statement rows, such as a switch and its stamp duty), how many **funds match the
+statement**, the **cash movements** and the account they go to (with bank matching: how
+many were matched), and how many rows are **already in the ledger** from an earlier import.
+
 - **Funds you hold come first.** Funds you sold completely are grouped below them.
 - **Each fund shows a ✓** when the units in your ledger after the import equal the
   statement's closing units.
