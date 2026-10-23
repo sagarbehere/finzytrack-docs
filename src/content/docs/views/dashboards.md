@@ -137,7 +137,7 @@ Every open asset account with its balance, in its own currency. Use the **As of*
   ```
   2026-03-01 balance Assets:Liquid:Checking:BofA  500.00 USD
   ```
-  Finzytrack adds up the account's transactions *before* 1 March. If they come to 500.00 USD, the check passed. If not, it failed, which usually means a transaction before that date is missing or wrong. Transactions after the date don't affect the check, so an old passed check says nothing about today's balance. Look at **Last balance check** to see how old it is.
+  Finzytrack adds up the account's transactions *before* 1 March. If they come to 500.00 USD, the check passed. If not, it failed, which usually means a transaction before that date is missing or wrong. Transactions after the date don't affect the check, so an old passed check says nothing about today's balance. Look at **Last balance check** to see how old it is. Both columns are blank for an account with no balance directive, and always blank on rows that group several accounts.
 - Hover over the **ⓘ** next to a column heading for a short explanation of the column.
 - A cash account is shown dimmed when it had no transaction and no balance check in the 60 days before the date. Accounts with `account-type` `cd` or `bond` are never dimmed.
 - Hide the columns you don't need from the Columns menu. Use **Copy** or **CSV** to take the table into a spreadsheet.

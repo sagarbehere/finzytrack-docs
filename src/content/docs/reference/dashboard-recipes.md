@@ -1315,6 +1315,7 @@ Tree table columns take the same properties as [table columns](#column-definitio
 | `aggregate` | string | How parent and group rows show this column: `"sum"` (exact decimal sum), `"max"` or `"min"` (largest or smallest; for ISO dates, `"max"` is the latest). Without it, a parent row shows a value only when every row beneath has the same one. |
 | `hidden` | boolean | Start with this column hidden. |
 | `description` | string | Short explanation of the column, shown from an **ⓘ** next to its heading (on hover or keyboard focus). |
+| `leafOnly` | boolean | Show the column only on rows from the query (e.g. one account), never on parent or group rows. For per-row facts that don't combine, such as a status. Ignored with `aggregate`. |
 
 Users can:
 
