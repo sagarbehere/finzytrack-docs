@@ -1478,8 +1478,9 @@ Predefined format strings control how numbers are displayed. They can be used in
 |--------|----------------|---------|
 | `"currency"` | $14,200.00 or ₹14,20,000.00 | Monetary amounts (currency-aware) |
 | `"signedCurrency"` | +$14,200 or -₹500 | Signed monetary amounts (currency-aware) |
-| `"compact"` | 14.2k, 1.5M | Large numbers |
-| `"number"` | 14,200 | Plain numbers with thousand separators |
+| `"compact"` | 14.2k, 1.5M (INR: 2.6L, 1.8Cr) | Large numbers, e.g. chart labels and axes |
+| `"number"` | 14,200 | Whole numbers such as counts and days |
+| `"units"` | 1,234.567 | Holding quantities (fund units, shares): at least 3 decimals, up to 6 |
 | `"percent"` | 42% | Percentages |
 | `"date"` | Jan 15, 2026 | ISO dates as readable text |
 | `"dateShort"` | 1/15/26 | Short date format |
@@ -1488,7 +1489,7 @@ Predefined format strings control how numbers are displayed. They can be used in
 
 ### Currency-Aware Formatting
 
-The `"currency"` and `"signedCurrency"` formats are locale-aware — they use the correct currency symbol and number grouping based on the widget's `currency` parameter. For example:
+The `"currency"`, `"signedCurrency"`, `"compact"` and `"units"` formats are locale-aware — they use the number grouping (and, for the two currency formats, the symbol) of the widget's `currency` parameter, or of the row's own currency when the column sets `currencyField`. For example:
 
 - A widget with a `currency` parameter set to `"USD"` formats as `$1,234,567.89` (en-US locale)
 - A widget with a `currency` parameter set to `"INR"` formats as `₹12,34,567.89` (en-IN locale)
