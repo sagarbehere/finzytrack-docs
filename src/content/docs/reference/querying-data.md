@@ -30,7 +30,7 @@ SQL queries run against a SQLite export of your Beancount ledger. This is the de
 
 The database contains two groups of tables:
 - **`postings`** — a denormalized, analytics-optimized table with one row per posting. This is the primary table for dashboard widgets and aggregate queries.
-- **Ledger mirror tables** — normalized tables covering all other Beancount directives and computed state: `accounts`, `account_balances`, `commodities`, `prices`, `balance_assertions`, `lots`, and more.
+- **Ledger mirror tables** — normalized tables covering all other Beancount directives and computed state: `accounts`, `account_balances`, `commodities`, `prices`, `latest_prices`, `balance_assertions`, `lots`, and more.
 
 Most queries only need the `postings` table. The ledger mirror tables are useful for specialized widgets like price history charts, lot tracking views, or balance assertion reports.
 
@@ -392,6 +392,28 @@ FROM prices
 WHERE base_currency = 'AAPL' AND quote_currency = 'USD'
 ORDER BY date
 ```
+
+#### latest_prices
+
+One row per (`base_currency`, `quote_currency`) pair: the newest price from `prices`. If a pair has several prices on its newest date, the last one in the ledger is used. Use it to value holdings at their current price.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `date` | TEXT | Date of the newest price (YYYY-MM-DD). |
+| `base_currency` | TEXT | What's being priced (e.g., `AAPL`). |
+| `quote_number` | TEXT | Price value as decimal string. |
+| `quote_currency` | TEXT | Price denomination (e.g., `USD`). |
+
+**Example — current market value per holding:**
+```sql
+SELECT l.units_currency AS holding, lp.quote_currency AS currency,
+       SUM(CAST(l.units_number AS REAL)) * CAST(lp.quote_number AS REAL) AS market_value
+FROM lots l
+JOIN latest_prices lp ON lp.base_currency = l.units_currency
+GROUP BY l.units_currency, lp.quote_currency
+```
+
+For a price as of a past date, query `prices` with `date <=` that date.
 
 #### balance_assertions
 
