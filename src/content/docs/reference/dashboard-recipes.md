@@ -1302,16 +1302,31 @@ With rows such as `Assets:Liquid:Checking:BofA` (USD) and `Assets:Liquid:Savings
 | `label` | string | Header of the tree column. Default `"Name"`. |
 | `labelField` | string | Row field with a display label. Rows without one show their last path segment; parent rows show their path segment. |
 | `link` | object | Click-through on the tree column (see [Click-Through Links](#click-through-links)). `{{row.<pathField>}}` is each row's own path, including parent rows. Group rows have no link. |
-| `expandDepth` | integer | Number of levels expanded on load (`0` shows only the top level). Default: all levels expanded. |
+| `expandDepth` | integer | Number of levels expanded on first load (`0` shows only the top level). Default: all levels expanded. After that, the user's own expansion is remembered. |
+| `foldSingleChildren` | boolean | Fold a parent with exactly one child (and no row of its own) into that child, shown as `Bonds › TreasuryDirect › IBonds`. Default `true`. |
+| `share` | object | Adds a share column with a small bar: `{ "column": "balance", "base": "total" }`. `base` is `"total"` (the row's share of its top-level total — the group, or all rows without `groupBy`) or `"parent"`. Optional `label`, `hidden` to start it hidden, and `description` for its **ⓘ**. |
+| `dimField` | string | Row field that dims the row when true (or `1`), e.g. a stale account. A parent is dimmed when every row beneath it is. |
 | `emptyText` | string | Message shown when there are no rows. |
 
 Tree table columns take the same properties as [table columns](#column-definition) except `link`, plus:
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `aggregate` | string | `"sum"`: parent and group rows show the exact decimal sum of everything beneath them. Without it, a parent row shows a value only when every row beneath has the same one. |
+| `aggregate` | string | How parent and group rows show this column: `"sum"` (exact decimal sum), `"max"` or `"min"` (largest or smallest; for ISO dates, `"max"` is the latest). Without it, a parent row shows a value only when every row beneath has the same one. |
+| `hidden` | boolean | Start with this column hidden. |
+| `description` | string | Short explanation of the column, shown from an **ⓘ** next to its heading (on hover or keyboard focus). |
 
-Value columns are resizable by dragging the left edge of their heading; double-click the edge to reset the width.
+Users can:
+
+- search rows by name or path;
+- expand to a level, or use **Expand all** / **Collapse all** in the tree column's heading;
+- sort siblings by a value column (click its heading: largest first, smallest first, original order);
+- show or hide value columns from the Columns menu;
+- resize value columns by dragging the left edge of their heading (double-click to reset);
+- copy the visible rows (tab-separated, for pasting into a spreadsheet) or download them as a CSV file;
+- move with the keyboard: arrow keys, Home/End, Enter to open a row's link, Space to expand or collapse.
+
+Expansion, sort, visible columns and widths are remembered per widget.
 
 ### Pivot Table
 
@@ -1490,7 +1505,7 @@ Widgets can be made interactive by adding a click action. A click action is one 
 - **Navigate** (`{name, query}`) — clicking a value goes to the Transactions view with filters pre-applied.
 - **Select** (`{select}`) — clicking sets dashboard parameters from the clicked context, driving other widgets on the same dashboard (master-detail drill-down). See [Select Action](#select-action-master-detail).
 
-Every click-action field — a chart `clickLink`/`seriesClickLinks`, a KPI `clickLink`, a pivot `valueLink`, a table column `link`, and a budget-progress `link` — accepts either mode.
+Every click-action field — a chart `clickLink`/`seriesClickLinks`, a KPI `clickLink`, a pivot `valueLink`, a table column `link`, and a budget-progress `link` — accepts either mode. A tree table's `link` supports **Navigate** only.
 
 ### Link Structure
 

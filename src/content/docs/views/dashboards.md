@@ -17,7 +17,7 @@ Dashboards are organized as **tabs** along the top of the view. Each tab corresp
 - **Close a tab** by clicking the **X** that appears when you hover over it (or always visible on the active tab). This hides the dashboard from view but does not delete it — you can add it back at any time.
 - **Add a dashboard** by clicking the **+** button at the end of the tab bar. This opens the dashboard picker where you can choose from all available dashboards.
 
-Your tab selection is saved automatically. The same tabs will be open the next time you launch the app, with the same dashboard active.
+Your tab selection is saved automatically. The same tabs will be open the next time you launch the app, with the same dashboard active. If Finzytrack is open in several browser tabs, they share one set of dashboard tabs: opening or closing a dashboard in one shows up in the others.
 
 ### Toolbar
 
@@ -57,7 +57,13 @@ Tabular data with sortable columns: click a column heading to sort ascending, ag
 
 ### Tree Tables
 
-Rows grouped into an expandable tree, for example accounts by currency and then by account hierarchy. Each parent row shows the total of the rows beneath it. Click the arrow next to a row to expand or collapse it, and drag the left edge of a column heading to resize it. Row names can be clickable links to filtered transaction views.
+Rows grouped into an expandable tree, for example accounts by currency and then by account hierarchy. Each parent row shows the total of the rows beneath it, and a parent with a single child is shown on one row (`Bonds › TreasuryDirect › IBonds`).
+
+- Click the arrow next to a row to expand or collapse it, use **Expand all** / **Collapse all**, or **Expand to level** in the toolbar.
+- Search by name, click a column heading to sort, and use the Columns menu to show or hide columns. Drag the left edge of a column heading to resize it. An **ⓘ** next to a heading explains the column.
+- **Copy** copies the visible rows so you can paste them into a spreadsheet; **CSV** downloads them as a CSV file. Both include the shown columns with plain numbers.
+- With a row focused, the arrow keys move and expand, and Enter opens the row's transactions.
+- Your expansion, sort, columns and widths are remembered.
 
 ### Pivot Tables
 
@@ -123,8 +129,18 @@ An annual financial summary. Use the **Year** parameter to select the year.
 
 Every open asset account with its balance, in its own currency. Use the **As of** date to see balances on an earlier date; **Today** returns to the current date.
 
-- Accounts are grouped by currency, with a total for each currency and for every level of the account tree. Click the arrow next to a row to expand or collapse it.
+- Accounts are grouped by currency, with a total for each currency and for every level of the account tree.
 - Investment accounts are valued at market price: units held × the latest price on or before the date, or the cost when there is no price.
+- **% of total** shows each row's share of its currency's total. It can be above 100% when some accounts in that currency have a negative balance.
+- **Last activity** is the date of the latest transaction. **Last balance check** is the date of the latest `balance` directive for the account.
+- **Check result** tells you whether your ledger agreed with that `balance` directive. A balance directive records what the balance should be on a date, for example from a bank statement:
+  ```
+  2026-03-01 balance Assets:Liquid:Checking:BofA  500.00 USD
+  ```
+  Finzytrack adds up the account's transactions *before* 1 March. If they come to 500.00 USD, the check passed. If not, it failed, which usually means a transaction before that date is missing or wrong. Transactions after the date don't affect the check, so an old passed check says nothing about today's balance. Look at **Last balance check** to see how old it is.
+- Hover over the **ⓘ** next to a column heading for a short explanation of the column.
+- A cash account is shown dimmed when it had no transaction and no balance check in the 60 days before the date. Accounts with `account-type` `cd` or `bond` are never dimmed.
+- Hide the columns you don't need from the Columns menu. Use **Copy** or **CSV** to take the table into a spreadsheet.
 - Click a row to see its transactions.
 - To show a friendlier name for an account, add `display-name` to its `open` directive (see [Metadata](/reference/metadata/)).
 

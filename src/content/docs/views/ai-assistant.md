@@ -163,7 +163,7 @@ The assistant can create dashboard and widget recipes for you. Describe what you
 
 ### Dashboard Preview
 
-When the assistant generates a recipe, it validates the recipe and renders a **live preview** in the sidebar. The preview shows the actual dashboard layout with real data from your ledger — KPI cards, charts, tables, and pivot tables all render as they would on the Dashboards view.
+When the assistant generates a recipe, it validates the recipe and renders a **live preview** in the sidebar. The preview shows the actual dashboard layout with real data from your ledger — KPI cards, charts, tables, tree tables, and pivot tables all render as they would on the Dashboards view.
 
 You can review the preview, ask the assistant to make changes (e.g., "change the bar chart to a line chart" or "add a currency filter"), and iterate until you are satisfied. The assistant then saves the recipe to disk — files under `config/recipes/` are auto-discovered, no manifest to maintain.
 
