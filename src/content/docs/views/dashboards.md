@@ -5,7 +5,7 @@ sidebar:
   order: 2
 ---
 
-The Dashboards view is Finzytrack's primary interface for visualizing your financial data. It presents your finances through interactive widgets — KPI cards, charts, tables, and pivot tables — arranged in customizable grid layouts.
+The Dashboards view is Finzytrack's primary interface for visualizing your financial data. It presents your finances through interactive widgets — KPI cards, charts, tables, tree tables, and pivot tables — arranged in customizable grid layouts.
 
 ---
 
@@ -55,6 +55,10 @@ Visual plots of your data. Supported chart types include **bar**, **line**, **pi
 
 Tabular data with sortable columns: click a column heading to sort ascending, again for descending, and a third time to return to the original order. Total rows stay at the bottom, and amounts in different currencies are sorted separately. Values can be formatted as currency, percentage, or plain numbers. Table cells can be clickable links to filtered transaction views.
 
+### Tree Tables
+
+Rows grouped into an expandable tree, for example accounts by currency and then by account hierarchy. Each parent row shows the total of the rows beneath it. Click the arrow next to a row to expand or collapse it, and drag the left edge of a column heading to resize it. Row names can be clickable links to filtered transaction views.
+
 ### Pivot Tables
 
 Two-dimensional summaries — for example, expense categories as rows and months as columns. Pivot tables can show row totals, column totals, and a grand total. Cells can be clickable links to filtered transaction views.
@@ -81,7 +85,7 @@ Some parameters default to a **templated value** like *Current Year* or *Current
 
 ## Included Dashboards
 
-Finzytrack ships with several dashboards out of the box: three **overview** dashboards that give you a useful picture from day one, three **investment** dashboards for holdings and cash instruments, a **Widget Gallery** reference of every supported widget type, and a set of **budget** dashboards (one per common budgeting style).
+Finzytrack ships with several dashboards out of the box: four **overview** dashboards that give you a useful picture from day one, three **investment** dashboards for holdings and cash instruments, a **Widget Gallery** reference of every supported widget type, and a set of **budget** dashboards (one per common budgeting style).
 
 ### Financial Overview
 
@@ -114,6 +118,15 @@ An annual financial summary. Use the **Year** parameter to select the year.
 - **Savings** — income minus expenses.
 - **Monthly Income & Expenses** — a bar chart comparing income, expenses, and savings month by month throughout the year. Click any bar to see the transactions behind it.
 - **Expenses Pivot Table** — a table with expense categories as rows and months as columns, showing how spending in each category changes over the year. Includes row and column totals.
+
+### Account Balances
+
+Every open asset account with its balance, in its own currency. Use the **As of** date to see balances on an earlier date; **Today** returns to the current date.
+
+- Accounts are grouped by currency, with a total for each currency and for every level of the account tree. Click the arrow next to a row to expand or collapse it.
+- Investment accounts are valued at market price: units held × the latest price on or before the date, or the cost when there is no price.
+- Click a row to see its transactions.
+- To show a friendlier name for an account, add `display-name` to its `open` directive (see [Metadata](/reference/metadata/)).
 
 ### Investment dashboards
 
@@ -157,7 +170,7 @@ The realized-gains figures are derived from your ledger and are **not a tax docu
 
 ### Widget Gallery
 
-A reference dashboard with one example of every widget type the app supports — KPI, bar, line, area, pie, scatter, treemap, table, pivot, funnel, gauge, calendar heatmap, sankey, radar, and sunburst. Each widget hovers a small **ⓘ** icon next to its title that, on hover, explains the type's gotchas (data shape requirements, encoding patterns, click-through behaviour, etc.).
+A reference dashboard with one example of every widget type the app supports — KPI, bar, line, area, pie, scatter, treemap, table, tree table, pivot, funnel, gauge, calendar heatmap, sankey, radar, and sunburst. Each widget hovers a small **ⓘ** icon next to its title that, on hover, explains the type's gotchas (data shape requirements, encoding patterns, click-through behaviour, etc.).
 
 Treat the gallery as both:
 

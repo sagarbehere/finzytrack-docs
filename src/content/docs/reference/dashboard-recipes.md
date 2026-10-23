@@ -10,14 +10,14 @@ If you have [AI configured](/quick-start/#configuring-ai), you can [build dashbo
 :::
 
 :::tip[Quickest way in: copy from the Widget Gallery]
-The bundled **Widget Gallery** dashboard contains a working example of every widget type the app supports (kpi, bar, line, area, pie, scatter, treemap, table, pivot, funnel, gauge, calendar heatmap, sankey, radar, sunburst, budget progress). When building a new recipe, the fastest path is to find the closest gallery widget, copy its JSON, and adapt the SQL and titles. The gallery's source lives at `backend/resources/seed_config/recipes/dashboards/widget-gallery.json` (or open it from the Dashboard panel and use the recipe editor to inspect each widget). Each gallery widget has a `helpText` field describing the type's specific gotchas — those notes are the most reliable distillation of what works for that chart type.
+The bundled **Widget Gallery** dashboard contains a working example of every widget type the app supports (kpi, bar, line, area, pie, scatter, treemap, table, tree table, pivot, funnel, gauge, calendar heatmap, sankey, radar, sunburst, budget progress). When building a new recipe, the fastest path is to find the closest gallery widget, copy its JSON, and adapt the SQL and titles. The gallery's source lives at `backend/resources/seed_config/recipes/dashboards/widget-gallery.json` (or open it from the Dashboard panel and use the recipe editor to inspect each widget). Each gallery widget has a `helpText` field describing the type's specific gotchas — those notes are the most reliable distillation of what works for that chart type.
 :::
 
 Dashboards in Finzytrack are defined using **JSON recipe files**. Each dashboard defines a grid layout and the widgets it contains **inline** — there are no separate, standalone widget files. 
 
 ## Concepts
 
-A **widget** is the fundamental building block — a KPI card, chart, table, pivot table, or budget-progress list. Each widget is a small **pipeline of steps** feeding a visualization. A step is one of:
+A **widget** is the fundamental building block — a KPI card, chart, table, tree table, pivot table, or budget-progress list. Each widget is a small **pipeline of steps** feeding a visualization. A step is one of:
 
 - **`query`** — a read-only SQL query against your ledger data (the common case). You can freely write any query that makes sense for your widget.
 - **`compute`** — a server-side function that returns computed values (for example `budget_for_range`, which supplies budget numbers). There is a fixed catalog of available compute functions.
@@ -441,6 +441,8 @@ When a parameter's `default` is a no-argument generator reference (for example `
 Picking the templated option means "always evaluate this generator on load." On the next dashboard load it produces the value that is current *then* — March in March, April in April. Picking a specific literal value (for example the month "May") pins that value until the user changes it. To go back to the templated behavior after pinning, the user re-selects the italicized templated option.
 
 This lets the same parameter satisfy two different intents — the dashboard author declares a sensible default behavior, and the user can override it (sticky) or stay with it (templated). It also means recipe authors don't need to choose between "this should always reflect the current month" and "the user's pick should stick" — both are reachable from a single `{ "$gen": "currentMonth" }` default.
+
+A **date** parameter with a no-argument generator default (for example `{ "$gen": "today" }`) works the same way. While a specific date is picked, a button named after the generator (**Today**) appears next to the date field and returns to the templated value. Clearing the date field also returns to the default.
 
 Generators that take config arguments (for example `{ "$gen": "startOfMonth", "offset": -1 }`) are resolved at load time and are not exposed as templated options — only no-argument generator defaults are templatable.
 
@@ -1267,6 +1269,49 @@ Displays query results as a simple data table.
 | `format` | string | Value format (see [Formats](#formats)). |
 | `currencyField` | string | For a money column in a multi-currency table: the row field holding that row's currency code, so each cell is formatted in its own currency (symbol + grouping) instead of the widget's single `currency` param. Use with a `"currency"`/`"signedCurrency"` `format`. |
 | `link` | object | Click-through link for cell values (see [Click-Through Links](#click-through-links)). |
+
+### Tree Table
+
+Displays rows as an expandable tree built from a hierarchical path, such as an account name. Every path prefix becomes a collapsible parent row, and parent rows show totals. The query returns only the leaf rows; the widget builds the hierarchy and the totals.
+
+```json
+{
+  "type": "tree-table",
+  "pathField": "account",
+  "skipLevels": 1,
+  "groupBy": "currency",
+  "label": "Account",
+  "labelField": "display_name",
+  "link": { "name": "transactions", "query": { "accountContains": "{{row.account}}" } },
+  "columns": [
+    { "key": "balance", "label": "Balance", "format": "currency", "currencyField": "currency", "align": "right", "aggregate": "sum" }
+  ]
+}
+```
+
+With rows such as `Assets:Liquid:Checking:BofA` (USD) and `Assets:Liquid:Savings:AxisBank:NRE` (INR), this shows one top-level row per currency with its total, then `Liquid`, `Checking`, `BofA` and so on beneath it.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `type` | string | **Required.** Must be `"tree-table"`. |
+| `pathField` | string | **Required.** Row field holding the hierarchical path. |
+| `columns` | array | **Required.** Value columns shown to the right of the tree column (see below). |
+| `separator` | string | Path separator. Default `":"`. |
+| `skipLevels` | integer | Leading path segments left out of the tree, e.g. `1` drops a shared `Assets` root. Default `0`. |
+| `groupBy` | string | Row field whose distinct values form the top level, each with its own total. Use `"currency"` so amounts in different currencies are never added together. |
+| `label` | string | Header of the tree column. Default `"Name"`. |
+| `labelField` | string | Row field with a display label. Rows without one show their last path segment; parent rows show their path segment. |
+| `link` | object | Click-through on the tree column (see [Click-Through Links](#click-through-links)). `{{row.<pathField>}}` is each row's own path, including parent rows. Group rows have no link. |
+| `expandDepth` | integer | Number of levels expanded on load (`0` shows only the top level). Default: all levels expanded. |
+| `emptyText` | string | Message shown when there are no rows. |
+
+Tree table columns take the same properties as [table columns](#column-definition) except `link`, plus:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `aggregate` | string | `"sum"`: parent and group rows show the exact decimal sum of everything beneath them. Without it, a parent row shows a value only when every row beneath has the same one. |
+
+Value columns are resizable by dragging the left edge of their heading; double-click the edge to reset the width.
 
 ### Pivot Table
 

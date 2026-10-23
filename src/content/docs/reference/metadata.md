@@ -93,6 +93,7 @@ Written by the account form in the Accounts view.
 | Key | Values | Used for |
 |---|---|---|
 | `description` | Text | The account's description. |
+| `display-name` | Text, e.g. `"TechCU Checking"` | The account's name on the Account Balances dashboard, instead of its last name segment. |
 | `account_number` | Text | Shown in the account's details. |
 | `ifsc_code` | Text | Shown in the account's details. |
 | `swift_bic` | Text | Shown in the account's details. |
