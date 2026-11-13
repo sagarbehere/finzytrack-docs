@@ -355,9 +355,16 @@ Each platform job:
 2. Sets up Python 3.13 and Node.js 22.
 3. Installs all dependencies (frontend, backend, desktop, and Linux system packages where needed).
 4. Runs `python build.py` in the `desktop/` directory.
-5. Uploads the platform artifact.
+5. Runs a startup check (`desktop/startup_check.py`): starts the packaged app headless, completes first-run setup with the demo ledger, and fails the job unless the app reports itself healthy.
+6. Uploads the platform artifact.
+
+The Linux job builds on Ubuntu 22.04 on purpose: an AppImage runs only on systems at least as new as the one it was built on, so this keeps Ubuntu 22.04 and its derivatives supported.
 
 When triggered by a version tag (`v*`), a separate release job runs after all builds complete. It downloads all three artifacts and creates a **draft GitHub Release** with the binaries attached.
+
+### Tests
+
+A separate **Tests** workflow (`.github/workflows/tests.yml`) runs on every push and pull request: the backend test suite (`pytest`) and the frontend type check (`vue-tsc`) and tests (`vitest`).
 
 ### Build artifacts
 
