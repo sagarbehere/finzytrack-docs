@@ -170,6 +170,10 @@ On first launch, Finzytrack creates a data directory and seeds it with default c
 
 Uninstalling the app does not remove this directory. Delete it manually if you want to remove all data.
 
+### If Finzytrack can't start
+
+If Finzytrack cannot start — for example because the folder holding your ledger was moved, renamed, or is on a drive that isn't connected — it opens a small window that says why and names the settings file to fix (`config/config.yaml` in the directory above). Put the file or folder back, or edit `ledger_file` in that settings file to point to where it is now, then open Finzytrack again. More details are in `logs/finzytrack.log` in the same directory.
+
 ## Command-line options
 
 The Finzytrack launcher accepts the following options:

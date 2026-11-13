@@ -131,7 +131,7 @@ Click the **column visibility button** (adjustments icon) at the top of the tabl
 | Column | Default | Description |
 |--------|---------|-------------|
 | Account | Visible | The ledger account for this posting (e.g., `Expenses:Groceries`). Offers autocomplete from your chart of accounts. |
-| Amount | Visible | The monetary amount. Positive amounts show in green, negative in red. |
+| Amount | Visible | The monetary amount, with thousands separators grouped the way the posting's currency writes numbers (1,129.41; 12,34,567.89 for INR). While you edit it, the plain number is shown. Positive amounts show in green, negative in red. |
 | Currency | Visible | The currency code for this posting. |
 | Cost Amount | Hidden | Cost basis amount. Used for tracking investments or foreign currency purchases at a specific cost. |
 | Cost Currency | Hidden | The currency of the cost basis. |

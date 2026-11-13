@@ -66,7 +66,7 @@ The rightmost column contains icon buttons for each account. Hover over an icon 
 ### Edit (pencil icon)
 
 Opens the account form where you can change:
-- **Account name** — renaming updates all transactions that reference this account.
+- **Account name** — renaming updates every reference to this account in your ledger: transactions, metadata on any entry, and budgets.
 - **Open date** and **close date**.
 - **Currencies** — add or remove currencies.
 - **Description** — a free-text note about the account.

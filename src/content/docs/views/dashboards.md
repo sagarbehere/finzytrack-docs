@@ -16,8 +16,9 @@ Dashboards are organized as **tabs** along the top of the view. Each tab corresp
 - **Switch dashboards** by clicking a tab.
 - **Close a tab** by clicking the **X** that appears when you hover over it (or always visible on the active tab). This hides the dashboard from view but does not delete it — you can add it back at any time.
 - **Add a dashboard** by clicking the **+** button at the end of the tab bar. This opens the dashboard picker where you can choose from all available dashboards.
+- **Reorder tabs** by dragging a tab to a new position.
 
-Your tab selection is saved automatically. The same tabs will be open the next time you launch the app, with the same dashboard active.
+Your tab selection is saved automatically. The same tabs will be open the next time you launch the app, with the same dashboard active. If Finzytrack is open in several browser tabs, they share one set of dashboard tabs: opening or closing a dashboard in one shows up in the others.
 
 ### Toolbar
 
@@ -53,11 +54,11 @@ Visual plots of your data. Supported chart types include **bar**, **line**, **pi
 
 ### Tables
 
-Tabular data with sortable columns. Values can be formatted as currency, percentage, or plain numbers. Table cells can be clickable links to filtered transaction views.
+Tabular data with sortable columns: click a column heading to sort ascending, again for descending, and a third time to return to the original order. Total rows stay at the bottom. Values can be formatted as currency, percentage, or plain numbers. Table cells can be clickable links to filtered transaction views.
 
 ### Pivot Tables
 
-Two-dimensional summaries — for example, expense categories as rows and months as columns. Pivot tables can show row totals, column totals, and a grand total. Cells can be clickable links to filtered transaction views.
+Two-dimensional summaries — for example, expense categories as rows and months as columns. Pivot tables can show row totals, column totals, and a grand total. By default, values show two decimals, grouped the way the dashboard's currency writes numbers (for example 12,34,567.89 for INR). Hovering a cell highlights its row and column. Cells can be clickable links to filtered transaction views.
 
 ### Colors
 

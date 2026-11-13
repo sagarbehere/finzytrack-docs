@@ -397,6 +397,8 @@ Picking the templated option means "always evaluate this generator on load." On 
 
 This lets the same parameter satisfy two different intents — the dashboard author declares a sensible default behavior, and the user can override it (sticky) or stay with it (templated). It also means recipe authors don't need to choose between "this should always reflect the current month" and "the user's pick should stick" — both are reachable from a single `{ "$gen": "currentMonth" }` default.
 
+A **date** parameter with a no-argument generator default (for example `{ "$gen": "today" }`) works the same way. While a specific date is picked, a button named after the generator (**Today**) appears next to the date field and returns to the templated value. Clearing the date field also returns to the default.
+
 Generators that take config arguments (for example `{ "$gen": "startOfMonth", "offset": -1 }`) are resolved at load time and are not exposed as templated options — only no-argument generator defaults are templatable.
 
 ### Using Parameters in Queries
@@ -430,7 +432,7 @@ Generators can appear anywhere in the recipe JSON. Any object with a `"$gen"` ke
 |-----------|--------|-------|
 | `currentYear` | Current year as a number | `{ "$gen": "currentYear" }` |
 | `currentMonth` | Current month (1-12) | `{ "$gen": "currentMonth" }` |
-| `defaultCurrency` | User's default currency string | `{ "$gen": "defaultCurrency" }` |
+| `defaultCurrency` | Your default currency. If the active ledger has no transactions in that currency, the currency the ledger uses most. | `{ "$gen": "defaultCurrency" }` |
 | `today` | Today's date as YYYY-MM-DD | `{ "$gen": "today" }` |
 
 #### Date Generators
@@ -806,6 +808,8 @@ Renders charts using [Apache ECharts](https://echarts.apache.org/). Supported ch
 | `seriesClickLinks` | object | Per-series click-through link overrides (see [Click-Through Links](#click-through-links)). |
 
 The `options` object uses standard [Apache ECharts configuration](https://echarts.apache.org/en/option.html). Properties like `xAxis`, `yAxis`, `series`, `grid`, `legend`, and `tooltip` follow the ECharts API directly — refer to the [ECharts documentation](https://echarts.apache.org/en/option.html) for the full set of available options. The app processes `options` lightly before passing it to ECharts: it injects your query results as the chart's dataset, applies dark mode styling to text and grid lines, and applies any label formats you specified (e.g., `seriesLabelFormat`). Everything else is standard ECharts.
+
+To let users zoom and pan a chart with axes (for example a long time series), add an ECharts [`dataZoom`](https://echarts.apache.org/en/option.html#dataZoom) to `options`. A `slider` gets the dashboard's light/dark styling unless the recipe sets its own. For wheel zoom with a modifier key (`"zoomOnMouseWheel": "ctrl"` on an `inside` zoom), ⌘ works as well as Ctrl on a Mac, and plain scrolling still scrolls the page.
 
 #### How Query Results Connect to Charts
 
@@ -1248,7 +1252,7 @@ Displays a cross-tabulation with row and column totals. Requires a `pivot` trans
 |----------|------|-------------|
 | `type` | string | **Required.** Must be `"pivot"`. |
 | `rowHeader` | string | Label for the row header column (default: `"Account"`). |
-| `format` | string | Cell value format (see [Formats](#formats)). |
+| `format` | string | Cell value format (see [Formats](#formats)). Without one, cells show two decimals, grouped by the widget's `currency` parameter. |
 | `showRowTotals` | boolean | Show a "Total" column on the right (default: `true`). |
 | `showColumnTotals` | boolean | Show a totals row at the bottom (default: `true`). |
 | `colorByValue` | boolean | Tint each cell by its value read as a budget-usage fraction (e.g. `pctUsed`) — a **budget-adherence heat-map**. Uses the same green/amber/blue/red scale as [budget-progress](#budget-progress). Point `valueField` at a `pctUsed`-style column and turn totals off. |
@@ -1371,7 +1375,7 @@ Predefined format strings control how numbers are displayed. They can be used in
 |--------|----------------|---------|
 | `"currency"` | $14,200.00 or ₹14,20,000.00 | Monetary amounts (currency-aware) |
 | `"signedCurrency"` | +$14,200 or -₹500 | Signed monetary amounts (currency-aware) |
-| `"compact"` | 14.2k, 1.5M | Large numbers |
+| `"compact"` | 14.2k, 1.5M (INR: 2.6L, 1.8Cr) | Large numbers, e.g. chart labels and axes |
 | `"number"` | 14,200 | Plain numbers with thousand separators |
 | `"percent"` | 42% | Percentages |
 | `"date"` | Jan 15, 2026 | ISO dates as readable text |
@@ -1381,7 +1385,7 @@ Predefined format strings control how numbers are displayed. They can be used in
 
 ### Currency-Aware Formatting
 
-The `"currency"` and `"signedCurrency"` formats are locale-aware — they use the correct currency symbol and number grouping based on the widget's `currency` parameter. For example:
+The `"currency"`, `"signedCurrency"` and `"compact"` formats are locale-aware — they use the number grouping (and, for the two currency formats, the symbol) of the widget's `currency` parameter. For example:
 
 - A widget with a `currency` parameter set to `"USD"` formats as `$1,234,567.89` (en-US locale)
 - A widget with a `currency` parameter set to `"INR"` formats as `₹12,34,567.89` (en-IN locale)
